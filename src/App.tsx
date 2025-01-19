@@ -37,6 +37,7 @@ const App = () => {
           .eq('id', session.user.id)
           .single();
         
+        console.log("Perfil do usuário:", profile);
         setUserType(profile?.user_type || null);
       } else {
         setUserType(null);
@@ -61,14 +62,12 @@ const App = () => {
             <Route 
               path="/" 
               element={
-                isAuthenticated ? (
-                  userType === "business_owner" ? (
-                    <Navigate to="/business-dashboard" />
-                  ) : (
-                    <Navigate to="/user-dashboard" />
-                  )
+                !isAuthenticated ? (
+                  <Index />
+                ) : userType === "business_owner" ? (
+                  <Navigate to="/business-dashboard" />
                 ) : (
-                  <Navigate to="/login" />
+                  <Navigate to="/user-dashboard" />
                 )
               } 
             />
