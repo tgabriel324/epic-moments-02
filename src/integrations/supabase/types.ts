@@ -90,6 +90,89 @@ export type Database = {
         }
         Relationships: []
       }
+      stamp_video_links: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean | null
+          stamp_id: string
+          updated_at: string
+          video_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          stamp_id: string
+          updated_at?: string
+          video_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          stamp_id?: string
+          updated_at?: string
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stamp_video_links_stamp_id_fkey"
+            columns: ["stamp_id"]
+            isOneToOne: false
+            referencedRelation: "stamps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stamp_video_links_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stamps: {
+        Row: {
+          business_id: string
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string
+          name: string
+          status: Database["public"]["Enums"]["stamp_status"] | null
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url: string
+          name: string
+          status?: Database["public"]["Enums"]["stamp_status"] | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string
+          name?: string
+          status?: Database["public"]["Enums"]["stamp_status"] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stamps_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_plans: {
         Row: {
           created_at: string
@@ -170,6 +253,50 @@ export type Database = {
           },
         ]
       }
+      videos: {
+        Row: {
+          business_id: string
+          created_at: string
+          description: string | null
+          duration: number | null
+          id: string
+          name: string
+          status: Database["public"]["Enums"]["video_status"] | null
+          updated_at: string
+          video_url: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          description?: string | null
+          duration?: number | null
+          id?: string
+          name: string
+          status?: Database["public"]["Enums"]["video_status"] | null
+          updated_at?: string
+          video_url: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          description?: string | null
+          duration?: number | null
+          id?: string
+          name?: string
+          status?: Database["public"]["Enums"]["video_status"] | null
+          updated_at?: string
+          video_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "videos_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -178,8 +305,10 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      stamp_status: "active" | "inactive" | "deleted"
       subscription_plan: "free" | "pro" | "enterprise"
       user_type: "admin" | "business_owner" | "end_user"
+      video_status: "processing" | "ready" | "error" | "deleted"
     }
     CompositeTypes: {
       [_ in never]: never
