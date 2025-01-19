@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
 import BusinessDashboard from "./pages/business/Dashboard";
 import Stamps from "./pages/business/Stamps";
+import Videos from "./pages/business/Videos";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => {
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/business" element={<BusinessDashboard />} />
             <Route path="/business/stamps" element={<Stamps />} />
+            <Route path="/business/videos" element={<Videos />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
