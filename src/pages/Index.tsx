@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 const Index = () => {
   return (
@@ -7,6 +8,7 @@ const Index = () => {
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="flex flex-col items-center text-center space-y-8">
+          <Logo className="w-48 h-48 mb-4" /> {/* Added Logo component */}
           <h1 className="text-4xl md:text-5xl font-bold text-black">
             Transforme suas Roupas em Experiências Interativas
           </h1>
