@@ -35,30 +35,36 @@ const BusinessDashboard = () => {
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
+        console.log("Iniciando busca de métricas...");
         const { data: { user } } = await supabase.auth.getUser();
         
-        if (!user) return;
+        if (!user) {
+          console.log("Usuário não encontrado");
+          return;
+        }
 
-        // Buscar contagem de estampas
+        console.log("Buscando contagem de estampas...");
         const { count: stampsCount } = await supabase
           .from('stamps')
           .select('*', { count: 'exact', head: true })
           .eq('business_id', user.id);
 
-        // Buscar contagem de vídeos
+        console.log("Buscando contagem de vídeos...");
         const { count: videosCount } = await supabase
           .from('videos')
           .select('*', { count: 'exact', head: true })
           .eq('business_id', user.id);
 
-        // Buscar métricas de uso
+        console.log("Buscando métricas de uso...");
         const { data: usageData } = await supabase
           .from('usage_metrics')
           .select('total_views, total_interactions')
           .eq('business_id', user.id)
           .order('month_year', { ascending: false })
           .limit(1)
-          .single();
+          .maybeSingle();
+
+        console.log("Dados de uso recebidos:", usageData);
 
         setMetrics({
           totalStamps: stampsCount || 0,
