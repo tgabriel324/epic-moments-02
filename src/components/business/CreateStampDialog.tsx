@@ -14,6 +14,7 @@ import { ImagePlus, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 export function CreateStampDialog() {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,6 +23,7 @@ export function CreateStampDialog() {
   const [description, setDescription] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -41,9 +43,17 @@ export function CreateStampDialog() {
       return;
     }
 
+    if (!user?.id) {
+      toast({
+        title: "Erro de autenticação",
+        description: "Você precisa estar logado para criar uma estampa",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
-      // Upload da imagem
       const fileExt = image.name.split(".").pop();
       const filePath = `${crypto.randomUUID()}.${fileExt}`;
 
@@ -53,18 +63,17 @@ export function CreateStampDialog() {
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from("stamps")
         .getPublicUrl(filePath);
 
-      // Criar estampa
       const { error: insertError } = await supabase
         .from("stamps")
         .insert({
           name,
           description,
           image_url: publicUrl,
+          business_id: user.id,
         });
 
       if (insertError) throw insertError;

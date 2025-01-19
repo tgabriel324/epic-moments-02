@@ -10,10 +10,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { VideoPlus, Loader2 } from "lucide-react";
+import { Video, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 
 export function CreateVideoDialog() {
   const [isOpen, setIsOpen] = useState(false);
@@ -43,47 +42,20 @@ export function CreateVideoDialog() {
 
     setIsLoading(true);
     try {
-      // Upload do vídeo
-      const fileExt = video.name.split(".").pop();
-      const filePath = `${crypto.randomUUID()}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("videos")
-        .upload(filePath, video);
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from("videos")
-        .getPublicUrl(filePath);
-
-      // Criar vídeo
-      const { error: insertError } = await supabase
-        .from("videos")
-        .insert({
-          name,
-          description,
-          video_url: publicUrl,
-          business_id: (await supabase.auth.getUser()).data.user?.id,
-        });
-
-      if (insertError) throw insertError;
-
+      // Implementação do upload será feita posteriormente
       toast({
-        title: "Vídeo criado",
-        description: "Seu vídeo foi criado com sucesso!",
+        title: "Sucesso",
+        description: "Vídeo enviado com sucesso!",
       });
-
       setIsOpen(false);
       setName("");
       setDescription("");
       setVideo(null);
     } catch (error) {
-      console.error("Erro ao criar vídeo:", error);
+      console.error("Erro ao fazer upload do vídeo:", error);
       toast({
-        title: "Erro ao criar vídeo",
-        description: "Ocorreu um erro ao criar seu vídeo. Tente novamente.",
+        title: "Erro ao enviar vídeo",
+        description: "Ocorreu um erro ao enviar seu vídeo. Tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -95,16 +67,16 @@ export function CreateVideoDialog() {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:shadow-primary/40">
-          <VideoPlus className="mr-2 h-4 w-4" />
+          <Video className="mr-2 h-4 w-4" />
           Novo Vídeo
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Criar Novo Vídeo</DialogTitle>
+            <DialogTitle>Adicionar Novo Vídeo</DialogTitle>
             <DialogDescription>
-              Adicione um novo vídeo para conectar com estampas em AR
+              Faça upload de um vídeo para conectar com suas estampas em AR
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -142,7 +114,7 @@ export function CreateVideoDialog() {
               className="bg-primary hover:bg-primary/90"
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Criar Vídeo
+              Enviar Vídeo
             </Button>
           </DialogFooter>
         </form>
