@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
+import AdminDashboard from "./pages/admin/Dashboard";
 
 const queryClient = new QueryClient();
 
@@ -75,6 +76,17 @@ const App = () => {
             <Route 
               path="/reset-password" 
               element={<Login />} 
+            />
+            {/* Rotas administrativas */}
+            <Route
+              path="/admin"
+              element={
+                isAuthenticated && userType === 'admin' ? (
+                  <AdminDashboard />
+                ) : (
+                  <Navigate to="/login" />
+                )
+              }
             />
           </Routes>
         </BrowserRouter>
