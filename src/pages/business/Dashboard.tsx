@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BusinessLayout } from "@/components/layouts/BusinessLayout";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, Image, Video, Eye, MousePointer } from "lucide-react";
 
 const BusinessDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -60,8 +60,8 @@ const BusinessDashboard = () => {
   if (loading) {
     return (
       <BusinessLayout>
-        <div className="flex items-center justify-center h-full">
-          <Loader2 className="h-8 w-8 animate-spin" />
+        <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
+          <Loader2 className="h-8 w-8 animate-spin text-[#00BFFF]" />
         </div>
       </BusinessLayout>
     );
@@ -70,38 +70,55 @@ const BusinessDashboard = () => {
   return (
     <BusinessLayout>
       <div className="space-y-6">
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total de Estampas</CardTitle>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="mt-2 text-gray-600">
+            Acompanhe as métricas principais do seu negócio
+          </p>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <Card className="border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-sm font-medium text-gray-600">Total de Estampas</CardTitle>
+              <Image className="w-4 h-4 text-[#00BFFF]" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{metrics.totalStamps}</div>
+              <div className="text-2xl font-bold text-gray-900">{metrics.totalStamps}</div>
+              <p className="text-xs text-gray-500 mt-1">Estampas cadastradas</p>
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total de Vídeos</CardTitle>
+
+          <Card className="border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-sm font-medium text-gray-600">Total de Vídeos</CardTitle>
+              <Video className="w-4 h-4 text-[#00BFFF]" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{metrics.totalVideos}</div>
+              <div className="text-2xl font-bold text-gray-900">{metrics.totalVideos}</div>
+              <p className="text-xs text-gray-500 mt-1">Vídeos vinculados</p>
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Visualizações</CardTitle>
+
+          <Card className="border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-sm font-medium text-gray-600">Visualizações</CardTitle>
+              <Eye className="w-4 h-4 text-[#00BFFF]" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{metrics.totalViews}</div>
+              <div className="text-2xl font-bold text-gray-900">{metrics.totalViews}</div>
+              <p className="text-xs text-gray-500 mt-1">Visualizações totais</p>
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Interações</CardTitle>
+
+          <Card className="border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-sm font-medium text-gray-600">Interações</CardTitle>
+              <MousePointer className="w-4 h-4 text-[#00BFFF]" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{metrics.totalInteractions}</div>
+              <div className="text-2xl font-bold text-gray-900">{metrics.totalInteractions}</div>
+              <p className="text-xs text-gray-500 mt-1">Interações totais</p>
             </CardContent>
           </Card>
         </div>
