@@ -1,8 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { Logo } from "@/components/Logo";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
+  const navigate = useNavigate();
+
+  const handleGetStarted = () => {
+    navigate("/login");
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
@@ -19,6 +26,7 @@ const Index = () => {
           <div className="flex flex-col sm:flex-row gap-4">
             <Button 
               className="bg-[#00BFFF] hover:bg-[#00BFFF]/90 text-white px-8"
+              onClick={handleGetStarted}
             >
               Começar Agora
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -68,6 +76,7 @@ const Index = () => {
           </h2>
           <Button 
             className="bg-[#00BFFF] hover:bg-[#00BFFF]/90 text-white px-8"
+            onClick={handleGetStarted}
           >
             Criar Conta Grátis
           </Button>
