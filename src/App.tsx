@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
 import BusinessDashboard from "./pages/business/Dashboard";
+import Stamps from "./pages/business/Stamps";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => {
             <Route path="/reset-password" element={<Login />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/business" element={<BusinessDashboard />} />
+            <Route path="/business/stamps" element={<Stamps />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
