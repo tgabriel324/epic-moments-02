@@ -19,16 +19,6 @@ const formSchema = z.object({
 const getErrorMessage = (error: AuthError) => {
   console.log("Erro detalhado:", error);
   
-  // Tentar extrair a mensagem do corpo da resposta se disponível
-  try {
-    const errorBody = JSON.parse(error.message);
-    if (errorBody?.message === "Email not confirmed") {
-      return "Por favor, confirme seu email antes de fazer login. Verifique sua caixa de entrada.";
-    }
-  } catch (e) {
-    // Ignorar erro de parse e continuar com o switch padrão
-  }
-  
   switch (error.message) {
     case "Invalid login credentials":
       return "Email ou senha inválidos";
@@ -65,6 +55,8 @@ export const LoginForm = () => {
           return;
         }
 
+        console.log("Resposta do login:", data);
+
         if (!data.user) {
           console.error("Usuário não encontrado após login");
           toast.error("Erro ao recuperar dados do usuário");
@@ -88,10 +80,10 @@ export const LoginForm = () => {
         toast.success("Login realizado com sucesso!");
 
         // Redirecionar baseado no tipo de usuário
-        if (profile?.user_type === 'business_owner') {
+        if (profile?.user_type === 'admin') {
+          navigate('/admin');
+        } else if (profile?.user_type === 'business_owner') {
           navigate('/business-dashboard');
-        } else if (profile?.user_type === 'end_user') {
-          navigate('/user-dashboard');
         } else {
           navigate('/');
         }

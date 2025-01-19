@@ -33,6 +33,12 @@ export const AuthForm = ({ isLogin, isLoading, onSubmit }: AuthFormProps) => {
     },
   });
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      form.handleSubmit(onSubmit)();
+    }
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -46,6 +52,7 @@ export const AuthForm = ({ isLogin, isLoading, onSubmit }: AuthFormProps) => {
                 <Input 
                   placeholder="seu@email.com" 
                   {...field}
+                  onKeyPress={handleKeyPress}
                   className="bg-white border-[#C4C4C4] focus:border-[#00BFFF] focus:ring-[#00BFFF] text-[#000000]" 
                 />
               </FormControl>
@@ -65,6 +72,7 @@ export const AuthForm = ({ isLogin, isLoading, onSubmit }: AuthFormProps) => {
                   type="password" 
                   placeholder="••••••" 
                   {...field}
+                  onKeyPress={handleKeyPress}
                   className="bg-white border-[#C4C4C4] focus:border-[#00BFFF] focus:ring-[#00BFFF] text-[#000000]" 
                 />
               </FormControl>
@@ -86,6 +94,7 @@ export const AuthForm = ({ isLogin, isLoading, onSubmit }: AuthFormProps) => {
                       type="password" 
                       placeholder="••••••" 
                       {...field}
+                      onKeyPress={handleKeyPress}
                       className="bg-white border-[#C4C4C4] focus:border-[#00BFFF] focus:ring-[#00BFFF] text-[#000000]" 
                     />
                   </FormControl>
