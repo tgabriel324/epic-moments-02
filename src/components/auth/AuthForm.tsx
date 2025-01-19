@@ -41,7 +41,7 @@ export const AuthForm = ({ isLogin, isLoading, onSubmit }: AuthFormProps) => {
                 <Input 
                   placeholder="seu@email.com" 
                   {...field}
-                  className="bg-white border-[#C4C4C4] focus:border-[#00BFFF] text-[#000000]" 
+                  className="bg-white border-[#C4C4C4] focus:border-[#00BFFF] focus:ring-[#00BFFF] text-[#000000]" 
                 />
               </FormControl>
               <FormMessage className="text-red-500" />
@@ -60,7 +60,7 @@ export const AuthForm = ({ isLogin, isLoading, onSubmit }: AuthFormProps) => {
                   type="password" 
                   placeholder="••••••" 
                   {...field}
-                  className="bg-white border-[#C4C4C4] focus:border-[#00BFFF] text-[#000000]" 
+                  className="bg-white border-[#C4C4C4] focus:border-[#00BFFF] focus:ring-[#00BFFF] text-[#000000]" 
                 />
               </FormControl>
               <FormMessage className="text-red-500" />
@@ -79,13 +79,13 @@ export const AuthForm = ({ isLogin, isLoading, onSubmit }: AuthFormProps) => {
                   <RadioGroup
                     onValueChange={field.onChange}
                     defaultValue={field.value}
-                    className="flex flex-col space-y-1"
+                    className="flex flex-col space-y-2"
                   >
                     <FormItem className="flex items-center space-x-3 space-y-0">
                       <FormControl>
                         <RadioGroupItem value="business_owner" />
                       </FormControl>
-                      <FormLabel className="font-normal">
+                      <FormLabel className="font-normal cursor-pointer">
                         Dono de Negócio
                       </FormLabel>
                     </FormItem>
@@ -93,7 +93,7 @@ export const AuthForm = ({ isLogin, isLoading, onSubmit }: AuthFormProps) => {
                       <FormControl>
                         <RadioGroupItem value="end_user" />
                       </FormControl>
-                      <FormLabel className="font-normal">
+                      <FormLabel className="font-normal cursor-pointer">
                         Usuário Final
                       </FormLabel>
                     </FormItem>

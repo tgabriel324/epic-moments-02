@@ -24,11 +24,19 @@ const App = () => {
     });
 
     // Escutar mudanças no estado de autenticação
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Mudança no estado de autenticação:", event);
       setIsAuthenticated(!!session);
+      
       if (session?.user) {
-        setUserType(session.user.user_metadata.user_type);
+        // Buscar o tipo de usuário do perfil
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('user_type')
+          .eq('id', session.user.id)
+          .single();
+        
+        setUserType(profile?.user_type || null);
       } else {
         setUserType(null);
       }
@@ -54,7 +62,7 @@ const App = () => {
               element={
                 isAuthenticated ? (
                   userType === "business_owner" ? (
-                    <Index />
+                    <Navigate to="/business-dashboard" />
                   ) : (
                     <Navigate to="/user-dashboard" />
                   )
@@ -70,6 +78,26 @@ const App = () => {
             <Route 
               path="/reset-password" 
               element={<Login />} 
+            />
+            <Route
+              path="/business-dashboard"
+              element={
+                isAuthenticated && userType === "business_owner" ? (
+                  <Index />
+                ) : (
+                  <Navigate to="/" />
+                )
+              }
+            />
+            <Route
+              path="/user-dashboard"
+              element={
+                isAuthenticated && userType === "end_user" ? (
+                  <Index />
+                ) : (
+                  <Navigate to="/" />
+                )
+              }
             />
           </Routes>
         </BrowserRouter>

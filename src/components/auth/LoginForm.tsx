@@ -25,7 +25,7 @@ export const LoginForm = () => {
       console.log(isLogin ? "Tentando login com:" : "Tentando cadastro com:", values);
       
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data: { user }, error } = await supabase.auth.signInWithPassword({
           email: values.email,
           password: values.password,
         });
@@ -40,8 +40,31 @@ export const LoginForm = () => {
           return;
         }
 
-        console.log("Login bem sucedido!");
+        // Buscar o tipo de usuário do perfil
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('user_type')
+          .eq('id', user?.id)
+          .single();
+
+        if (profileError) {
+          console.error("Erro ao buscar perfil:", profileError);
+          toast.error("Erro ao carregar perfil do usuário");
+          return;
+        }
+
+        console.log("Login bem sucedido! Tipo de usuário:", profile?.user_type);
         toast.success("Login realizado com sucesso!");
+
+        // Redirecionar baseado no tipo de usuário
+        if (profile?.user_type === 'business_owner') {
+          navigate('/business-dashboard');
+        } else if (profile?.user_type === 'end_user') {
+          navigate('/user-dashboard');
+        } else {
+          navigate('/');
+        }
+
       } else {
         const { error: signUpError } = await supabase.auth.signUp({
           email: values.email,
@@ -61,10 +84,8 @@ export const LoginForm = () => {
 
         console.log("Cadastro realizado!");
         toast.success("Cadastro realizado com sucesso! Verifique seu email.");
+        setIsLogin(true);
       }
-
-      navigate("/");
-      
     } catch (error) {
       console.error("Erro inesperado:", error);
       toast.error(`Erro inesperado ao ${isLogin ? 'fazer login' : 'realizar cadastro'}`);
@@ -74,10 +95,10 @@ export const LoginForm = () => {
   };
 
   const handleResetPassword = async () => {
-    const email = prompt("Digite seu email para recuperar a senha:");
-    if (!email) return;
-
     try {
+      const email = prompt("Digite seu email para recuperar a senha:");
+      if (!email) return;
+
       setIsLoading(true);
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
@@ -117,15 +138,17 @@ export const LoginForm = () => {
         <AuthToggle isLogin={isLogin} onToggle={setIsLogin} />
         <AuthForm isLogin={isLogin} isLoading={isLoading} onSubmit={onSubmit} />
 
-        <div className="text-center">
-          <Button 
-            variant="link" 
-            className="text-sm text-[#00BFFF] hover:text-[#00BFFF]/80 transition-colors duration-200"
-            onClick={handleResetPassword}
-          >
-            Esqueceu sua senha?
-          </Button>
-        </div>
+        {isLogin && (
+          <div className="text-center">
+            <Button 
+              variant="link" 
+              className="text-sm text-[#00BFFF] hover:text-[#00BFFF]/80 transition-colors duration-200"
+              onClick={handleResetPassword}
+            >
+              Esqueceu sua senha?
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
