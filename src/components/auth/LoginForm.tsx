@@ -7,6 +7,7 @@ import { AuthHeader } from "./AuthHeader";
 import { AuthToggle } from "./AuthToggle";
 import { AuthForm } from "./AuthForm";
 import * as z from "zod";
+import { AuthError } from "@supabase/supabase-js";
 
 const formSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -14,6 +15,23 @@ const formSchema = z.object({
   confirmPassword: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
   userType: z.enum(["business_owner", "end_user"]).optional(),
 });
+
+const getErrorMessage = (error: AuthError) => {
+  console.log("Erro detalhado:", error);
+  
+  switch (error.message) {
+    case "Invalid login credentials":
+      return "Email ou senha inválidos";
+    case "Email not confirmed":
+      return "Por favor, confirme seu email antes de fazer login";
+    case "User not found":
+      return "Usuário não encontrado";
+    case "Invalid email or password":
+      return "Email ou senha inválidos";
+    default:
+      return "Erro ao fazer login. Tente novamente.";
+  }
+};
 
 export const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -26,18 +44,20 @@ export const LoginForm = () => {
       console.log(isLogin ? "Tentando login com:" : "Tentando cadastro com:", values);
       
       if (isLogin) {
-        const { data: { user }, error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email: values.email,
           password: values.password,
         });
 
         if (error) {
           console.error("Erro no login:", error);
-          toast.error(
-            error.message === "Invalid login credentials"
-              ? "Email ou senha inválidos"
-              : "Erro ao fazer login. Tente novamente."
-          );
+          toast.error(getErrorMessage(error));
+          return;
+        }
+
+        if (!data.user) {
+          console.error("Usuário não encontrado após login");
+          toast.error("Erro ao recuperar dados do usuário");
           return;
         }
 
@@ -45,7 +65,7 @@ export const LoginForm = () => {
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('user_type')
-          .eq('id', user?.id)
+          .eq('id', data.user.id)
           .single();
 
         if (profileError) {
@@ -73,7 +93,7 @@ export const LoginForm = () => {
           return;
         }
 
-        const { error: signUpError } = await supabase.auth.signUp({
+        const { data, error: signUpError } = await supabase.auth.signUp({
           email: values.email,
           password: values.password,
           options: {
@@ -85,17 +105,19 @@ export const LoginForm = () => {
 
         if (signUpError) {
           console.error("Erro no cadastro:", signUpError);
-          toast.error("Erro ao realizar cadastro. Tente novamente.");
+          toast.error(getErrorMessage(signUpError));
           return;
         }
 
-        console.log("Cadastro realizado!");
-        toast.success("Cadastro realizado com sucesso! Verifique seu email.");
-        setIsLogin(true);
+        if (data.user) {
+          console.log("Cadastro realizado com sucesso!");
+          toast.success("Cadastro realizado! Você já pode fazer login.");
+          setIsLogin(true);
+        }
       }
     } catch (error) {
       console.error("Erro inesperado:", error);
-      toast.error(`Erro inesperado ao ${isLogin ? 'fazer login' : 'realizar cadastro'}`);
+      toast.error("Erro inesperado ao processar sua solicitação");
     } finally {
       setIsLoading(false);
     }
