@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
-import BusinessDashboard from "./pages/business/BusinessDashboard";
 
 const queryClient = new QueryClient();
 
@@ -64,10 +63,8 @@ const App = () => {
               element={
                 !isAuthenticated ? (
                   <Index />
-                ) : userType === "business_owner" ? (
-                  <Navigate to="/business-dashboard" />
                 ) : (
-                  <Navigate to="/user-dashboard" />
+                  <Index />
                 )
               } 
             />
@@ -78,26 +75,6 @@ const App = () => {
             <Route 
               path="/reset-password" 
               element={<Login />} 
-            />
-            <Route
-              path="/business-dashboard/*"
-              element={
-                isAuthenticated && userType === "business_owner" ? (
-                  <BusinessDashboard />
-                ) : (
-                  <Navigate to="/" />
-                )
-              }
-            />
-            <Route
-              path="/user-dashboard"
-              element={
-                isAuthenticated && userType === "end_user" ? (
-                  <Index />
-                ) : (
-                  <Navigate to="/" />
-                )
-              }
             />
           </Routes>
         </BrowserRouter>
