@@ -69,22 +69,22 @@ export const LoginForm = () => {
     <div className="w-full max-w-md space-y-8">
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center space-x-2">
-          <Sparkles className="w-8 h-8 text-[#9b87f5]" />
-          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#9b87f5] to-[#1EAEDB]">
+          <Sparkles className="w-8 h-8 text-[#00BFFF]" />
+          <h1 className="text-4xl font-bold text-[#000000]">
             Epic Moments
           </h1>
         </div>
-        <p className="text-lg text-gray-600">
+        <p className="text-lg text-[#333333]">
           Transforme suas estampas em experiências mágicas com Realidade Aumentada
         </p>
       </div>
 
-      <div className="backdrop-blur-sm bg-white/30 p-8 rounded-2xl shadow-xl border border-white/20 space-y-6">
+      <div className="bg-[#F5F5F5] p-8 rounded-2xl shadow-lg border border-[#C4C4C4] space-y-6">
         <div className="space-y-2 text-center">
-          <h2 className="text-2xl font-semibold text-gray-800">
+          <h2 className="text-2xl font-semibold text-[#000000]">
             {isLogin ? "Bem-vindo de volta!" : "Crie sua conta"}
           </h2>
-          <p className="text-gray-500">
+          <p className="text-[#333333]">
             {isLogin 
               ? "Entre para continuar sua jornada" 
               : "Comece a criar momentos épicos"}
@@ -95,7 +95,11 @@ export const LoginForm = () => {
           <Button
             type="button"
             variant={isLogin ? "default" : "outline"}
-            className={`flex-1 ${isLogin ? 'bg-gradient-to-r from-[#9b87f5] to-[#1EAEDB] hover:opacity-90 transition-opacity duration-200' : ''}`}
+            className={`flex-1 ${
+              isLogin 
+                ? 'bg-[#00BFFF] hover:bg-[#00BFFF]/90 text-white' 
+                : 'border-[#00BFFF] text-[#00BFFF] hover:bg-[#00BFFF]/10'
+            }`}
             onClick={() => setIsLogin(true)}
           >
             Login
@@ -103,7 +107,11 @@ export const LoginForm = () => {
           <Button
             type="button"
             variant={!isLogin ? "default" : "outline"}
-            className={`flex-1 ${!isLogin ? 'bg-gradient-to-r from-[#9b87f5] to-[#1EAEDB] hover:opacity-90 transition-opacity duration-200' : ''}`}
+            className={`flex-1 ${
+              !isLogin 
+                ? 'bg-[#00BFFF] hover:bg-[#00BFFF]/90 text-white' 
+                : 'border-[#00BFFF] text-[#00BFFF] hover:bg-[#00BFFF]/10'
+            }`}
             onClick={() => setIsLogin(false)}
           >
             Cadastro
@@ -117,15 +125,15 @@ export const LoginForm = () => {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel className="text-[#333333]">Email</FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="seu@email.com" 
                       {...field}
-                      className="bg-white/50 border-white/20 focus:border-[#9b87f5]" 
+                      className="bg-white border-[#C4C4C4] focus:border-[#00BFFF] text-[#000000]" 
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-red-500" />
                 </FormItem>
               )}
             />
@@ -135,23 +143,23 @@ export const LoginForm = () => {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Senha</FormLabel>
+                  <FormLabel className="text-[#333333]">Senha</FormLabel>
                   <FormControl>
                     <Input 
                       type="password" 
                       placeholder="••••••" 
                       {...field}
-                      className="bg-white/50 border-white/20 focus:border-[#9b87f5]" 
+                      className="bg-white border-[#C4C4C4] focus:border-[#00BFFF] text-[#000000]" 
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-red-500" />
                 </FormItem>
               )}
             />
 
             <Button 
               type="submit" 
-              className="w-full bg-gradient-to-r from-[#9b87f5] to-[#1EAEDB] hover:opacity-90 transition-opacity duration-200"
+              className="w-full bg-[#00BFFF] hover:bg-[#00BFFF]/90 text-white transition-colors duration-200"
               disabled={isLoading}
             >
               {isLoading 
@@ -162,7 +170,10 @@ export const LoginForm = () => {
         </Form>
 
         <div className="text-center">
-          <Button variant="link" className="text-sm text-[#9b87f5] hover:text-[#1EAEDB] transition-colors duration-200">
+          <Button 
+            variant="link" 
+            className="text-sm text-[#00BFFF] hover:text-[#00BFFF]/80 transition-colors duration-200"
+          >
             Esqueceu sua senha?
           </Button>
         </div>
