@@ -19,17 +19,27 @@ const formSchema = z.object({
 const getErrorMessage = (error: AuthError) => {
   console.log("Erro detalhado:", error);
   
+  // Tentar extrair a mensagem do corpo da resposta se disponível
+  try {
+    const errorBody = JSON.parse(error.message);
+    if (errorBody?.message === "Email not confirmed") {
+      return "Por favor, confirme seu email antes de fazer login. Verifique sua caixa de entrada.";
+    }
+  } catch (e) {
+    // Ignorar erro de parse e continuar com o switch padrão
+  }
+  
   switch (error.message) {
     case "Invalid login credentials":
       return "Email ou senha inválidos";
     case "Email not confirmed":
-      return "Por favor, confirme seu email antes de fazer login";
+      return "Por favor, confirme seu email antes de fazer login. Verifique sua caixa de entrada.";
     case "User not found":
       return "Usuário não encontrado";
     case "Invalid email or password":
       return "Email ou senha inválidos";
     default:
-      return "Erro ao fazer login. Tente novamente.";
+      return `Erro ao fazer login: ${error.message}`;
   }
 };
 
@@ -111,7 +121,7 @@ export const LoginForm = () => {
 
         if (data.user) {
           console.log("Cadastro realizado com sucesso!");
-          toast.success("Cadastro realizado! Você já pode fazer login.");
+          toast.success("Cadastro realizado! Por favor, verifique seu email para confirmar sua conta.");
           setIsLogin(true);
         }
       }
