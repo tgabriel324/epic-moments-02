@@ -1,127 +1,130 @@
 # Epic Momentos - Plataforma AR para Estampas
 
-## Roadmap de Desenvolvimento
+## Fases de Desenvolvimento
 
-### Fase 1 - Autenticação e Funcionalidades Básicas
+### Fase 1 - Autenticação e Estrutura Base
 - [ ] Sistema de Autenticação
-  - [ ] Login com email/senha
-  - [ ] Cadastro de novos usuários
+  - [x] Login com email/senha
+  - [x] Cadastro de novos usuários
   - [ ] Recuperação de senha
-  - [ ] Contexto de autenticação
-  - [ ] Proteção de rotas
+  - [x] Contexto de autenticação
+  - [x] Proteção de rotas
+  - [x] Diferenciação de tipos de usuário (admin/business/end_user)
 
-- [ ] Upload e Gerenciamento de Estampas
+- [ ] Perfis de Usuário
+  - [x] Tabela de perfis no banco
+  - [ ] Edição de informações do perfil
+  - [ ] Upload de avatar
+  - [ ] Configurações da conta
+
+### Fase 2 - Gestão de Conteúdo
+- [ ] Gestão de Estampas
   - [ ] Interface de upload de imagens
-  - [ ] Visualização de estampas cadastradas
+  - [ ] Visualização em grid das estampas
   - [ ] Edição de informações da estampa
   - [ ] Exclusão de estampas
+  - [ ] Preview da estampa
 
-- [ ] Gerenciamento de Vídeos
+- [ ] Gestão de Vídeos
   - [ ] Upload de vídeos
   - [ ] Vinculação vídeo-estampa
-  - [ ] Preview dos vídeos
-  - [ ] Gerenciamento de vídeos existentes
+  - [ ] Player de preview
+  - [ ] Edição de metadados
+  - [ ] Exclusão de vídeos
 
 - [ ] Sistema de QR Codes
   - [ ] Geração automática
-  - [ ] Visualização dos QR codes gerados
-  - [ ] Download de QR codes
-  - [ ] Página de destino do QR code
+  - [ ] Visualização em lista
+  - [ ] Download individual/em lote
+  - [ ] Página de destino personalizada
 
-### Fase 2 - Experiência AR e Preview
+### Fase 3 - Experiência AR
 - [ ] Visualização AR
   - [ ] Implementação do WebXR
-  - [ ] Exibição de vídeos em AR
-  - [ ] Calibração e tracking de imagens
+  - [ ] Detecção de marcadores
+  - [ ] Renderização de vídeos
+  - [ ] Controles de playback
+  - [ ] Ajustes de escala/posição
+
+- [ ] Preview e Testes
+  - [ ] Simulador AR web
+  - [ ] Testes em diferentes dispositivos
+  - [ ] Feedback visual de tracking
   - [ ] Otimização de performance
 
-- [ ] Sistema de Preview
-  - [ ] Preview de vídeos para donos de negócio
-  - [ ] Simulação da experiência AR
-  - [ ] Ajustes de posicionamento
+### Fase 4 - Planos e Monetização
+- [x] Sistema de Planos
+  - [x] Definição de planos (Free/Pro/Enterprise)
+  - [x] Tabela de features por plano
+  - [x] Preços e limites
+  - [ ] Interface de upgrade
 
-### Fase 3 - Monetização e Analytics
-- [ ] Planos e Assinaturas
-  - [ ] Implementação dos níveis de plano
-  - [ ] Sistema de pagamentos
-  - [ ] Limitações por plano
-  - [ ] Upgrade/downgrade de planos
+- [ ] Gestão de Assinaturas
+  - [x] Tabela de assinaturas
+  - [ ] Processo de checkout
+  - [ ] Gestão de pagamentos
+  - [ ] Renovações automáticas
+  - [ ] Cancelamentos
 
-- [ ] Analytics e Relatórios
-  - [ ] Métricas básicas de visualização
-  - [ ] Dashboard para donos de negócio
-  - [ ] Relatórios exportáveis
-  - [ ] Insights de uso
+### Fase 5 - Analytics e Relatórios
+- [x] Estrutura de Métricas
+  - [x] Tabela de métricas de uso
+  - [ ] Coleta automática de dados
+  - [ ] Processamento em background
 
-## Tecnologias Utilizadas
-- Frontend: React + Vite
-- Estilização: Tailwind CSS + Shadcn/ui
-- Gerenciamento de Estado: TanStack Query
-- Backend: Supabase
-- AR: WebXR
+- [ ] Dashboard de Analytics
+  - [ ] Visualizações por QR code
+  - [ ] Tempo médio de interação
+  - [ ] Métricas por período
+  - [ ] Exportação de relatórios
+
+### Fase 6 - Otimização e Escalabilidade
+- [ ] Performance
+  - [ ] Otimização de assets
+  - [ ] Lazy loading
+  - [ ] Caching estratégico
+  - [ ] CDN para mídia
+
+- [ ] Infraestrutura
+  - [ ] Monitoramento
+  - [ ] Logs centralizados
+  - [ ] Backups automáticos
+  - [ ] Escalabilidade horizontal
+
+## Stack Tecnológica
+- ✅ Frontend: React + Vite
+- ✅ Estilização: Tailwind CSS + Shadcn/ui
+- ✅ Gerenciamento de Estado: TanStack Query
+- ✅ Backend: Supabase
+  - ✅ Autenticação
+  - ✅ Banco de Dados
+  - [ ] Storage
+  - [ ] Edge Functions
+- [ ] AR: WebXR + Image Tracking
 
 ## Design System
 ### Cores
-- Primárias: 
+- ✅ Primárias: 
   - Preto (#000000)
   - Branco (#FFFFFF)
-- Secundária: 
+- ✅ Secundária: 
   - Azul Ciano (#00BFFF)
-- Neutras:
+- ✅ Neutras:
   - Cinza Claro (#F5F5F5)
   - Cinza Médio (#C4C4C4)
 
 ### Tipografia
-- Font Family: Poppins
-- Hierarquia:
+- ✅ Font Family: Poppins
+- ✅ Hierarquia:
   - H1: 36px (Bold)
   - H2: 24px (Bold)
   - H3: 20px (Bold)
   - Texto: 16px (Regular)
   - Texto secundário: 14px (Regular)
 
-## Como posso editar este código?
-
-Existem várias maneiras de editar sua aplicação.
-
-**Use Lovable**
-
-Basta visitar o [Projeto Lovable](https://lovable.dev/projects/b965520a-d27f-41dc-8b8c-c1be7846b501) e começar a fazer prompts.
-
-As alterações feitas via Lovable serão comprometidas automaticamente a este repositório.
-
-**Use seu IDE preferido**
-
-Se você quiser trabalhar localmente usando seu próprio IDE, você pode clonar este repositório e enviar alterações. As alterações enviadas também serão refletidas no Lovable.
-
-A única exigência é ter o Node.js e npm instalados - [instale com nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Siga estes passos:
-
-```sh
-# Passo 1: Clone o repositório usando a URL Git do projeto.
-git clone <YOUR_GIT_URL>
-
-# Passo 2: Navegue até o diretório do projeto.
-cd <YOUR_PROJECT_NAME>
-
-# Passo 3: Instale as dependências necessárias.
-npm i
-
-# Passo 4: Inicie o servidor de desenvolvimento com recarregamento automático e uma pré-visualização instantânea.
-npm run dev
-```
-
-**Edite um arquivo diretamente no GitHub**
-
-- Navegue até o(s) arquivo(s) desejado(s).
-- Clique no botão "Editar" (ícone de lápis) no canto superior direito da visualização do arquivo.
-- Faça suas alterações e comprometa as alterações.
-
-**Use GitHub Codespaces**
-
-- Navegue até a página principal do seu repositório.
-- Clique no botão "Código" (botão verde) perto do canto superior direito.
-- Selecione a aba "Codespaces".
-- Clique em "Novo codespace" para lançar um novo ambiente Codespace.
-- Edite arquivos diretamente dentro do Codespace e comprometa e envie suas alterações assim que terminar.
+## Próximos Passos Prioritários
+1. Implementar recuperação de senha
+2. Desenvolver interface de upload e gestão de estampas
+3. Implementar sistema de storage para mídia
+4. Criar sistema de geração de QR codes
+5. Desenvolver visualizador AR básico

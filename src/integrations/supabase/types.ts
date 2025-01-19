@@ -9,6 +9,54 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      business_subscriptions: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          end_date: string | null
+          id: string
+          is_active: boolean | null
+          plan_id: string | null
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          plan_id?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          plan_id?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_subscriptions_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           company_name: string | null
@@ -42,6 +90,86 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_plans: {
+        Row: {
+          created_at: string
+          has_advanced_reports: boolean | null
+          has_custom_branding: boolean | null
+          has_detailed_metrics: boolean | null
+          has_priority_support: boolean | null
+          id: string
+          max_stamps: number
+          name: Database["public"]["Enums"]["subscription_plan"]
+          price: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          has_advanced_reports?: boolean | null
+          has_custom_branding?: boolean | null
+          has_detailed_metrics?: boolean | null
+          has_priority_support?: boolean | null
+          id?: string
+          max_stamps: number
+          name: Database["public"]["Enums"]["subscription_plan"]
+          price: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          has_advanced_reports?: boolean | null
+          has_custom_branding?: boolean | null
+          has_detailed_metrics?: boolean | null
+          has_priority_support?: boolean | null
+          id?: string
+          max_stamps?: number
+          name?: Database["public"]["Enums"]["subscription_plan"]
+          price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      usage_metrics: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          id: string
+          month_year: string
+          stamp_count: number | null
+          total_interactions: number | null
+          total_views: number | null
+          updated_at: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          month_year: string
+          stamp_count?: number | null
+          total_interactions?: number | null
+          total_views?: number | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          month_year?: string
+          stamp_count?: number | null
+          total_interactions?: number | null
+          total_views?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_metrics_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -50,6 +178,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      subscription_plan: "free" | "pro" | "enterprise"
       user_type: "admin" | "business_owner" | "end_user"
     }
     CompositeTypes: {
