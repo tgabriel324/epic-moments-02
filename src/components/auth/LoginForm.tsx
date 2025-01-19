@@ -11,6 +11,7 @@ import * as z from "zod";
 const formSchema = z.object({
   email: z.string().email("Email inválido"),
   password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
+  confirmPassword: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
   userType: z.enum(["business_owner", "end_user"]).optional(),
 });
 
@@ -66,6 +67,12 @@ export const LoginForm = () => {
         }
 
       } else {
+        // Verificar se as senhas coincidem
+        if (values.password !== values.confirmPassword) {
+          toast.error("As senhas não coincidem");
+          return;
+        }
+
         const { error: signUpError } = await supabase.auth.signUp({
           email: values.email,
           password: values.password,
