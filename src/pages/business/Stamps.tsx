@@ -1,10 +1,10 @@
 import { BusinessLayout } from "@/components/layouts/BusinessLayout";
-import { Button } from "@/components/ui/button";
 import { ImagePlus, Search, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
+import { CreateStampDialog } from "@/components/business/CreateStampDialog";
 
 export default function Stamps() {
   const { data: stamps, isLoading } = useQuery({
@@ -25,24 +25,21 @@ export default function Stamps() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary/80 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
               Estampas
             </h1>
             <p className="text-muted-foreground mt-1">
               Gerencie suas estampas e conecte-as com vídeos em AR
             </p>
           </div>
-          <Button className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-600/20 transition-all hover:shadow-purple-600/40">
-            <ImagePlus className="mr-2 h-4 w-4" />
-            Nova Estampa
-          </Button>
+          <CreateStampDialog />
         </div>
 
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Buscar estampas..."
-            className="pl-10 bg-card border-muted/30 focus-visible:ring-purple-600/30"
+            className="pl-10 bg-card border-muted/30 focus-visible:ring-primary/30"
           />
         </div>
 
@@ -57,24 +54,21 @@ export default function Stamps() {
           </div>
         ) : stamps?.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-muted/50 bg-card/50 p-12 text-center">
-            <div className="rounded-full bg-purple-600/10 p-3">
-              <ImagePlus className="h-6 w-6 text-purple-600" />
+            <div className="rounded-full bg-primary/10 p-3">
+              <ImagePlus className="h-6 w-6 text-primary" />
             </div>
             <h3 className="mt-4 text-lg font-semibold">Nenhuma estampa</h3>
             <p className="mt-2 text-sm text-muted-foreground">
               Comece adicionando sua primeira estampa para conectar com vídeos em AR
             </p>
-            <Button className="mt-4 bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-600/20 transition-all hover:shadow-purple-600/40">
-              <Plus className="mr-2 h-4 w-4" />
-              Nova Estampa
-            </Button>
+            <CreateStampDialog />
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {stamps?.map((stamp) => (
               <div
                 key={stamp.id}
-                className="group relative aspect-square overflow-hidden rounded-lg border border-muted/20 bg-card shadow-sm transition-all hover:shadow-lg hover:shadow-purple-600/10 hover:border-purple-600/20"
+                className="group relative aspect-square overflow-hidden rounded-lg border border-muted/20 bg-card shadow-sm transition-all hover:shadow-lg hover:shadow-primary/10 hover:border-primary/20"
               >
                 <img
                   src={stamp.image_url}
