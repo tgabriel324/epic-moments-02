@@ -1,14 +1,12 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AuthHeader } from "./AuthHeader";
+import { AuthToggle } from "./AuthToggle";
+import { AuthForm } from "./AuthForm";
+import * as z from "zod";
 
 const formSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -19,14 +17,6 @@ export const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -67,17 +57,7 @@ export const LoginForm = () => {
 
   return (
     <div className="w-full max-w-md space-y-8">
-      <div className="text-center space-y-4">
-        <div className="flex items-center justify-center space-x-2">
-          <Sparkles className="w-8 h-8 text-[#00BFFF]" />
-          <h1 className="text-4xl font-bold text-[#000000]">
-            Epic Moments
-          </h1>
-        </div>
-        <p className="text-lg text-[#333333]">
-          Transforme suas estampas em experiências mágicas com Realidade Aumentada
-        </p>
-      </div>
+      <AuthHeader />
 
       <div className="bg-[#F5F5F5] p-8 rounded-2xl shadow-lg border border-[#C4C4C4] space-y-6">
         <div className="space-y-2 text-center">
@@ -91,83 +71,8 @@ export const LoginForm = () => {
           </p>
         </div>
 
-        <div className="flex gap-2 justify-center">
-          <Button
-            type="button"
-            variant={isLogin ? "default" : "outline"}
-            className={`flex-1 ${
-              isLogin 
-                ? 'bg-[#00BFFF] hover:bg-[#00BFFF]/90 text-white' 
-                : 'border-[#00BFFF] text-[#00BFFF] hover:bg-[#00BFFF]/10'
-            }`}
-            onClick={() => setIsLogin(true)}
-          >
-            Login
-          </Button>
-          <Button
-            type="button"
-            variant={!isLogin ? "default" : "outline"}
-            className={`flex-1 ${
-              !isLogin 
-                ? 'bg-[#00BFFF] hover:bg-[#00BFFF]/90 text-white' 
-                : 'border-[#00BFFF] text-[#00BFFF] hover:bg-[#00BFFF]/10'
-            }`}
-            onClick={() => setIsLogin(false)}
-          >
-            Cadastro
-          </Button>
-        </div>
-        
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-[#333333]">Email</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="seu@email.com" 
-                      {...field}
-                      className="bg-white border-[#C4C4C4] focus:border-[#00BFFF] text-[#000000]" 
-                    />
-                  </FormControl>
-                  <FormMessage className="text-red-500" />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-[#333333]">Senha</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="password" 
-                      placeholder="••••••" 
-                      {...field}
-                      className="bg-white border-[#C4C4C4] focus:border-[#00BFFF] text-[#000000]" 
-                    />
-                  </FormControl>
-                  <FormMessage className="text-red-500" />
-                </FormItem>
-              )}
-            />
-
-            <Button 
-              type="submit" 
-              className="w-full bg-[#00BFFF] hover:bg-[#00BFFF]/90 text-white transition-colors duration-200"
-              disabled={isLoading}
-            >
-              {isLoading 
-                ? (isLogin ? "Entrando..." : "Cadastrando...") 
-                : (isLogin ? "Entrar" : "Cadastrar")}
-            </Button>
-          </form>
-        </Form>
+        <AuthToggle isLogin={isLogin} onToggle={setIsLogin} />
+        <AuthForm isLogin={isLogin} isLoading={isLoading} onSubmit={onSubmit} />
 
         <div className="text-center">
           <Button 
