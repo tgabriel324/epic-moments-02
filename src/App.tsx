@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
+import BusinessDashboard from "./pages/business/Dashboard";
 
 const queryClient = new QueryClient();
 
@@ -65,7 +66,7 @@ const App = () => {
                 !isAuthenticated ? (
                   <Index />
                 ) : (
-                  <Index />
+                  <Navigate to={userType === 'admin' ? '/admin' : '/business'} />
                 )
               } 
             />
@@ -88,6 +89,19 @@ const App = () => {
                 )
               }
             />
+            {/* Rotas do Dono de Negócio */}
+            <Route
+              path="/business"
+              element={
+                isAuthenticated && userType === 'business_owner' ? (
+                  <BusinessDashboard />
+                ) : (
+                  <Navigate to="/login" />
+                )
+              }
+            />
+            {/* Redirecionar qualquer outra rota para a página inicial */}
+            <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
