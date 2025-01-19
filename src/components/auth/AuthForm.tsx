@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -8,6 +9,7 @@ import * as z from "zod";
 const formSchema = z.object({
   email: z.string().email("Email inválido"),
   password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
+  userType: z.enum(["business_owner", "end_user"]).optional(),
 });
 
 interface AuthFormProps {
@@ -22,6 +24,7 @@ export const AuthForm = ({ isLogin, isLoading, onSubmit }: AuthFormProps) => {
     defaultValues: {
       email: "",
       password: "",
+      userType: "end_user",
     },
   });
 
@@ -64,6 +67,43 @@ export const AuthForm = ({ isLogin, isLoading, onSubmit }: AuthFormProps) => {
             </FormItem>
           )}
         />
+
+        {!isLogin && (
+          <FormField
+            control={form.control}
+            name="userType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-[#333333]">Tipo de Usuário</FormLabel>
+                <FormControl>
+                  <RadioGroup
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    className="flex flex-col space-y-1"
+                  >
+                    <FormItem className="flex items-center space-x-3 space-y-0">
+                      <FormControl>
+                        <RadioGroupItem value="business_owner" />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        Dono de Negócio
+                      </FormLabel>
+                    </FormItem>
+                    <FormItem className="flex items-center space-x-3 space-y-0">
+                      <FormControl>
+                        <RadioGroupItem value="end_user" />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        Usuário Final
+                      </FormLabel>
+                    </FormItem>
+                  </RadioGroup>
+                </FormControl>
+                <FormMessage className="text-red-500" />
+              </FormItem>
+            )}
+          />
+        )}
 
         <Button 
           type="submit" 

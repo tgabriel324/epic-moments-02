@@ -11,6 +11,7 @@ import * as z from "zod";
 const formSchema = z.object({
   email: z.string().email("Email inválido"),
   password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
+  userType: z.enum(["business_owner", "end_user"]).optional(),
 });
 
 export const LoginForm = () => {
@@ -23,33 +24,75 @@ export const LoginForm = () => {
       setIsLoading(true);
       console.log(isLogin ? "Tentando login com:" : "Tentando cadastro com:", values);
       
-      const { error } = isLogin 
-        ? await supabase.auth.signInWithPassword({
-            email: values.email,
-            password: values.password,
-          })
-        : await supabase.auth.signUp({
-            email: values.email,
-            password: values.password,
-          });
+      if (isLogin) {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: values.email,
+          password: values.password,
+        });
 
-      if (error) {
-        console.error(isLogin ? "Erro no login:" : "Erro no cadastro:", error);
-        toast.error(
-          error.message === "Invalid login credentials"
-            ? "Email ou senha inválidos"
-            : `Erro ao ${isLogin ? 'fazer login' : 'realizar cadastro'}. Tente novamente.`
-        );
-        return;
+        if (error) {
+          console.error("Erro no login:", error);
+          toast.error(
+            error.message === "Invalid login credentials"
+              ? "Email ou senha inválidos"
+              : "Erro ao fazer login. Tente novamente."
+          );
+          return;
+        }
+
+        console.log("Login bem sucedido!");
+        toast.success("Login realizado com sucesso!");
+      } else {
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: values.email,
+          password: values.password,
+          options: {
+            data: {
+              user_type: values.userType || "end_user",
+            },
+          },
+        });
+
+        if (signUpError) {
+          console.error("Erro no cadastro:", signUpError);
+          toast.error("Erro ao realizar cadastro. Tente novamente.");
+          return;
+        }
+
+        console.log("Cadastro realizado!");
+        toast.success("Cadastro realizado com sucesso! Verifique seu email.");
       }
 
-      console.log(isLogin ? "Login bem sucedido!" : "Cadastro realizado!");
-      toast.success(isLogin ? "Login realizado com sucesso!" : "Cadastro realizado com sucesso!");
       navigate("/");
       
     } catch (error) {
       console.error("Erro inesperado:", error);
       toast.error(`Erro inesperado ao ${isLogin ? 'fazer login' : 'realizar cadastro'}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    const email = prompt("Digite seu email para recuperar a senha:");
+    if (!email) return;
+
+    try {
+      setIsLoading(true);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) {
+        console.error("Erro ao enviar email de recuperação:", error);
+        toast.error("Erro ao enviar email de recuperação. Tente novamente.");
+        return;
+      }
+
+      toast.success("Email de recuperação enviado! Verifique sua caixa de entrada.");
+    } catch (error) {
+      console.error("Erro inesperado:", error);
+      toast.error("Erro ao enviar email de recuperação");
     } finally {
       setIsLoading(false);
     }
@@ -78,6 +121,7 @@ export const LoginForm = () => {
           <Button 
             variant="link" 
             className="text-sm text-[#00BFFF] hover:text-[#00BFFF]/80 transition-colors duration-200"
+            onClick={handleResetPassword}
           >
             Esqueceu sua senha?
           </Button>

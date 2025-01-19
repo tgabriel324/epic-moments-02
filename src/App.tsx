@@ -12,17 +12,26 @@ const queryClient = new QueryClient();
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [userType, setUserType] = useState<string | null>(null);
 
   useEffect(() => {
     // Verificar estado inicial de autenticação
     supabase.auth.getSession().then(({ data: { session } }) => {
       setIsAuthenticated(!!session);
+      if (session?.user) {
+        setUserType(session.user.user_metadata.user_type);
+      }
     });
 
     // Escutar mudanças no estado de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("Mudança no estado de autenticação:", event);
       setIsAuthenticated(!!session);
+      if (session?.user) {
+        setUserType(session.user.user_metadata.user_type);
+      } else {
+        setUserType(null);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -42,11 +51,25 @@ const App = () => {
           <Routes>
             <Route 
               path="/" 
-              element={isAuthenticated ? <Index /> : <Navigate to="/login" />} 
+              element={
+                isAuthenticated ? (
+                  userType === "business_owner" ? (
+                    <Index />
+                  ) : (
+                    <Navigate to="/user-dashboard" />
+                  )
+                ) : (
+                  <Navigate to="/login" />
+                )
+              } 
             />
             <Route 
               path="/login" 
               element={!isAuthenticated ? <Login /> : <Navigate to="/" />} 
+            />
+            <Route 
+              path="/reset-password" 
+              element={<Login />} 
             />
           </Routes>
         </BrowserRouter>

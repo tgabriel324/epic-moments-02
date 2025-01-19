@@ -15,24 +15,30 @@ export type Database = {
           created_at: string
           first_name: string | null
           id: string
+          is_active: boolean
           last_name: string | null
           updated_at: string
+          user_type: Database["public"]["Enums"]["user_type"]
         }
         Insert: {
           company_name?: string | null
           created_at?: string
           first_name?: string | null
           id: string
+          is_active?: boolean
           last_name?: string | null
           updated_at?: string
+          user_type?: Database["public"]["Enums"]["user_type"]
         }
         Update: {
           company_name?: string | null
           created_at?: string
           first_name?: string | null
           id?: string
+          is_active?: boolean
           last_name?: string | null
           updated_at?: string
+          user_type?: Database["public"]["Enums"]["user_type"]
         }
         Relationships: []
       }
@@ -44,7 +50,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_type: "admin" | "business_owner" | "end_user"
     }
     CompositeTypes: {
       [_ in never]: never
