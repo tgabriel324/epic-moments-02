@@ -18,6 +18,8 @@ const formSchema = z.object({
 
 const getErrorMessage = (error: AuthError) => {
   console.log("Erro detalhado:", error);
+  console.log("Código do erro:", error.status);
+  console.log("Mensagem do erro:", error.message);
   
   switch (error.message) {
     case "Invalid login credentials":
@@ -41,9 +43,11 @@ export const LoginForm = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsLoading(true);
-      console.log(isLogin ? "Tentando login com:" : "Tentando cadastro com:", values);
+      console.log("Iniciando processo de", isLogin ? "login" : "cadastro");
+      console.log("Dados enviados:", { email: values.email, userType: values.userType });
       
       if (isLogin) {
+        console.log("Tentando login...");
         const { data, error } = await supabase.auth.signInWithPassword({
           email: values.email,
           password: values.password,
@@ -83,12 +87,13 @@ export const LoginForm = () => {
         if (profile?.user_type === 'admin') {
           navigate('/admin');
         } else if (profile?.user_type === 'business_owner') {
-          navigate('/business-dashboard');
+          navigate('/business');
         } else {
           navigate('/');
         }
 
       } else {
+        console.log("Iniciando processo de cadastro...");
         // Verificar se as senhas coincidem
         if (values.password !== values.confirmPassword) {
           toast.error("As senhas não coincidem");
@@ -111,9 +116,11 @@ export const LoginForm = () => {
           return;
         }
 
+        console.log("Resposta do cadastro:", data);
+
         if (data.user) {
           console.log("Cadastro realizado com sucesso!");
-          toast.success("Cadastro realizado! Por favor, verifique seu email para confirmar sua conta.");
+          toast.success("Cadastro realizado! Você já pode fazer login.");
           setIsLogin(true);
         }
       }
