@@ -1,22 +1,37 @@
 import { BusinessLayout } from "@/components/layouts/BusinessLayout";
-import { ImagePlus, Search, Plus } from "lucide-react";
+import { ImagePlus, Search, Plus, Edit, Trash2, Eye } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { CreateStampDialog } from "@/components/business/CreateStampDialog";
+import { useState } from "react";
+import { EditStampDialog } from "@/components/business/EditStampDialog";
+import { DeleteStampDialog } from "@/components/business/DeleteStampDialog";
+import { PreviewStampDialog } from "@/components/business/PreviewStampDialog";
+import { useToast } from "@/hooks/use-toast";
+
+type Stamp = Tables<"stamps">;
 
 export default function Stamps() {
+  const [selectedStamp, setSelectedStamp] = useState<Stamp | null>(null);
+  const [editingStamp, setEditingStamp] = useState<Stamp | null>(null);
+  const [deletingStamp, setDeletingStamp] = useState<Stamp | null>(null);
+  const [previewStamp, setPreviewStamp] = useState<Stamp | null>(null);
+  const { toast } = useToast();
+
   const { data: stamps, isLoading } = useQuery({
     queryKey: ["stamps"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("stamps")
         .select("*")
+        .eq("status", "active")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as Tables<"stamps">[];
+      console.log("Estampas carregadas:", data);
+      return data as Stamp[];
     },
   });
 
@@ -52,7 +67,7 @@ export default function Stamps() {
               />
             ))}
           </div>
-        ) : stamps?.length === 0 ? (
+        ) : !stamps?.length ? (
           <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-muted/50 bg-card/50 p-12 text-center">
             <div className="rounded-full bg-primary/10 p-3">
               <ImagePlus className="h-6 w-6 text-primary" />
@@ -65,7 +80,7 @@ export default function Stamps() {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {stamps?.map((stamp) => (
+            {stamps.map((stamp) => (
               <div
                 key={stamp.id}
                 className="group relative aspect-square overflow-hidden rounded-lg border border-muted/20 bg-card shadow-sm transition-all hover:shadow-lg hover:shadow-primary/10 hover:border-primary/20"
@@ -76,7 +91,7 @@ export default function Stamps() {
                   className="h-full w-full object-cover transition-transform group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 transition-opacity group-hover:opacity-100">
-                  <div className="absolute bottom-0 p-4">
+                  <div className="absolute bottom-0 p-4 w-full">
                     <h3 className="text-lg font-semibold text-white">
                       {stamp.name}
                     </h3>
@@ -85,12 +100,47 @@ export default function Stamps() {
                         {stamp.description}
                       </p>
                     )}
+                    <div className="mt-4 flex gap-2">
+                      <button
+                        onClick={() => setPreviewStamp(stamp)}
+                        className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                      >
+                        <Eye className="h-4 w-4 text-white" />
+                      </button>
+                      <button
+                        onClick={() => setEditingStamp(stamp)}
+                        className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                      >
+                        <Edit className="h-4 w-4 text-white" />
+                      </button>
+                      <button
+                        onClick={() => setDeletingStamp(stamp)}
+                        className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4 text-white" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             ))}
           </div>
         )}
+
+        <EditStampDialog
+          stamp={editingStamp}
+          onClose={() => setEditingStamp(null)}
+        />
+
+        <DeleteStampDialog
+          stamp={deletingStamp}
+          onClose={() => setDeletingStamp(null)}
+        />
+
+        <PreviewStampDialog
+          stamp={previewStamp}
+          onClose={() => setPreviewStamp(null)}
+        />
       </div>
     </BusinessLayout>
   );
