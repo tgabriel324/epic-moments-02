@@ -50,11 +50,15 @@ export const initARSession = async (): Promise<XRSession> => {
   try {
     console.log("Iniciando sessão AR...");
     
-    const session = await navigator.xr.requestSession("immersive-ar", {
-      requiredFeatures: ["dom-overlay", "hit-test"],
+    const session = await navigator.xr?.requestSession("immersive-ar", {
+      requiredFeatures: ["dom-overlay"],
       optionalFeatures: ["image-tracking"],
       domOverlay: { root: document.getElementById("ar-overlay") }
     });
+
+    if (!session) {
+      throw new Error("Não foi possível iniciar a sessão AR");
+    }
 
     console.log("Sessão AR iniciada com sucesso");
     return session;
@@ -64,12 +68,15 @@ export const initARSession = async (): Promise<XRSession> => {
   }
 };
 
-export const setupImageTracking = async (session: XRSession, imageUrl: string): Promise<XRTrackedImage | null> => {
+export const setupImageTracking = async (session: XRSession, imageUrl: string): Promise<ImageTrackingResult> => {
   try {
     // Verificar se o navegador suporta tracking de imagens
     if (!session.enabledFeatures?.includes("image-tracking")) {
       console.warn("Tracking de imagens não suportado nesta sessão");
-      return null;
+      return {
+        success: false,
+        error: "Tracking de imagens não suportado"
+      };
     }
 
     // Carregar imagem da estampa
@@ -79,13 +86,15 @@ export const setupImageTracking = async (session: XRSession, imageUrl: string): 
 
     console.log("Imagem carregada para tracking:", imageUrl);
     
-    // Retornar objeto de tracking
+    // Retornar resultado do setup
     return {
-      trackingState: "limited",
-      imageSpace: session.requestReferenceSpace("viewer")
+      success: true
     };
   } catch (error) {
     console.error("Erro ao configurar tracking de imagem:", error);
-    return null;
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Erro desconhecido"
+    };
   }
 };
