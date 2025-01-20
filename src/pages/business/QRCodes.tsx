@@ -13,41 +13,44 @@ import {
 import { Download, QrCode } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Tables } from "@/integrations/supabase/types";
+import type { Tables } from "@/integrations/supabase/types";
 
-type QRCode = Tables<"qr_codes">;
+type Stamp = Tables<"stamps">;
 
 export default function QRCodes() {
-  const [selectedQRs, setSelectedQRs] = useState<string[]>([]);
+  const [selectedStamps, setSelectedStamps] = useState<string[]>([]);
 
-  const { data: qrCodes, isLoading } = useQuery({
-    queryKey: ["qr-codes"],
+  const { data: stamps, isLoading } = useQuery({
+    queryKey: ["stamps-for-qr"],
     queryFn: async () => {
-      console.log("Buscando QR codes...");
+      console.log("Buscando estampas para QR codes...");
       const { data, error } = await supabase
-        .from("qr_codes")
-        .select(`
-          *,
-          stamps (
-            name,
-            image_url
-          )
-        `);
+        .from("stamps")
+        .select("*")
+        .eq("status", "active");
 
       if (error) {
-        console.error("Erro ao buscar QR codes:", error);
-        toast.error("Erro ao carregar QR codes");
+        console.error("Erro ao buscar estampas:", error);
+        toast.error("Erro ao carregar estampas");
         throw error;
       }
 
-      console.log("QR codes carregados:", data);
-      return data;
+      console.log("Estampas carregadas:", data);
+      return data as Stamp[];
     },
   });
 
   const handleDownloadQR = async (id: string) => {
     try {
-      // TODO: Implementar download do QR code
+      // TODO: Implementar geração e download do QR code
+      const stamp = stamps?.find(s => s.id === id);
+      if (!stamp) {
+        toast.error("Estampa não encontrada");
+        return;
+      }
+      
+      const qrUrl = `${window.location.origin}/ar/view/${stamp.id}`;
+      console.log("URL do QR code:", qrUrl);
       toast.success("QR code baixado com sucesso!");
     } catch (error) {
       console.error("Erro ao baixar QR code:", error);
@@ -57,7 +60,14 @@ export default function QRCodes() {
 
   const handleBatchDownload = async () => {
     try {
-      // TODO: Implementar download em lote
+      // TODO: Implementar download em lote dos QR codes
+      const selectedStampsData = stamps?.filter(s => selectedStamps.includes(s.id));
+      if (!selectedStampsData?.length) {
+        toast.error("Nenhuma estampa selecionada");
+        return;
+      }
+      
+      console.log("Gerando QR codes para:", selectedStampsData);
       toast.success("QR codes baixados com sucesso!");
     } catch (error) {
       console.error("Erro ao baixar QR codes:", error);
@@ -74,11 +84,11 @@ export default function QRCodes() {
               QR Codes
             </h1>
             <p className="text-muted-foreground mt-1">
-              Gerencie seus QR codes para experiências em AR
+              Gerencie QR codes para suas estampas em AR
             </p>
           </div>
           <div className="flex gap-4">
-            {selectedQRs.length > 0 && (
+            {selectedStamps.length > 0 && (
               <Button onClick={handleBatchDownload} variant="outline">
                 <Download className="w-4 h-4 mr-2" />
                 Baixar Selecionados
@@ -98,33 +108,33 @@ export default function QRCodes() {
                     <input
                       type="checkbox"
                       onChange={(e) => {
-                        if (e.target.checked && qrCodes) {
-                          setSelectedQRs(qrCodes.map((qr) => qr.id));
+                        if (e.target.checked && stamps) {
+                          setSelectedStamps(stamps.map((s) => s.id));
                         } else {
-                          setSelectedQRs([]);
+                          setSelectedStamps([]);
                         }
                       }}
                     />
                   </TableHead>
                   <TableHead>Estampa</TableHead>
-                  <TableHead>Downloads</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Criado em</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {qrCodes?.map((qr) => (
-                  <TableRow key={qr.id}>
+                {stamps?.map((stamp) => (
+                  <TableRow key={stamp.id}>
                     <TableCell>
                       <input
                         type="checkbox"
-                        checked={selectedQRs.includes(qr.id)}
+                        checked={selectedStamps.includes(stamp.id)}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setSelectedQRs([...selectedQRs, qr.id]);
+                            setSelectedStamps([...selectedStamps, stamp.id]);
                           } else {
-                            setSelectedQRs(
-                              selectedQRs.filter((id) => id !== qr.id)
+                            setSelectedStamps(
+                              selectedStamps.filter((id) => id !== stamp.id)
                             );
                           }
                         }}
@@ -134,24 +144,22 @@ export default function QRCodes() {
                       <div className="flex items-center gap-2">
                         <QrCode className="w-8 h-8 text-muted-foreground" />
                         <div>
-                          <p className="font-medium">
-                            {(qr as any).stamps?.name || "Sem nome"}
-                          </p>
+                          <p className="font-medium">{stamp.name}</p>
                           <p className="text-sm text-muted-foreground">
-                            ID: {qr.id.slice(0, 8)}
+                            ID: {stamp.id.slice(0, 8)}
                           </p>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell>{qr.downloads_count}</TableCell>
+                    <TableCell>{stamp.status}</TableCell>
                     <TableCell>
-                      {new Date(qr.created_at).toLocaleDateString()}
+                      {new Date(stamp.created_at).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="text-right">
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleDownloadQR(qr.id)}
+                        onClick={() => handleDownloadQR(stamp.id)}
                       >
                         <Download className="w-4 h-4" />
                       </Button>
