@@ -22,7 +22,10 @@ const ARView = () => {
     queryFn: async () => {
       if (!stampId || !isValidUUID(stampId)) {
         console.error("ID da estampa inválido:", stampId);
-        throw new Error("ID da estampa inválido");
+        const error = new Error("ID da estampa inválido");
+        toast.error(error.message);
+        setTimeout(() => navigate("/"), 3000);
+        throw error;
       }
       
       console.log("Buscando dados da estampa:", stampId);
@@ -40,23 +43,23 @@ const ARView = () => {
 
       if (error) {
         console.error("Erro ao buscar estampa:", error);
-        throw new Error("Erro ao buscar dados da estampa");
+        const customError = new Error("Erro ao buscar dados da estampa");
+        toast.error(customError.message);
+        setTimeout(() => navigate("/"), 3000);
+        throw customError;
       }
 
       if (!data) {
-        throw new Error("Estampa não encontrada");
+        const notFoundError = new Error("Estampa não encontrada");
+        toast.error(notFoundError.message);
+        setTimeout(() => navigate("/"), 3000);
+        throw notFoundError;
       }
 
       return data;
     },
     enabled: !!stampId,
-    retry: false,
-    onError: (error) => {
-      const message = error instanceof Error ? error.message : "Erro desconhecido";
-      toast.error(message);
-      // Redirecionar para uma página de erro após alguns segundos
-      setTimeout(() => navigate("/"), 3000);
-    }
+    retry: false
   });
 
   useEffect(() => {
