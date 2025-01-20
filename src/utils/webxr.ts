@@ -20,10 +20,11 @@ export const checkXRSupport = async (): Promise<boolean> => {
   }
 };
 
-export const setupARCanvas = (container: HTMLElement): THREE.WebGLRenderer => {
+export const setupARCanvas = (container: HTMLCanvasElement): THREE.WebGLRenderer => {
   console.log("Configurando canvas AR...");
   
   const renderer = new THREE.WebGLRenderer({
+    canvas: container,
     antialias: true,
     alpha: true,
   });
@@ -31,8 +32,6 @@ export const setupARCanvas = (container: HTMLElement): THREE.WebGLRenderer => {
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.xr.enabled = true;
-  
-  container.appendChild(renderer.domElement);
   
   console.log("Canvas AR configurado com sucesso");
   return renderer;

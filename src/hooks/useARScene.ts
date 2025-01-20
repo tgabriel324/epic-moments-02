@@ -13,11 +13,19 @@ import {
 } from "@/utils/webxr";
 import { toast } from "sonner";
 
-export const useARScene = (
-  stampImageUrl?: string,
-  videoRef?: React.RefObject<HTMLVideoElement>,
-  containerRef?: React.RefObject<HTMLDivElement>
-) => {
+interface UseARSceneConfig {
+  stampImageUrl?: string;
+  videoRef: React.RefObject<HTMLVideoElement>;
+  canvasRef: React.RefObject<HTMLCanvasElement>;
+  overlayRef: React.RefObject<HTMLDivElement>;
+}
+
+export const useARScene = ({
+  stampImageUrl,
+  videoRef,
+  canvasRef,
+  overlayRef
+}: UseARSceneConfig) => {
   const [sceneState, setSceneState] = useState<ARSceneState>({
     xrSession: null,
     renderer: null,
@@ -41,17 +49,17 @@ export const useARScene = (
         throw new Error("AR não suportado neste dispositivo");
       }
 
-      if (!containerRef?.current || !videoRef?.current) {
+      if (!overlayRef?.current || !videoRef?.current || !canvasRef?.current) {
         throw new Error("Referências não encontradas");
       }
 
       // Setup Three.js
-      const renderer = setupARCanvas(containerRef.current);
+      const renderer = setupARCanvas(canvasRef.current);
       const scene = createARScene();
       const camera = setupARCamera();
       
       // Iniciar sessão AR
-      const session = await initARSession(containerRef.current);
+      const session = await initARSession(overlayRef.current);
       
       // Setup tracking de imagem
       if (stampImageUrl) {
@@ -91,7 +99,7 @@ export const useARScene = (
       toast.error(error instanceof Error ? error.message : "Erro ao iniciar experiência AR");
       setTracking({ isTracking: false, confidence: 0 });
     }
-  }, [stampImageUrl, videoRef, containerRef]);
+  }, [stampImageUrl, videoRef, canvasRef, overlayRef]);
 
   useEffect(() => {
     const cleanup = initAR();

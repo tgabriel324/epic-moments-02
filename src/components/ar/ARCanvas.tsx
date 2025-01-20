@@ -14,7 +14,12 @@ export const ARCanvas = ({ settings, stampImageUrl }: ARCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   
-  const { sceneState, tracking } = useARScene(stampImageUrl, videoRef, canvasRef);
+  const { sceneState, tracking } = useARScene({
+    stampImageUrl,
+    videoRef,
+    canvasRef,
+    overlayRef
+  });
   
   const {
     controlsState,
