@@ -1,14 +1,7 @@
-// Export the XRSystem interface
+// Define basic XR types
 export interface XRSystem {
-  isSessionSupported(mode: string): Promise<boolean>;
-  requestSession(mode: string, options?: any): Promise<XRSession>;
-}
-
-// Declare global augmentations
-declare global {
-  interface Navigator {
-    xr?: XRSystem;
-  }
+  isSessionSupported(mode: XRSessionMode): Promise<boolean>;
+  requestSession(mode: XRSessionMode, options?: XRSessionInit): Promise<XRSession>;
 }
 
 // Export types needed for XR sessions
@@ -20,4 +13,11 @@ export interface XRSessionInit {
   domOverlay?: {
     root: Element | null;
   };
+}
+
+// Augment the Navigator interface in a module context
+declare module "webxr" {
+  interface Navigator {
+    xr?: XRSystem;
+  }
 }
