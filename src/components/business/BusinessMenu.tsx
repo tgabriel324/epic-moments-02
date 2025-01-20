@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/Logo";
 import {
   LayoutDashboard,
   Image,
@@ -8,6 +9,7 @@ import {
   QrCode,
   Settings,
   LogOut,
+  Wand2,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -20,6 +22,11 @@ export function BusinessMenu() {
       href: "/business/dashboard",
       label: "Dashboard",
       icon: LayoutDashboard,
+    },
+    {
+      href: "/business/ar",
+      label: "Realidade Aumentada",
+      icon: Wand2,
     },
     {
       href: "/business/stamps",
@@ -44,8 +51,15 @@ export function BusinessMenu() {
   ];
 
   return (
-    <div className="space-y-4 py-4">
-      <div className="px-3 py-2">
+    <div className="flex flex-col h-full">
+      <div className="p-6">
+        <div className="flex items-center gap-2">
+          <Logo className="w-8 h-8" />
+          <span className="text-xl font-semibold text-[#00BFFF]">Epic Moments</span>
+        </div>
+      </div>
+      
+      <div className="flex-1 px-3 py-2">
         <div className="space-y-1">
           {menuItems.map((item) => (
             <Link key={item.href} to={item.href}>
@@ -60,7 +74,8 @@ export function BusinessMenu() {
           ))}
         </div>
       </div>
-      <div className="px-3 py-2">
+
+      <div className="px-3 py-2 mt-auto">
         <Button
           variant="ghost"
           className="w-full justify-start text-red-500 hover:text-red-500 hover:bg-red-50"
