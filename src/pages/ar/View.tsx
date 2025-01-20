@@ -1,19 +1,29 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 
 const ARView = () => {
   const { stampId } = useParams();
+  const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [interactionId, setInteractionId] = useState<string | null>(null);
 
+  // Validar UUID antes da query
+  const isValidUUID = (uuid: string) => {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(uuid);
+  };
+
   const { data: stampData, isLoading } = useQuery({
     queryKey: ["stamp", stampId],
     queryFn: async () => {
-      if (!stampId) throw new Error("ID da estampa não fornecido");
+      if (!stampId || !isValidUUID(stampId)) {
+        console.error("ID da estampa inválido:", stampId);
+        throw new Error("ID da estampa inválido");
+      }
       
       console.log("Buscando dados da estampa:", stampId);
       const { data, error } = await supabase
@@ -40,7 +50,13 @@ const ARView = () => {
       return data;
     },
     enabled: !!stampId,
-    retry: false
+    retry: false,
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : "Erro desconhecido";
+      toast.error(message);
+      // Redirecionar para uma página de erro após alguns segundos
+      setTimeout(() => navigate("/"), 3000);
+    }
   });
 
   useEffect(() => {
@@ -120,7 +136,7 @@ const ARView = () => {
           });
       }
     };
-  }, [stampId, stampData]);
+  }, [stampId, stampData, navigate]);
 
   if (isLoading) {
     return (
