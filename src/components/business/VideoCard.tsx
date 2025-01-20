@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Play, Pencil, Trash2, Link } from "lucide-react";
 import { Video } from "@/types/video";
+import { useCdn } from "@/hooks/useCdn";
 
 type VideoCardProps = {
   video: Video;
@@ -11,6 +12,8 @@ type VideoCardProps = {
 };
 
 export function VideoCard({ video, onPlay, onEdit, onDelete, onLink }: VideoCardProps) {
+  const { data: cdnUrl, isLoading } = useCdn(video.video_url);
+
   return (
     <div className="group relative rounded-lg border bg-card p-4 hover:shadow-lg transition-all">
       <div className="aspect-video bg-muted rounded-md mb-3 overflow-hidden relative">
@@ -24,10 +27,12 @@ export function VideoCard({ video, onPlay, onEdit, onDelete, onLink }: VideoCard
             <Play className="h-8 w-8" />
           </Button>
         </div>
-        <video
-          src={video.video_url}
-          className="w-full h-full object-cover"
-        />
+        {!isLoading && (
+          <video
+            src={cdnUrl || video.video_url}
+            className="w-full h-full object-cover"
+          />
+        )}
       </div>
       <div className="flex items-start justify-between">
         <div>

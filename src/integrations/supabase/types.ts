@@ -108,6 +108,30 @@ export type Database = {
           },
         ]
       }
+      cdn_settings: {
+        Row: {
+          cdn_url: string
+          created_at: string
+          id: string
+          is_active: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          cdn_url: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          cdn_url?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           company_name: string | null
