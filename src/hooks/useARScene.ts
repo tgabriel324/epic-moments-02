@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import * as THREE from "three";
 import { ARSceneState, ARTrackingState } from "@/types/ar";
 import {
@@ -39,6 +39,11 @@ export const useARScene = ({
     confidence: 0
   });
 
+  // Refs para performance
+  const frameId = useRef<number>();
+  const lastFrameTime = useRef<number>(0);
+  const frameCount = useRef<number>(0);
+
   const initAR = useCallback(async () => {
     try {
       console.log("Iniciando experiência AR...");
@@ -68,10 +73,13 @@ export const useARScene = ({
           throw new Error(trackingResult.error);
         }
 
-        // Criar plano para o vídeo
+        // Criar plano para o vídeo com otimizações
         const geometry = new THREE.PlaneGeometry(1, 1);
+        geometry.computeBoundingSphere(); // Otimizar culling
+        
         const material = createVideoMaterial(videoRef.current);
         const plane = new THREE.Mesh(geometry, material);
+        plane.matrixAutoUpdate = false; // Otimizar updates
         scene.add(plane);
 
         setSceneState({
@@ -87,12 +95,33 @@ export const useARScene = ({
       const handleResizeEvent = () => handleResize(camera, renderer);
       window.addEventListener("resize", handleResizeEvent);
 
+      // Setup animation loop otimizado
+      const animate = (time: number) => {
+        frameId.current = requestAnimationFrame(animate);
+        
+        // Calcular FPS
+        frameCount.current++;
+        if (time - lastFrameTime.current >= 1000) {
+          const fps = Math.round((frameCount.current * 1000) / (time - lastFrameTime.current));
+          console.log("FPS:", fps);
+          frameCount.current = 0;
+          lastFrameTime.current = time;
+        }
+
+        if (renderer && scene && camera) {
+          renderer.render(scene, camera);
+        }
+      };
+
+      frameId.current = requestAnimationFrame(animate);
+
       console.log("Experiência AR iniciada com sucesso");
       
       return () => {
         window.removeEventListener("resize", handleResizeEvent);
         if (session) session.end().catch(console.error);
         if (renderer) renderer.dispose();
+        if (frameId.current) cancelAnimationFrame(frameId.current);
       };
     } catch (error) {
       console.error("Erro ao iniciar AR:", error);

@@ -11,17 +11,28 @@ export interface ARViewSettings {
 export interface ARTrackingState {
   isTracking: boolean;
   confidence: number;
+  lastUpdate?: number;
+  trackingData?: {
+    position: THREE.Vector3;
+    rotation: THREE.Euler;
+    scale: THREE.Vector3;
+  };
 }
 
 export interface ARVideoState {
   isPlaying: boolean;
   currentTime: number;
   duration: number;
+  isBuffering?: boolean;
+  volume?: number;
+  playbackRate?: number;
 }
 
 export interface ARControlsState {
   scale: number;
   rotation: number;
+  position?: THREE.Vector3;
+  isLocked?: boolean;
 }
 
 export interface ARSceneState {
@@ -30,6 +41,8 @@ export interface ARSceneState {
   scene: THREE.Scene | null;
   camera: THREE.PerspectiveCamera | null;
   videoPlane: THREE.Mesh | null;
+  lastFrameTime?: number;
+  frameRate?: number;
 }
 
 export interface ImageTrackingResult {
@@ -66,7 +79,18 @@ declare global {
 
   interface XRFrame {
     getViewerPose(referenceSpace: XRReferenceSpace): XRViewerPose | null;
+    getPose?(space: XRSpace, baseSpace: XRSpace): XRPose | null;
+    getImageTrackingResults?(): XRImageTrackingResult[];
   }
+  
+  interface XRImageTrackingResult {
+    readonly imageSpace: XRSpace;
+    readonly trackingState: XRTrackingState;
+    readonly measuredWidthInMeters: number;
+    readonly estimatedHeightInMeters: number;
+  }
+  
+  type XRTrackingState = "tracked" | "limited" | "emulated";
 }
 
 export {};
