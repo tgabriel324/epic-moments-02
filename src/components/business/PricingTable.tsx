@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 interface Plan {
   id: string;
@@ -25,30 +26,43 @@ export function PricingTable({ plans }: PricingTableProps) {
   };
 
   return (
-    <div className="grid md:grid-cols-3 gap-6">
+    <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto px-4">
       {plans.map((plan) => (
-        <div
+        <Card
           key={plan.id}
-          className="rounded-lg border bg-card text-card-foreground shadow-sm"
+          className={`relative overflow-hidden transition-all duration-300 hover:shadow-xl ${
+            plan.name === 'pro' ? 'border-[#00BFFF] shadow-lg scale-105' : ''
+          }`}
         >
-          <div className="p-6 space-y-4">
-            <h3 className="text-2xl font-bold">{plan.name}</h3>
-            <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-bold">{formatPrice(plan.price)}</span>
-              <span className="text-sm text-muted-foreground">/mês</span>
+          {plan.name === 'pro' && (
+            <div className="absolute top-0 right-0 bg-[#00BFFF] text-white px-4 py-1 rounded-bl-lg text-sm font-medium">
+              Popular
+            </div>
+          )}
+          
+          <div className="p-6 space-y-6">
+            <div className="space-y-2 text-center">
+              <h3 className="text-2xl font-bold capitalize">{plan.name}</h3>
+              <div className="flex items-baseline justify-center gap-1">
+                <span className="text-4xl font-bold">{formatPrice(plan.price)}</span>
+                <span className="text-sm text-muted-foreground">/mês</span>
+              </div>
             </div>
             
-            <Button className="w-full" variant={plan.name === 'Pro' ? 'default' : 'outline'}>
+            <Button 
+              className="w-full bg-gradient-to-r from-[#000000] to-[#00BFFF] hover:opacity-90 transition-opacity" 
+              variant={plan.name === 'pro' ? 'default' : 'outline'}
+            >
               Fazer Upgrade
             </Button>
           </div>
           
-          <div className="p-6 border-t space-y-4">
-            <h4 className="text-sm font-medium">O que está incluído:</h4>
+          <div className="p-6 border-t space-y-4 bg-gray-50">
+            <h4 className="text-sm font-medium text-muted-foreground">O que está incluído:</h4>
             <ul className="space-y-3">
               <li className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-[#00BFFF]" />
-                <span>Até {plan.max_stamps} estampas</span>
+                <span>Até {plan.max_stamps.toLocaleString()} estampas</span>
               </li>
               
               {plan.has_detailed_metrics && (
@@ -80,7 +94,7 @@ export function PricingTable({ plans }: PricingTableProps) {
               )}
             </ul>
           </div>
-        </div>
+        </Card>
       ))}
     </div>
   );

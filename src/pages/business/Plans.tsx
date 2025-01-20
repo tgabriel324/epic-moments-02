@@ -36,10 +36,12 @@ export default function Plans() {
 
   return (
     <BusinessLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Planos e Preços</h1>
-          <p className="text-gray-500 mt-2">
+      <div className="space-y-8">
+        <div className="text-center max-w-3xl mx-auto space-y-4">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-[#000000] to-[#00BFFF] bg-clip-text text-transparent">
+            Planos e Preços
+          </h1>
+          <p className="text-lg text-muted-foreground">
             Escolha o plano ideal para o seu negócio
           </p>
         </div>
