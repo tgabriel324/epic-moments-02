@@ -111,7 +111,7 @@ const ARView = () => {
   }
 
   if (arError) {
-    return <ErrorScreen settings={settings} error={arError.message} />;
+    return <ErrorScreen settings={settings} error={arError} />;
   }
 
   return <ARCanvas settings={settings} />;
