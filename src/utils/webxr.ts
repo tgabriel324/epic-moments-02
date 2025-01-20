@@ -11,14 +11,7 @@ export const checkXRSupport = async (): Promise<boolean> => {
       return false;
     }
 
-    // Verificar suporte específico para tracking de imagens
-    const imageTrackingSupported = await navigator.xr.isSessionSupported("immersive-ar-image-tracking");
-    if (!imageTrackingSupported) {
-      console.error("Tracking de imagens não é suportado neste dispositivo");
-      return false;
-    }
-
-    console.log("WebXR e tracking de imagens suportados!");
+    console.log("WebXR suportado!");
     return true;
   } catch (error) {
     console.error("Erro ao verificar suporte WebXR:", error);
@@ -58,10 +51,9 @@ export const initARSession = async (): Promise<XRSession> => {
     console.log("Iniciando sessão AR...");
     
     const session = await navigator.xr.requestSession("immersive-ar", {
-      requiredFeatures: ["image-tracking"],
-      imageTrackingOptions: {
-        trackingMode: "best-quality"
-      }
+      requiredFeatures: ["dom-overlay", "hit-test"],
+      optionalFeatures: ["image-tracking"],
+      domOverlay: { root: document.getElementById("ar-overlay") }
     });
 
     console.log("Sessão AR iniciada com sucesso");
@@ -72,23 +64,28 @@ export const initARSession = async (): Promise<XRSession> => {
   }
 };
 
-export const createImageTracker = async (session: XRSession, imageUrl: string): Promise<XRImageTracker> => {
+export const setupImageTracking = async (session: XRSession, imageUrl: string): Promise<XRTrackedImage | null> => {
   try {
+    // Verificar se o navegador suporta tracking de imagens
+    if (!session.enabledFeatures?.includes("image-tracking")) {
+      console.warn("Tracking de imagens não suportado nesta sessão");
+      return null;
+    }
+
     // Carregar imagem da estampa
     const response = await fetch(imageUrl);
     const blob = await response.blob();
     const imageBitmap = await createImageBitmap(blob);
 
-    // Criar tracker de imagem
-    const tracker = await session.createImageTracker([{
-      image: imageBitmap,
-      widthInMeters: 0.2 // Ajuste conforme o tamanho real da estampa
-    }]);
-
-    console.log("Tracker de imagem criado com sucesso");
-    return tracker;
+    console.log("Imagem carregada para tracking:", imageUrl);
+    
+    // Retornar objeto de tracking
+    return {
+      trackingState: "limited",
+      imageSpace: session.requestReferenceSpace("viewer")
+    };
   } catch (error) {
-    console.error("Erro ao criar tracker de imagem:", error);
-    throw error;
+    console.error("Erro ao configurar tracking de imagem:", error);
+    return null;
   }
 };

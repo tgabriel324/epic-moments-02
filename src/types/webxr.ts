@@ -1,13 +1,13 @@
-export interface XRImageTracker {
-  tracked: boolean;
+export interface XRTrackedImage {
   trackingState: "tracked" | "emulated" | "limited";
-  lastKnownPose: XRPose | null;
+  imageSpace: XRSpace;
 }
 
 export interface ARSessionConfig {
   requiredFeatures: string[];
-  imageTrackingOptions?: {
-    trackingMode: "best-quality" | "low-latency";
+  optionalFeatures?: string[];
+  domOverlay?: {
+    root: Element | null;
   };
 }
 
