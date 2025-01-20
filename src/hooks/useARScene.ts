@@ -44,16 +44,41 @@ export const useARScene = ({
   const lastFrameTime = useRef<number>(0);
   const frameCount = useRef<number>(0);
 
+  // Função para atualizar o estado de tracking
+  const updateTracking = useCallback((confidence: number) => {
+    setTracking(prev => ({
+      isTracking: confidence > 0.7,
+      confidence,
+      lastUpdate: Date.now()
+    }));
+  }, []);
+
+  // Função para atualizar a posição do vídeo
+  const updateVideoPosition = useCallback((pose: XRPose) => {
+    if (!sceneState.videoPlane) return;
+
+    const { position, orientation } = pose.transform;
+    
+    sceneState.videoPlane.position.set(
+      position.x,
+      position.y,
+      position.z
+    );
+    
+    sceneState.videoPlane.quaternion.set(
+      orientation.x,
+      orientation.y,
+      orientation.z,
+      orientation.w
+    );
+
+    sceneState.videoPlane.updateMatrix();
+  }, [sceneState.videoPlane]);
+
   const initAR = useCallback(async () => {
     try {
       console.log("Iniciando experiência AR...");
       
-      // Verificar suporte
-      const isSupported = await checkXRSupport();
-      if (!isSupported) {
-        throw new Error("AR não suportado neste dispositivo");
-      }
-
       if (!overlayRef?.current || !videoRef?.current || !canvasRef?.current) {
         throw new Error("Referências não encontradas");
       }
@@ -68,18 +93,20 @@ export const useARScene = ({
       
       // Setup tracking de imagem
       if (stampImageUrl) {
+        console.log("Configurando tracking de imagem:", stampImageUrl);
         const trackingResult = await setupImageTracking(stampImageUrl);
+        
         if (!trackingResult.success) {
           throw new Error(trackingResult.error);
         }
 
-        // Criar plano para o vídeo com otimizações
+        // Criar plano para o vídeo
         const geometry = new THREE.PlaneGeometry(1, 1);
-        geometry.computeBoundingSphere(); // Otimizar culling
+        geometry.computeBoundingSphere();
         
         const material = createVideoMaterial(videoRef.current);
         const plane = new THREE.Mesh(geometry, material);
-        plane.matrixAutoUpdate = false; // Otimizar updates
+        plane.matrixAutoUpdate = false;
         scene.add(plane);
 
         setSceneState({
@@ -89,13 +116,15 @@ export const useARScene = ({
           camera,
           videoPlane: plane
         });
+
+        console.log("Cena AR configurada com sucesso");
       }
 
       // Listener para redimensionamento
       const handleResizeEvent = () => handleResize(camera, renderer);
       window.addEventListener("resize", handleResizeEvent);
 
-      // Setup animation loop otimizado
+      // Loop de animação otimizado
       const animate = (time: number) => {
         frameId.current = requestAnimationFrame(animate);
         
@@ -114,8 +143,6 @@ export const useARScene = ({
       };
 
       frameId.current = requestAnimationFrame(animate);
-
-      console.log("Experiência AR iniciada com sucesso");
       
       return () => {
         window.removeEventListener("resize", handleResizeEvent);
@@ -137,5 +164,10 @@ export const useARScene = ({
     };
   }, [initAR]);
 
-  return { sceneState, tracking, setTracking };
+  return { 
+    sceneState, 
+    tracking, 
+    updateTracking,
+    updateVideoPosition 
+  };
 };

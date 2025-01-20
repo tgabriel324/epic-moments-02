@@ -1,7 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ARControlsState, ARVideoState } from "@/types/ar";
+import { supabase } from "@/integrations/supabase/client";
 
-export const useARControls = (videoRef: React.RefObject<HTMLVideoElement>) => {
+export const useARControls = (
+  videoRef: React.RefObject<HTMLVideoElement>,
+  stampId?: string,
+  videoId?: string
+) => {
   const [controlsState, setControlsState] = useState<ARControlsState>({
     scale: 1,
     rotation: 0
@@ -10,8 +15,32 @@ export const useARControls = (videoRef: React.RefObject<HTMLVideoElement>) => {
   const [videoState, setVideoState] = useState<ARVideoState>({
     isPlaying: false,
     currentTime: 0,
-    duration: 0
+    duration: 0,
+    volume: 1
   });
+
+  // Registrar interação quando o vídeo começa
+  useEffect(() => {
+    if (videoState.isPlaying && stampId && videoId) {
+      supabase
+        .from('ar_interactions')
+        .insert({
+          stamp_id: stampId,
+          video_id: videoId,
+          user_agent: navigator.userAgent,
+          device_info: JSON.stringify({
+            platform: navigator.platform,
+            vendor: navigator.vendor,
+          }),
+          status: 'started'
+        })
+        .then(({ error }) => {
+          if (error) {
+            console.error("Erro ao registrar interação:", error);
+          }
+        });
+    }
+  }, [videoState.isPlaying, stampId, videoId]);
 
   const handlePlayPause = () => {
     if (!videoRef.current) return;
@@ -33,7 +62,28 @@ export const useARControls = (videoRef: React.RefObject<HTMLVideoElement>) => {
     
     setVideoState(prev => ({
       ...prev,
-      currentTime: videoRef.current?.currentTime || 0
+      currentTime: videoRef.current?.currentTime || 0,
+      duration: videoRef.current?.duration || 0
+    }));
+  };
+
+  const handleVolumeChange = (value: number) => {
+    if (!videoRef.current) return;
+    
+    videoRef.current.volume = value;
+    setVideoState(prev => ({
+      ...prev,
+      volume: value
+    }));
+  };
+
+  const handleSeek = (value: number) => {
+    if (!videoRef.current) return;
+    
+    videoRef.current.currentTime = value;
+    setVideoState(prev => ({
+      ...prev,
+      currentTime: value
     }));
   };
 
@@ -71,6 +121,8 @@ export const useARControls = (videoRef: React.RefObject<HTMLVideoElement>) => {
     handlers: {
       handlePlayPause,
       handleTimeUpdate,
+      handleVolumeChange,
+      handleSeek,
       handleScaleChange,
       handleZoomIn,
       handleZoomOut,
