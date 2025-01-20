@@ -6,7 +6,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export type Database = {
+export interface Database {
   public: {
     Tables: {
       ar_interactions: {
@@ -16,7 +16,7 @@ export type Database = {
           duration: number | null
           id: string
           stamp_id: string
-          status: Database["public"]["Enums"]["ar_interaction_status"] | null
+          status: "started" | "completed" | "failed" | null
           updated_at: string
           user_agent: string | null
           video_id: string
@@ -27,7 +27,7 @@ export type Database = {
           duration?: number | null
           id?: string
           stamp_id: string
-          status?: Database["public"]["Enums"]["ar_interaction_status"] | null
+          status?: "started" | "completed" | "failed" | null
           updated_at?: string
           user_agent?: string | null
           video_id: string
@@ -38,7 +38,7 @@ export type Database = {
           duration?: number | null
           id?: string
           stamp_id?: string
-          status?: Database["public"]["Enums"]["ar_interaction_status"] | null
+          status?: "started" | "completed" | "failed" | null
           updated_at?: string
           user_agent?: string | null
           video_id?: string
@@ -192,7 +192,7 @@ export type Database = {
           is_active: boolean
           last_name: string | null
           updated_at: string
-          user_type: Database["public"]["Enums"]["user_type"]
+          user_type: "admin" | "business_owner" | "end_user"
         }
         Insert: {
           company_name?: string | null
@@ -202,7 +202,7 @@ export type Database = {
           is_active?: boolean
           last_name?: string | null
           updated_at?: string
-          user_type?: Database["public"]["Enums"]["user_type"]
+          user_type?: "admin" | "business_owner" | "end_user"
         }
         Update: {
           company_name?: string | null
@@ -212,7 +212,7 @@ export type Database = {
           is_active?: boolean
           last_name?: string | null
           updated_at?: string
-          user_type?: Database["public"]["Enums"]["user_type"]
+          user_type?: "admin" | "business_owner" | "end_user"
         }
         Relationships: []
       }
@@ -266,7 +266,7 @@ export type Database = {
           id: string
           image_url: string
           name: string
-          status: Database["public"]["Enums"]["stamp_status"] | null
+          status: "active" | "inactive" | "deleted" | null
           updated_at: string
         }
         Insert: {
@@ -276,7 +276,7 @@ export type Database = {
           id?: string
           image_url: string
           name: string
-          status?: Database["public"]["Enums"]["stamp_status"] | null
+          status?: "active" | "inactive" | "deleted" | null
           updated_at?: string
         }
         Update: {
@@ -286,7 +286,7 @@ export type Database = {
           id?: string
           image_url?: string
           name?: string
-          status?: Database["public"]["Enums"]["stamp_status"] | null
+          status?: "active" | "inactive" | "deleted" | null
           updated_at?: string
         }
         Relationships: [
@@ -308,7 +308,7 @@ export type Database = {
           has_priority_support: boolean | null
           id: string
           max_stamps: number
-          name: Database["public"]["Enums"]["subscription_plan"]
+          name: "free" | "pro" | "enterprise"
           price: number
           updated_at: string
         }
@@ -320,7 +320,7 @@ export type Database = {
           has_priority_support?: boolean | null
           id?: string
           max_stamps: number
-          name: Database["public"]["Enums"]["subscription_plan"]
+          name: "free" | "pro" | "enterprise"
           price: number
           updated_at?: string
         }
@@ -332,7 +332,7 @@ export type Database = {
           has_priority_support?: boolean | null
           id?: string
           max_stamps?: number
-          name?: Database["public"]["Enums"]["subscription_plan"]
+          name?: "free" | "pro" | "enterprise"
           price?: number
           updated_at?: string
         }
@@ -387,7 +387,7 @@ export type Database = {
           duration: number | null
           id: string
           name: string
-          status: Database["public"]["Enums"]["video_status"] | null
+          status: "processing" | "ready" | "error" | "deleted" | null
           updated_at: string
           video_url: string
         }
@@ -398,7 +398,7 @@ export type Database = {
           duration?: number | null
           id?: string
           name: string
-          status?: Database["public"]["Enums"]["video_status"] | null
+          status?: "processing" | "ready" | "error" | "deleted" | null
           updated_at?: string
           video_url: string
         }
@@ -409,7 +409,7 @@ export type Database = {
           duration?: number | null
           id?: string
           name?: string
-          status?: Database["public"]["Enums"]["video_status"] | null
+          status?: "processing" | "ready" | "error" | "deleted" | null
           updated_at?: string
           video_url?: string
         }
@@ -442,3 +442,6 @@ export type Database = {
     }
   }
 }
+
+export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row']
+export type Enums<T extends keyof Database['public']['Enums']> = Database['public']['Enums'][T]
