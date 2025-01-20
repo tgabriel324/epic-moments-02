@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+
 export interface ARViewSettings {
   background_color: string;
   landing_page_primary_color: string;

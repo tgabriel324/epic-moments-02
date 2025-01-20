@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { ARSessionConfig, ImageTrackingResult } from "@/types/ar";
+import { ImageTrackingResult } from "@/types/ar";
 import { toast } from "sonner";
 
 export const checkXRSupport = async (): Promise<boolean> => {

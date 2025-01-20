@@ -11,9 +11,10 @@ interface ARCanvasProps {
 
 export const ARCanvas = ({ settings, stampImageUrl }: ARCanvasProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   
-  const { sceneState, tracking } = useARScene(stampImageUrl, videoRef, overlayRef);
+  const { sceneState, tracking } = useARScene(stampImageUrl, videoRef, canvasRef);
   
   const {
     controlsState,
@@ -34,7 +35,7 @@ export const ARCanvas = ({ settings, stampImageUrl }: ARCanvasProps) => {
       />
       
       <canvas
-        ref={overlayRef}
+        ref={canvasRef}
         className="w-full h-full absolute inset-0"
       />
       
