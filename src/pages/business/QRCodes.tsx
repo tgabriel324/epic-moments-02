@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, QrCode } from "lucide-react";
+import { Download, Loader2, QrCode } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
@@ -19,6 +19,7 @@ type Stamp = Tables<"stamps">;
 
 export default function QRCodes() {
   const [selectedStamps, setSelectedStamps] = useState<string[]>([]);
+  const [generatingQR, setGeneratingQR] = useState<string | null>(null);
 
   const { data: stamps, isLoading } = useQuery({
     queryKey: ["stamps-for-qr"],
@@ -42,32 +43,58 @@ export default function QRCodes() {
 
   const handleDownloadQR = async (id: string) => {
     try {
-      // TODO: Implementar geração e download do QR code
+      setGeneratingQR(id);
       const stamp = stamps?.find(s => s.id === id);
       if (!stamp) {
         toast.error("Estampa não encontrada");
         return;
       }
-      
-      const qrUrl = `${window.location.origin}/ar/view/${stamp.id}`;
-      console.log("URL do QR code:", qrUrl);
+
+      // Gerar QR code usando a Edge Function
+      const response = await fetch('/api/generate-qr', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ stampId: id }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao gerar QR code');
+      }
+
+      const { qrCode } = await response.json();
+
+      // Criar link de download
+      const link = document.createElement('a');
+      link.href = qrCode;
+      link.download = `qrcode-${stamp.name.toLowerCase().replace(/\s+/g, '-')}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
       toast.success("QR code baixado com sucesso!");
     } catch (error) {
       console.error("Erro ao baixar QR code:", error);
       toast.error("Erro ao baixar QR code");
+    } finally {
+      setGeneratingQR(null);
     }
   };
 
   const handleBatchDownload = async () => {
     try {
-      // TODO: Implementar download em lote dos QR codes
       const selectedStampsData = stamps?.filter(s => selectedStamps.includes(s.id));
       if (!selectedStampsData?.length) {
         toast.error("Nenhuma estampa selecionada");
         return;
       }
+
+      // Gerar todos os QR codes selecionados
+      for (const stamp of selectedStampsData) {
+        await handleDownloadQR(stamp.id);
+      }
       
-      console.log("Gerando QR codes para:", selectedStampsData);
       toast.success("QR codes baixados com sucesso!");
     } catch (error) {
       console.error("Erro ao baixar QR codes:", error);
@@ -98,7 +125,9 @@ export default function QRCodes() {
         </div>
 
         {isLoading ? (
-          <div>Carregando...</div>
+          <div className="flex items-center justify-center p-8">
+            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+          </div>
         ) : (
           <div className="border rounded-lg">
             <Table>
@@ -160,8 +189,13 @@ export default function QRCodes() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDownloadQR(stamp.id)}
+                        disabled={generatingQR === stamp.id}
                       >
-                        <Download className="w-4 h-4" />
+                        {generatingQR === stamp.id ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Download className="w-4 h-4" />
+                        )}
                       </Button>
                     </TableCell>
                   </TableRow>
