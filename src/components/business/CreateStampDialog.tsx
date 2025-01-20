@@ -102,7 +102,7 @@ export function CreateStampDialog() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:shadow-primary/40">
+        <Button className="bg-[#00BFFF] hover:bg-[#00BFFF]/90 text-white shadow-lg shadow-[#00BFFF]/20 transition-all hover:shadow-[#00BFFF]/40">
           <ImagePlus className="mr-2 h-4 w-4" />
           Nova Estampa
         </Button>
@@ -147,7 +147,7 @@ export function CreateStampDialog() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="bg-primary hover:bg-primary/90"
+              className="bg-[#00BFFF] hover:bg-[#00BFFF]/90"
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Criar Estampa
