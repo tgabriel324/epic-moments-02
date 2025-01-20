@@ -146,19 +146,33 @@ const ARView = () => {
     };
   }, [stampId, stampData, navigate]);
 
+  // Default values for settings
+  const defaultSettings = {
+    background_color: "black",
+    landing_page_primary_color: "#00BFFF",
+    landing_page_title: "Iniciando experiência AR...",
+    landing_page_description: "Aponte a câmera para a estampa para visualizar o conteúdo em AR"
+  };
+
+  // Merge default settings with actual settings
+  const settings = {
+    ...defaultSettings,
+    ...stampData?.settings
+  };
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center" style={{
-        backgroundColor: stampData?.settings?.background_color || "black"
+        backgroundColor: settings.background_color
       }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style={{
-            borderColor: stampData?.settings?.landing_page_primary_color || "#00BFFF"
+            borderColor: settings.landing_page_primary_color
           }}></div>
           <p className="mt-4" style={{
-            color: stampData?.settings?.landing_page_primary_color || "#00BFFF"
+            color: settings.landing_page_primary_color
           }}>
-            {stampData?.settings?.landing_page_title || "Iniciando experiência AR..."}
+            {settings.landing_page_title}
           </p>
         </div>
       </div>
@@ -168,7 +182,7 @@ const ARView = () => {
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center" style={{
-        backgroundColor: stampData?.settings?.background_color || "black"
+        backgroundColor: settings.background_color
       }}>
         <div className="text-center px-4">
           <div className="bg-red-100 p-4 rounded-lg mb-4">
@@ -178,7 +192,7 @@ const ARView = () => {
             onClick={() => window.location.reload()}
             className="px-6 py-2 rounded-lg hover:opacity-90"
             style={{
-              backgroundColor: stampData?.settings?.landing_page_primary_color || "#00BFFF",
+              backgroundColor: settings.landing_page_primary_color,
               color: "white"
             }}
           >
@@ -191,7 +205,7 @@ const ARView = () => {
 
   return (
     <div className="relative min-h-screen" style={{
-      backgroundColor: stampData?.settings?.background_color || "black"
+      backgroundColor: settings.background_color
     }}>
       <video
         ref={videoRef}
@@ -201,10 +215,10 @@ const ARView = () => {
       />
       <canvas id="ar-canvas" className="w-full h-full absolute inset-0" />
       
-      {stampData?.settings?.landing_page_logo_url && (
+      {settings.landing_page_logo_url && (
         <div className="absolute top-4 left-4 right-4">
           <img 
-            src={stampData.settings.landing_page_logo_url} 
+            src={settings.landing_page_logo_url} 
             alt="Logo"
             className="h-12 object-contain"
           />
@@ -213,11 +227,10 @@ const ARView = () => {
       
       <div className="absolute bottom-4 left-4 right-4">
         <div className="bg-black/50 p-4 rounded-lg backdrop-blur-sm" style={{
-          color: stampData?.settings?.landing_page_primary_color || "white"
+          color: settings.landing_page_primary_color
         }}>
           <p className="text-sm">
-            {stampData?.settings?.landing_page_description || 
-              "Aponte a câmera para a estampa para visualizar o conteúdo em AR"}
+            {settings.landing_page_description}
           </p>
         </div>
       </div>
