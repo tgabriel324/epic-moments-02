@@ -26,7 +26,7 @@ export function CreateVideoDialog() {
   const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Validar tipo e tamanho do arquivo
+      // Validar tipo
       if (!file.type.startsWith('video/')) {
         toast({
           title: "Arquivo inválido",
@@ -35,7 +35,7 @@ export function CreateVideoDialog() {
         });
         return;
       }
-      // 100MB em bytes
+      // Validar tamanho (100MB)
       if (file.size > 100 * 1024 * 1024) {
         toast({
           title: "Arquivo muito grande",
@@ -70,29 +70,29 @@ export function CreateVideoDialog() {
 
       console.log("Iniciando upload do vídeo:", { name, description, videoName: video.name, userId: user.id });
       
-      // Gerar nome único para o arquivo
-      const fileExt = video.name.split('.').pop();
-      const fileName = `${crypto.randomUUID()}.${fileExt}`;
-      const filePath = `${fileName}`;
+      // Preparar FormData para envio
+      const formData = new FormData();
+      formData.append('file', video);
 
-      // Upload do arquivo para o bucket 'videos'
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('videos')
-        .upload(filePath, video, {
-          cacheControl: '3600',
-          upsert: false
-        });
+      // Enviar para o endpoint de otimização
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/optimize-video`,
+        {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+          }
+        }
+      );
 
-      if (uploadError) {
-        throw new Error(`Erro no upload: ${uploadError.message}`);
+      if (!response.ok) {
+        throw new Error('Falha ao otimizar vídeo');
       }
 
-      console.log("Upload concluído:", uploadData);
+      const { publicUrl } = await response.json();
 
-      // Obter URL pública do vídeo
-      const { data: { publicUrl } } = supabase.storage
-        .from('videos')
-        .getPublicUrl(filePath);
+      console.log("Vídeo otimizado e enviado:", publicUrl);
 
       // Inserir registro na tabela de vídeos
       const { data: videoData, error: insertError } = await supabase
@@ -102,7 +102,7 @@ export function CreateVideoDialog() {
           description,
           video_url: publicUrl,
           status: 'processing',
-          business_id: user.id // Adicionando o business_id
+          business_id: user.id
         })
         .select()
         .single();
