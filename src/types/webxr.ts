@@ -1,10 +1,4 @@
-// Define basic XR types
-export interface XRSystem {
-  isSessionSupported(mode: XRSessionMode): Promise<boolean>;
-  requestSession(mode: XRSessionMode, options?: XRSessionInit): Promise<XRSession>;
-}
-
-// Export types needed for XR sessions
+// Define basic XR types that we need and aren't provided by @types/webxr
 export type XRSessionMode = "immersive-ar" | "immersive-vr" | "inline";
 
 export interface XRSessionInit {
@@ -13,11 +7,4 @@ export interface XRSessionInit {
   domOverlay?: {
     root: Element | null;
   };
-}
-
-// Augment the Navigator interface globally
-declare global {
-  interface Navigator {
-    xr?: XRSystem;
-  }
 }
