@@ -55,7 +55,7 @@ export interface ImageTrackingResult {
   };
 }
 
-// Extensões do WebXR
+// WebXR Types
 declare global {
   interface Navigator {
     xr?: XRSystem;
@@ -79,7 +79,7 @@ declare global {
 
   interface XRFrame {
     getViewerPose(referenceSpace: XRReferenceSpace): XRViewerPose | null;
-    getPose?(space: XRSpace, baseSpace: XRSpace): XRPose | null;
+    getPose(space: XRSpace, baseSpace: XRSpace): XRPose | null;
     getImageTrackingResults?(): XRImageTrackingResult[];
   }
   

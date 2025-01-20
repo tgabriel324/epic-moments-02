@@ -30,10 +30,10 @@ export const setupARCanvas = (container: HTMLCanvasElement): THREE.WebGLRenderer
     powerPreference: "high-performance"
   });
   
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Limitar para performance
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.xr.enabled = true;
-  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   
   console.log("Canvas AR configurado com sucesso");
@@ -45,11 +45,9 @@ export const createARScene = (): THREE.Scene => {
   
   const scene = new THREE.Scene();
   
-  // Luz ambiente otimizada
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
   scene.add(ambientLight);
   
-  // Luz direcional com sombras
   const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
   directionalLight.position.set(0, 5, 0);
   directionalLight.castShadow = true;
@@ -172,7 +170,7 @@ export const createVideoMaterial = (video: HTMLVideoElement): THREE.Material => 
   texture.minFilter = THREE.LinearFilter;
   texture.magFilter = THREE.LinearFilter;
   texture.format = THREE.RGBAFormat;
-  texture.encoding = THREE.sRGBEncoding;
+  texture.colorSpace = THREE.SRGBColorSpace;
   
   const material = new THREE.MeshBasicMaterial({
     map: texture,
