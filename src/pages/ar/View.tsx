@@ -18,15 +18,12 @@ const ARView = () => {
     return uuidRegex.test(uuid);
   };
 
-  const { data: stampData, isLoading } = useQuery({
+  const { data: stampData, isLoading, error: queryError } = useQuery({
     queryKey: ["stamp", stampId],
     queryFn: async () => {
       if (!stampId || !isValidUUID(stampId)) {
         console.error("ID da estampa inválido:", stampId);
-        const error = new Error("ID da estampa inválido");
-        toast.error(error.message);
-        setTimeout(() => navigate("/"), 3000);
-        throw error;
+        return null;
       }
       
       console.log("Buscando dados da estampa:", stampId);
@@ -42,12 +39,14 @@ const ARView = () => {
         .eq("id", stampId)
         .maybeSingle();
 
-      if (stampError || !stamp) {
+      if (stampError) {
         console.error("Erro ao buscar estampa:", stampError);
-        const error = new Error("Estampa não encontrada");
-        toast.error(error.message);
-        setTimeout(() => navigate("/"), 3000);
-        throw error;
+        throw stampError;
+      }
+
+      if (!stamp) {
+        console.error("Estampa não encontrada");
+        return null;
       }
 
       // Buscar configurações de QR code do negócio
@@ -64,11 +63,34 @@ const ARView = () => {
 
       return { stamp, settings };
     },
-    enabled: !!stampId,
     retry: false
   });
 
-  const { error } = useARExperience(stampId, stampData);
+  // Se não encontrou dados válidos, mostra erro
+  if (queryError || !stampData) {
+    const errorMessage = "Estampa não encontrada ou ID inválido";
+    toast.error(errorMessage);
+    
+    // Redireciona após 3 segundos para dar tempo de ler a mensagem
+    setTimeout(() => {
+      navigate("/");
+    }, 3000);
+
+    // Mostra tela de erro enquanto aguarda redirecionamento
+    return (
+      <ErrorScreen 
+        settings={{
+          background_color: "black",
+          landing_page_primary_color: "#00BFFF",
+          landing_page_title: "Erro",
+          landing_page_description: errorMessage
+        }} 
+        error={new Error(errorMessage)} 
+      />
+    );
+  }
+
+  const { error: arError } = useARExperience(stampId, stampData);
 
   // Default values for settings
   const defaultSettings: ARViewSettings = {
@@ -88,8 +110,8 @@ const ARView = () => {
     return <LoadingScreen settings={settings} />;
   }
 
-  if (error) {
-    return <ErrorScreen settings={settings} error={error} />;
+  if (arError) {
+    return <ErrorScreen settings={settings} error={arError} />;
   }
 
   return <ARCanvas settings={settings} />;
