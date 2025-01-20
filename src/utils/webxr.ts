@@ -1,5 +1,4 @@
 import { toast } from "sonner";
-import type { XRSystem } from "@/types/webxr";
 
 export const checkXRSupport = async (): Promise<boolean> => {
   console.log("Verificando suporte WebXR...");
