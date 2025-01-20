@@ -9,6 +9,57 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      ar_interactions: {
+        Row: {
+          created_at: string
+          device_info: string | null
+          duration: number | null
+          id: string
+          stamp_id: string
+          status: Database["public"]["Enums"]["ar_interaction_status"] | null
+          updated_at: string
+          user_agent: string | null
+          video_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_info?: string | null
+          duration?: number | null
+          id?: string
+          stamp_id: string
+          status?: Database["public"]["Enums"]["ar_interaction_status"] | null
+          updated_at?: string
+          user_agent?: string | null
+          video_id: string
+        }
+        Update: {
+          created_at?: string
+          device_info?: string | null
+          duration?: number | null
+          id?: string
+          stamp_id?: string
+          status?: Database["public"]["Enums"]["ar_interaction_status"] | null
+          updated_at?: string
+          user_agent?: string | null
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ar_interactions_stamp_id_fkey"
+            columns: ["stamp_id"]
+            isOneToOne: false
+            referencedRelation: "stamps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ar_interactions_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_subscriptions: {
         Row: {
           business_id: string | null
@@ -305,6 +356,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      ar_interaction_status: "started" | "completed" | "failed"
       stamp_status: "active" | "inactive" | "deleted"
       subscription_plan: "free" | "pro" | "enterprise"
       user_type: "admin" | "business_owner" | "end_user"
