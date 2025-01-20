@@ -15,8 +15,8 @@ export interface XRSessionInit {
   };
 }
 
-// Augment the Navigator interface in a module context
-declare module "webxr" {
+// Augment the Navigator interface globally
+declare global {
   interface Navigator {
     xr?: XRSystem;
   }
