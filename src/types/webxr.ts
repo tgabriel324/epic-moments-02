@@ -1,9 +1,10 @@
-interface XRSystem {
+// Export the XRSystem interface
+export interface XRSystem {
   isSessionSupported(mode: string): Promise<boolean>;
   requestSession(mode: string, options?: any): Promise<XRSession>;
 }
 
-// Declare as extensões globais
+// Declare global augmentations
 declare global {
   interface Navigator {
     xr?: XRSystem;
