@@ -7,6 +7,6 @@ export interface XRSystem {
 // Estender a interface Navigator global
 declare global {
   interface Navigator {
-    readonly xr?: XRSystem;
+    readonly xr: XRSystem | undefined;
   }
 }
