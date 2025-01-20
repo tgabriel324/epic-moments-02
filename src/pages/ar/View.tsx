@@ -2,36 +2,46 @@ import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 
 const ARView = () => {
   const { stampId } = useParams();
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [interactionId, setInteractionId] = useState<string | null>(null);
+
+  const { data: stampData, isLoading } = useQuery({
+    queryKey: ["stamp", stampId],
+    queryFn: async () => {
+      console.log("Buscando dados da estampa:", stampId);
+      const { data, error } = await supabase
+        .from("stamps")
+        .select(`
+          *,
+          stamp_video_links!inner(
+            video_id,
+            videos(*)
+          )
+        `)
+        .eq("id", stampId)
+        .single();
+
+      if (error) {
+        console.error("Erro ao buscar estampa:", error);
+        throw new Error("Estampa não encontrada");
+      }
+
+      return data;
+    },
+    retry: false,
+    enabled: !!stampId
+  });
 
   useEffect(() => {
     const initAR = async () => {
       try {
-        console.log("Iniciando experiência AR para stamp:", stampId);
-        
-        // Buscar informações da estampa e vídeo
-        const { data: stampData, error: stampError } = await supabase
-          .from("stamps")
-          .select(`
-            *,
-            stamp_video_links!inner(
-              video_id,
-              videos(*)
-            )
-          `)
-          .eq("id", stampId)
-          .single();
-
-        if (stampError) {
-          console.error("Erro ao buscar estampa:", stampError);
-          throw new Error("Estampa não encontrada");
-        }
+        if (!stampData) return;
+        console.log("Iniciando experiência AR para estampa:", stampData);
 
         // Registrar início da interação
         const { data: interaction, error: interactionError } = await supabase
@@ -44,6 +54,7 @@ const ARView = () => {
               platform: navigator.platform,
               vendor: navigator.vendor,
             }),
+            status: "started"
           })
           .select()
           .single();
@@ -55,7 +66,7 @@ const ARView = () => {
 
         setInteractionId(interaction.id);
         
-        // Inicializar WebXR
+        // Verificar suporte WebXR
         if ("xr" in navigator) {
           const isArSupported = await (navigator as any).xr?.isSessionSupported(
             "immersive-ar"
@@ -65,24 +76,28 @@ const ARView = () => {
               "Seu dispositivo não suporta Realidade Aumentada"
             );
           }
+          
+          console.log("Dispositivo suporta AR, iniciando sessão...");
+          // Aqui vamos iniciar a sessão AR quando implementarmos o tracking
         } else {
           throw new Error("WebXR não está disponível neste navegador");
         }
 
-        setLoading(false);
       } catch (err) {
         console.error("Erro na inicialização AR:", err);
         setError(err instanceof Error ? err.message : "Erro desconhecido");
-        setLoading(false);
+        toast.error(err instanceof Error ? err.message : "Erro desconhecido");
       }
     };
 
-    initAR();
+    if (stampData) {
+      initAR();
+    }
 
     // Cleanup
     return () => {
       if (interactionId) {
-        // Atualizar duração da interação
+        console.log("Finalizando interação AR:", interactionId);
         supabase
           .from("ar_interactions")
           .update({
@@ -99,14 +114,14 @@ const ARView = () => {
           });
       }
     };
-  }, [stampId]);
+  }, [stampId, stampData]);
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-black">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00BFFF] mx-auto"></div>
-          <p className="mt-4 text-gray-600">Iniciando experiência AR...</p>
+          <p className="mt-4 text-white">Iniciando experiência AR...</p>
         </div>
       </div>
     );
@@ -114,7 +129,7 @@ const ARView = () => {
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-black">
         <div className="text-center px-4">
           <div className="bg-red-100 p-4 rounded-lg mb-4">
             <p className="text-red-600">{error}</p>
@@ -131,7 +146,7 @@ const ARView = () => {
   }
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen bg-black">
       <video
         ref={videoRef}
         className="hidden"
