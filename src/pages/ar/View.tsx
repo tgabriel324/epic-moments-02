@@ -29,7 +29,7 @@ const ARView = () => {
       }
       
       console.log("Buscando dados da estampa:", stampId);
-      const { data, error } = await supabase
+      const { data: stamp, error: stampError } = await supabase
         .from("stamps")
         .select(`
           *,
@@ -41,22 +41,27 @@ const ARView = () => {
         .eq("id", stampId)
         .maybeSingle();
 
-      if (error) {
-        console.error("Erro ao buscar estampa:", error);
-        const customError = new Error("Erro ao buscar dados da estampa");
-        toast.error(customError.message);
+      if (stampError || !stamp) {
+        console.error("Erro ao buscar estampa:", stampError);
+        const error = new Error("Estampa não encontrada");
+        toast.error(error.message);
         setTimeout(() => navigate("/"), 3000);
-        throw customError;
+        throw error;
       }
 
-      if (!data) {
-        const notFoundError = new Error("Estampa não encontrada");
-        toast.error(notFoundError.message);
-        setTimeout(() => navigate("/"), 3000);
-        throw notFoundError;
+      // Buscar configurações de QR code do negócio
+      console.log("Buscando configurações de QR code:", stamp.business_id);
+      const { data: settings, error: settingsError } = await supabase
+        .from("qr_code_settings")
+        .select("*")
+        .eq("business_id", stamp.business_id)
+        .single();
+
+      if (settingsError && settingsError.code !== "PGRST116") {
+        console.error("Erro ao buscar configurações:", settingsError);
       }
 
-      return data;
+      return { stamp, settings };
     },
     enabled: !!stampId,
     retry: false
@@ -65,15 +70,15 @@ const ARView = () => {
   useEffect(() => {
     const initAR = async () => {
       try {
-        if (!stampData) return;
-        console.log("Iniciando experiência AR para estampa:", stampData);
+        if (!stampData?.stamp) return;
+        console.log("Iniciando experiência AR para estampa:", stampData.stamp);
 
         // Registrar início da interação
         const { data: interaction, error: interactionError } = await supabase
           .from("ar_interactions")
           .insert({
             stamp_id: stampId,
-            video_id: stampData.stamp_video_links[0].video_id,
+            video_id: stampData.stamp.stamp_video_links[0].video_id,
             user_agent: navigator.userAgent,
             device_info: JSON.stringify({
               platform: navigator.platform,
@@ -115,7 +120,7 @@ const ARView = () => {
       }
     };
 
-    if (stampData) {
+    if (stampData?.stamp) {
       initAR();
     }
 
@@ -143,10 +148,18 @@ const ARView = () => {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-black">
+      <div className="flex min-h-screen items-center justify-center" style={{
+        backgroundColor: stampData?.settings?.background_color || "black"
+      }}>
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00BFFF] mx-auto"></div>
-          <p className="mt-4 text-white">Iniciando experiência AR...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style={{
+            borderColor: stampData?.settings?.landing_page_primary_color || "#00BFFF"
+          }}></div>
+          <p className="mt-4" style={{
+            color: stampData?.settings?.landing_page_primary_color || "#00BFFF"
+          }}>
+            {stampData?.settings?.landing_page_title || "Iniciando experiência AR..."}
+          </p>
         </div>
       </div>
     );
@@ -154,14 +167,20 @@ const ARView = () => {
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-black">
+      <div className="flex min-h-screen items-center justify-center" style={{
+        backgroundColor: stampData?.settings?.background_color || "black"
+      }}>
         <div className="text-center px-4">
           <div className="bg-red-100 p-4 rounded-lg mb-4">
             <p className="text-red-600">{error}</p>
           </div>
           <button
             onClick={() => window.location.reload()}
-            className="bg-[#00BFFF] text-white px-6 py-2 rounded-lg hover:bg-[#00BFFF]/90"
+            className="px-6 py-2 rounded-lg hover:opacity-90"
+            style={{
+              backgroundColor: stampData?.settings?.landing_page_primary_color || "#00BFFF",
+              color: "white"
+            }}
           >
             Tentar Novamente
           </button>
@@ -171,7 +190,9 @@ const ARView = () => {
   }
 
   return (
-    <div className="relative min-h-screen bg-black">
+    <div className="relative min-h-screen" style={{
+      backgroundColor: stampData?.settings?.background_color || "black"
+    }}>
       <video
         ref={videoRef}
         className="hidden"
@@ -180,10 +201,23 @@ const ARView = () => {
       />
       <canvas id="ar-canvas" className="w-full h-full absolute inset-0" />
       
+      {stampData?.settings?.landing_page_logo_url && (
+        <div className="absolute top-4 left-4 right-4">
+          <img 
+            src={stampData.settings.landing_page_logo_url} 
+            alt="Logo"
+            className="h-12 object-contain"
+          />
+        </div>
+      )}
+      
       <div className="absolute bottom-4 left-4 right-4">
-        <div className="bg-black/50 text-white p-4 rounded-lg backdrop-blur-sm">
+        <div className="bg-black/50 p-4 rounded-lg backdrop-blur-sm" style={{
+          color: stampData?.settings?.landing_page_primary_color || "white"
+        }}>
           <p className="text-sm">
-            Aponte a câmera para a estampa para visualizar o conteúdo em AR
+            {stampData?.settings?.landing_page_description || 
+              "Aponte a câmera para a estampa para visualizar o conteúdo em AR"}
           </p>
         </div>
       </div>

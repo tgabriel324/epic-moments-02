@@ -13,9 +13,7 @@ import {
 import { Download, Loader2, QrCode } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import type { Tables } from "@/integrations/supabase/types";
-
-type Stamp = Tables<"stamps">;
+import { QRCodeSettingsDialog } from "@/components/business/QRCodeSettingsDialog";
 
 export default function QRCodes() {
   const [selectedStamps, setSelectedStamps] = useState<string[]>([]);
@@ -37,7 +35,7 @@ export default function QRCodes() {
       }
 
       console.log("Estampas carregadas:", data);
-      return data as Stamp[];
+      return data;
     },
   });
 
@@ -51,23 +49,17 @@ export default function QRCodes() {
       }
 
       // Gerar QR code usando a Edge Function
-      const response = await fetch('/api/generate-qr', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ stampId: id }),
+      const { data, error } = await supabase.functions.invoke('generate-qr', {
+        body: { stampId: id }
       });
 
-      if (!response.ok) {
-        throw new Error('Erro ao gerar QR code');
+      if (error) {
+        throw error;
       }
-
-      const { qrCode } = await response.json();
 
       // Criar link de download
       const link = document.createElement('a');
-      link.href = qrCode;
+      link.href = data.qrCode;
       link.download = `qrcode-${stamp.name.toLowerCase().replace(/\s+/g, '-')}.png`;
       document.body.appendChild(link);
       link.click();
@@ -115,6 +107,7 @@ export default function QRCodes() {
             </p>
           </div>
           <div className="flex gap-4">
+            <QRCodeSettingsDialog />
             {selectedStamps.length > 0 && (
               <Button onClick={handleBatchDownload} variant="outline">
                 <Download className="w-4 h-4 mr-2" />

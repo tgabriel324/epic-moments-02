@@ -165,6 +165,65 @@ export type Database = {
         }
         Relationships: []
       }
+      qr_code_settings: {
+        Row: {
+          background_color: string
+          border_size: number | null
+          border_style: string | null
+          business_id: string
+          created_at: string
+          custom_text: string | null
+          foreground_color: string
+          id: string
+          landing_page_description: string | null
+          landing_page_logo_url: string | null
+          landing_page_primary_color: string | null
+          landing_page_title: string | null
+          logo_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          background_color?: string
+          border_size?: number | null
+          border_style?: string | null
+          business_id: string
+          created_at?: string
+          custom_text?: string | null
+          foreground_color?: string
+          id?: string
+          landing_page_description?: string | null
+          landing_page_logo_url?: string | null
+          landing_page_primary_color?: string | null
+          landing_page_title?: string | null
+          logo_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          background_color?: string
+          border_size?: number | null
+          border_style?: string | null
+          business_id?: string
+          created_at?: string
+          custom_text?: string | null
+          foreground_color?: string
+          id?: string
+          landing_page_description?: string | null
+          landing_page_logo_url?: string | null
+          landing_page_primary_color?: string | null
+          landing_page_title?: string | null
+          logo_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qr_code_settings_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stamp_video_links: {
         Row: {
           created_at: string
