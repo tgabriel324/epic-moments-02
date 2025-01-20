@@ -1,13 +1,5 @@
-export interface XRSystem {
-  isSessionSupported(mode: string): Promise<boolean>;
-  requestSession(mode: string, options?: any): Promise<XRSession>;
-}
-
-declare global {
-  interface Navigator {
-    xr?: XRSystem;
-  }
-}
+import { toast } from "sonner";
+import type { XRSystem } from "@/types/webxr";
 
 export const checkXRSupport = async (): Promise<boolean> => {
   console.log("Verificando suporte WebXR...");
