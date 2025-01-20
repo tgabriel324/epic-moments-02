@@ -4,9 +4,20 @@ export interface XRSystem {
   requestSession(mode: string, options?: any): Promise<XRSession>;
 }
 
-// Estender a interface Navigator global
-declare global {
+// Augment the Navigator interface in a module declaration
+declare module "webxr" {
   interface Navigator {
-    readonly xr: XRSystem | undefined;
+    xr?: XRSystem;
   }
+}
+
+// Export types needed for XR sessions
+export type XRSessionMode = "immersive-ar" | "immersive-vr" | "inline";
+
+export interface XRSessionInit {
+  optionalFeatures?: string[];
+  requiredFeatures?: string[];
+  domOverlay?: {
+    root: Element | null;
+  };
 }
