@@ -17,7 +17,7 @@ export function BusinessMenu() {
 
   const menuItems = [
     {
-      href: "/business",
+      href: "/business/dashboard",
       label: "Dashboard",
       icon: LayoutDashboard,
     },
