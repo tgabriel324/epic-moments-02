@@ -1,10 +1,18 @@
-// Define basic XR types that we need and aren't provided by @types/webxr
-export type XRSessionMode = "immersive-ar" | "immersive-vr" | "inline";
+export interface XRImageTracker {
+  tracked: boolean;
+  trackingState: "tracked" | "emulated" | "limited";
+  lastKnownPose: XRPose | null;
+}
 
-export interface XRSessionInit {
-  optionalFeatures?: string[];
-  requiredFeatures?: string[];
-  domOverlay?: {
-    root: Element | null;
+export interface ARSessionConfig {
+  requiredFeatures: string[];
+  imageTrackingOptions?: {
+    trackingMode: "best-quality" | "low-latency";
   };
+}
+
+export interface ImageTrackingResult {
+  success: boolean;
+  error?: string;
+  pose?: XRPose;
 }

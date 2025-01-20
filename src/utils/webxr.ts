@@ -1,41 +1,67 @@
-import { toast } from "sonner";
-
 export const checkXRSupport = async (): Promise<boolean> => {
-  console.log("Verificando suporte WebXR...");
-  
-  if (!navigator.xr) {
+  if (!window.navigator.xr) {
     console.error("WebXR não está disponível neste navegador");
-    toast.error("Seu navegador não suporta realidade aumentada");
     return false;
   }
 
   try {
-    const isSupported = await navigator.xr.isSessionSupported("immersive-ar");
-    console.log("Suporte WebXR:", isSupported);
-    
-    if (!isSupported) {
-      toast.error("Seu dispositivo não suporta realidade aumentada");
+    const supported = await navigator.xr.isSessionSupported("immersive-ar");
+    if (!supported) {
+      console.error("AR não é suportado neste dispositivo");
+      return false;
     }
-    
-    return isSupported;
+
+    // Verificar suporte específico para tracking de imagens
+    const imageTrackingSupported = await navigator.xr.isSessionSupported("immersive-ar-image-tracking");
+    if (!imageTrackingSupported) {
+      console.error("Tracking de imagens não é suportado neste dispositivo");
+      return false;
+    }
+
+    console.log("WebXR e tracking de imagens suportados!");
+    return true;
   } catch (error) {
     console.error("Erro ao verificar suporte WebXR:", error);
-    toast.error("Erro ao verificar suporte para realidade aumentada");
     return false;
   }
 };
 
-export const initARSession = async () => {
-  console.log("Iniciando sessão AR...");
-  
+export const setupARCanvas = (canvas: HTMLCanvasElement): WebGLRenderingContext | null => {
   try {
-    if (!navigator.xr) {
-      throw new Error("WebXR não disponível");
+    const gl = canvas.getContext("webgl", {
+      xrCompatible: true,
+      alpha: true,
+      antialias: true,
+      preserveDrawingBuffer: true
+    });
+
+    if (!gl) {
+      throw new Error("WebGL não está disponível");
     }
 
+    // Configuração básica do WebGL
+    gl.clearColor(0, 0, 0, 0);
+    gl.enable(gl.DEPTH_TEST);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+    console.log("Canvas AR configurado com sucesso");
+    return gl;
+  } catch (error) {
+    console.error("Erro ao configurar canvas AR:", error);
+    return null;
+  }
+};
+
+export const initARSession = async (): Promise<XRSession> => {
+  try {
+    console.log("Iniciando sessão AR...");
+    
     const session = await navigator.xr.requestSession("immersive-ar", {
-      requiredFeatures: ["hit-test", "dom-overlay"],
-      domOverlay: { root: document.getElementById("ar-overlay") }
+      requiredFeatures: ["image-tracking"],
+      imageTrackingOptions: {
+        trackingMode: "best-quality"
+      }
     });
 
     console.log("Sessão AR iniciada com sucesso");
@@ -46,29 +72,23 @@ export const initARSession = async () => {
   }
 };
 
-export const setupARCanvas = (canvas: HTMLCanvasElement) => {
-  console.log("Configurando canvas AR...");
-  
-  const gl = canvas.getContext("webgl", {
-    xrCompatible: true,
-    alpha: true,
-    antialias: true,
-    preserveDrawingBuffer: true
-  });
+export const createImageTracker = async (session: XRSession, imageUrl: string): Promise<XRImageTracker> => {
+  try {
+    // Carregar imagem da estampa
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+    const imageBitmap = await createImageBitmap(blob);
 
-  if (!gl) {
-    console.error("WebGL não está disponível");
-    throw new Error("WebGL não está disponível neste dispositivo");
+    // Criar tracker de imagem
+    const tracker = await session.createImageTracker([{
+      image: imageBitmap,
+      widthInMeters: 0.2 // Ajuste conforme o tamanho real da estampa
+    }]);
+
+    console.log("Tracker de imagem criado com sucesso");
+    return tracker;
+  } catch (error) {
+    console.error("Erro ao criar tracker de imagem:", error);
+    throw error;
   }
-
-  // Configurações de otimização
-  gl.enable(gl.DEPTH_TEST);
-  gl.enable(gl.CULL_FACE);
-  gl.cullFace(gl.BACK);
-  
-  // Limpar buffer com transparência
-  gl.clearColor(0, 0, 0, 0);
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-  return gl;
 };
