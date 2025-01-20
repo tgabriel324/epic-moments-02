@@ -1,8 +1,8 @@
 import { BusinessLayout } from "@/components/layouts/BusinessLayout";
-import { Search, Video, Play, Pencil, Trash2 } from "lucide-react";
+import { Search, Video, Play, Pencil, Trash2, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { CreateVideoDialog } from "@/components/business/CreateVideoDialog";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,15 +10,29 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea";
+
+type Video = {
+  id: string;
+  name: string;
+  description: string | null;
+  video_url: string;
+  status: 'processing' | 'ready' | 'error' | 'deleted';
+};
 
 export default function Videos() {
-  const [selectedVideo, setSelectedVideo] = useState<{
-    id: string;
-    name: string;
-    video_url: string;
-  } | null>(null);
+  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
+  const [editingVideo, setEditingVideo] = useState<Video | null>(null);
+  const [deletingVideo, setDeletingVideo] = useState<Video | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: videos, isLoading } = useQuery({
     queryKey: ['videos'],
@@ -33,6 +47,95 @@ export default function Videos() {
       return data;
     },
   });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, name, description }: { id: string; name: string; description: string }) => {
+      console.log("Atualizando vídeo:", { id, name, description });
+      const { data, error } = await supabase
+        .from('videos')
+        .update({ name, description })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['videos'] });
+      toast({
+        title: "Vídeo atualizado",
+        description: "As informações do vídeo foram atualizadas com sucesso.",
+      });
+      setEditingVideo(null);
+    },
+    onError: (error) => {
+      console.error("Erro ao atualizar vídeo:", error);
+      toast({
+        title: "Erro ao atualizar",
+        description: "Não foi possível atualizar o vídeo. Tente novamente.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      console.log("Excluindo vídeo:", id);
+      const { error } = await supabase
+        .from('videos')
+        .update({ status: 'deleted' })
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['videos'] });
+      toast({
+        title: "Vídeo excluído",
+        description: "O vídeo foi excluído com sucesso.",
+      });
+      setDeletingVideo(null);
+    },
+    onError: (error) => {
+      console.error("Erro ao excluir vídeo:", error);
+      toast({
+        title: "Erro ao excluir",
+        description: "Não foi possível excluir o vídeo. Tente novamente.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleEdit = (video: Video) => {
+    setEditingVideo(video);
+    setEditName(video.name);
+    setEditDescription(video.description || "");
+  };
+
+  const handleUpdate = async () => {
+    if (!editingVideo) return;
+    
+    if (!editName.trim()) {
+      toast({
+        title: "Nome obrigatório",
+        description: "Por favor, insira um nome para o vídeo.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    updateMutation.mutate({
+      id: editingVideo.id,
+      name: editName,
+      description: editDescription,
+    });
+  };
+
+  const handleDelete = async () => {
+    if (!deletingVideo) return;
+    deleteMutation.mutate(deletingVideo.id);
+  };
 
   return (
     <BusinessLayout>
@@ -78,7 +181,7 @@ export default function Videos() {
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {videos.map((video) => (
+            {videos.filter(v => v.status !== 'deleted').map((video) => (
               <div
                 key={video.id}
                 className="group relative rounded-lg border bg-card p-4 hover:shadow-lg transition-all"
@@ -112,10 +215,18 @@ export default function Videos() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="ghost" size="icon">
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => handleEdit(video)}
+                    >
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon">
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => setDeletingVideo(video)}
+                    >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -125,6 +236,7 @@ export default function Videos() {
           </div>
         )}
 
+        {/* Modal de Preview */}
         <Dialog open={!!selectedVideo} onOpenChange={() => setSelectedVideo(null)}>
           <DialogContent className="max-w-4xl">
             <DialogHeader>
@@ -141,6 +253,81 @@ export default function Videos() {
                 </video>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Modal de Edição */}
+        <Dialog open={!!editingVideo} onOpenChange={() => setEditingVideo(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Editar Vídeo</DialogTitle>
+              <DialogDescription>
+                Atualize as informações do vídeo
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Input
+                  placeholder="Nome do vídeo"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Textarea
+                  placeholder="Descrição (opcional)"
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setEditingVideo(null)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleUpdate}
+                disabled={updateMutation.isPending}
+              >
+                {updateMutation.isPending && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                Salvar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Modal de Confirmação de Exclusão */}
+        <Dialog open={!!deletingVideo} onOpenChange={() => setDeletingVideo(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirmar Exclusão</DialogTitle>
+              <DialogDescription>
+                Tem certeza que deseja excluir o vídeo "{deletingVideo?.name}"? Esta ação não pode ser desfeita.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setDeletingVideo(null)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDelete}
+                disabled={deleteMutation.isPending}
+              >
+                {deleteMutation.isPending && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                Excluir
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
