@@ -1,11 +1,10 @@
-// Define a interface básica do XRSystem
-export interface XRSystem {
+interface XRSystem {
   isSessionSupported(mode: string): Promise<boolean>;
   requestSession(mode: string, options?: any): Promise<XRSession>;
 }
 
-// Augment the Navigator interface in a module declaration
-declare module "webxr" {
+// Declare as extensões globais
+declare global {
   interface Navigator {
     xr?: XRSystem;
   }

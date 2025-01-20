@@ -14,6 +14,8 @@ const queryClient = new QueryClient({
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutos
+      cacheTime: 10 * 60 * 1000, // 10 minutos
     },
   },
 });
@@ -21,18 +23,20 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/business/dashboard" element={<Dashboard />} />
-          <Route path="/business/media" element={<Media />} />
-          <Route path="/business/stamps" element={<Stamps />} />
-          <Route path="/business/videos" element={<Videos />} />
-          <Route path="/business/qrcodes" element={<QRCodes />} />
-          <Route path="/ar/view/:stampId" element={<View />} />
-        </Routes>
-      </Router>
+      <div className="min-h-screen bg-[#121212]">
+        <Router>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/business/dashboard" element={<Dashboard />} />
+            <Route path="/business/media" element={<Media />} />
+            <Route path="/business/stamps" element={<Stamps />} />
+            <Route path="/business/videos" element={<Videos />} />
+            <Route path="/business/qrcodes" element={<QRCodes />} />
+            <Route path="/ar/view/:stampId" element={<View />} />
+          </Routes>
+        </Router>
+      </div>
     </QueryClientProvider>
   );
 }
