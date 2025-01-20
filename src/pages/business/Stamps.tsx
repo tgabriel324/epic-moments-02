@@ -1,5 +1,5 @@
 import { BusinessLayout } from "@/components/layouts/BusinessLayout";
-import { ImagePlus, Search } from "lucide-react";
+import { ImagePlus, Search, Eye, Edit, Trash } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -114,7 +114,7 @@ export default function Stamps() {
                       onClick={() => setDeletingStamp(stamp)}
                       className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
                     >
-                      <Trash2 className="h-4 w-4 text-white" />
+                      <Trash className="h-4 w-4 text-white" />
                     </button>
                   </div>
                 </div>
