@@ -10,7 +10,7 @@ declare global {
   }
   
   interface XRSession {
-    readonly enabledFeatures: Array<string>;
+    enabledFeatures: Array<string>;
     requestReferenceSpace(type: string): Promise<XRReferenceSpace>;
     requestAnimationFrame(callback: XRFrameRequestCallback): number;
     end(): Promise<void>;
