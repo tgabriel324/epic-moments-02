@@ -47,10 +47,12 @@ export const initARSession = async (domOverlay: Element): Promise<XRSession> => 
   try {
     console.log("Iniciando sessão AR...");
     
-    const session = await navigator.xr?.requestSession("immersive-ar", {
+    const sessionInit: XRSessionInit = {
       requiredFeatures: ["dom-overlay", "image-tracking"],
       domOverlay: { root: domOverlay }
-    });
+    };
+
+    const session = await navigator.xr?.requestSession("immersive-ar", sessionInit);
 
     if (!session) {
       throw new Error("Não foi possível iniciar a sessão AR");
@@ -71,15 +73,18 @@ export const setupImageTracking = async (imageUrl: string): Promise<ImageTrackin
     const blob = await response.blob();
     const imageBitmap = await createImageBitmap(blob);
 
-    // Criar textura para tracking
-    const texture = new THREE.Texture(imageBitmap);
-    texture.needsUpdate = true;
+    // Extrair características da imagem para tracking
+    const trackingData = {
+      imageWidth: imageBitmap.width,
+      imageHeight: imageBitmap.height,
+      featurePoints: await extractFeaturePoints(imageBitmap)
+    };
 
     console.log("Imagem carregada para tracking:", imageUrl);
     
     return {
       success: true,
-      texture
+      trackingData
     };
   } catch (error) {
     console.error("Erro ao configurar tracking de imagem:", error);
@@ -88,6 +93,22 @@ export const setupImageTracking = async (imageUrl: string): Promise<ImageTrackin
       error: error instanceof Error ? error.message : "Erro desconhecido"
     };
   }
+};
+
+const extractFeaturePoints = async (image: ImageBitmap): Promise<number[]> => {
+  // Simulação de extração de pontos característicos
+  // Em uma implementação real, usaríamos uma biblioteca de visão computacional
+  const points: number[] = [];
+  const numPoints = 100;
+  
+  for (let i = 0; i < numPoints; i++) {
+    points.push(
+      Math.random() * image.width,
+      Math.random() * image.height
+    );
+  }
+  
+  return points;
 };
 
 export const createVideoMaterial = (video: HTMLVideoElement): THREE.Material => {

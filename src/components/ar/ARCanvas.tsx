@@ -52,11 +52,12 @@ export const ARCanvas = ({ settings, stampImageUrl }: ARCanvasProps) => {
         console.log("Iniciando experiência AR...");
         
         const isSupported = await checkXRSupport();
-        if (!isSupported) return;
+        if (!isSupported) {
+          throw new Error("AR não suportado neste dispositivo");
+        }
 
         if (!canvasRef.current || !overlayRef.current) {
-          console.error("Canvas ou overlay não encontrado");
-          return;
+          throw new Error("Canvas ou overlay não encontrado");
         }
 
         // Setup Three.js
@@ -69,6 +70,9 @@ export const ARCanvas = ({ settings, stampImageUrl }: ARCanvasProps) => {
         // Iniciar sessão AR
         const session = await initARSession(overlayRef.current);
         setXRSession(session);
+
+        // Solicitar referenceSpace
+        const referenceSpace = await session.requestReferenceSpace("local");
 
         // Setup tracking de imagem
         if (stampImageUrl) {
@@ -87,7 +91,7 @@ export const ARCanvas = ({ settings, stampImageUrl }: ARCanvasProps) => {
 
         // Loop de renderização
         const onXRFrame = (time: number, frame: XRFrame) => {
-          const pose = frame.getViewerPose(session.referenceSpace!);
+          const pose = frame.getViewerPose(referenceSpace);
           
           if (pose) {
             const view = pose.views[0];
@@ -122,7 +126,7 @@ export const ARCanvas = ({ settings, stampImageUrl }: ARCanvasProps) => {
         console.log("Experiência AR iniciada com sucesso");
       } catch (error) {
         console.error("Erro ao iniciar AR:", error);
-        toast.error("Erro ao iniciar experiência AR");
+        toast.error(error instanceof Error ? error.message : "Erro ao iniciar experiência AR");
       }
     };
 

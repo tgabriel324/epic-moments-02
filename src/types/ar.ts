@@ -28,5 +28,22 @@ export interface ARSessionConfig {
 export interface ImageTrackingResult {
   success: boolean;
   error?: string;
-  pose?: XRPose;
+  trackingData?: {
+    imageWidth: number;
+    imageHeight: number;
+    featurePoints: number[];
+  };
+}
+
+export interface XRReferenceSpace extends XRSpace {
+  getOffsetReferenceSpace(originOffset: XRRigidTransform): XRReferenceSpace;
+}
+
+declare global {
+  interface XRSession {
+    requestReferenceSpace(type: XRReferenceSpaceType): Promise<XRReferenceSpace>;
+    updateRenderState(state: XRRenderState): Promise<void>;
+    requestAnimationFrame(callback: XRFrameRequestCallback): number;
+    end(): Promise<void>;
+  }
 }
