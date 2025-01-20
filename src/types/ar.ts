@@ -39,6 +39,18 @@ export interface XRReferenceSpace extends XRSpace {
   getOffsetReferenceSpace(originOffset: XRRigidTransform): XRReferenceSpace;
 }
 
+export interface ARSceneState {
+  xrSession: XRSession | null;
+  renderer: THREE.WebGLRenderer | null;
+  scene: THREE.Scene | null;
+  videoPlane: THREE.Mesh | null;
+}
+
+export interface ARControlsState {
+  scale: number;
+  rotation: number;
+}
+
 declare global {
   interface XRSession {
     requestReferenceSpace(type: XRReferenceSpaceType): Promise<XRReferenceSpace>;
