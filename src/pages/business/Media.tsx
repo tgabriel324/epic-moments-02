@@ -2,8 +2,8 @@ import { BusinessLayout } from "@/components/layouts/BusinessLayout";
 import { CreateStampDialog } from "@/components/business/CreateStampDialog";
 import { CreateVideoDialog } from "@/components/business/CreateVideoDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Stamps } from "@/pages/business/Stamps";
-import { Videos } from "@/pages/business/Videos";
+import Stamps from "@/pages/business/Stamps";
+import Videos from "@/pages/business/Videos";
 
 export default function Media() {
   return (
