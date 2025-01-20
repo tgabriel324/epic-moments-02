@@ -7,6 +7,7 @@ import { ErrorScreen } from "@/components/ar/ErrorScreen";
 import { ARCanvas } from "@/components/ar/ARCanvas";
 import { useARExperience } from "@/hooks/useARExperience";
 import type { ARViewSettings } from "@/types/ar";
+import { useEffect } from "react";
 
 const ARView = () => {
   const { stampId } = useParams();
@@ -66,29 +67,20 @@ const ARView = () => {
     retry: false
   });
 
-  // Se não encontrou dados válidos, mostra erro
-  if (queryError || !stampData) {
-    const errorMessage = "Estampa não encontrada ou ID inválido";
-    toast.error(errorMessage);
-    
-    // Redireciona após 3 segundos para dar tempo de ler a mensagem
-    setTimeout(() => {
-      navigate("/");
-    }, 3000);
+  // Gerenciar redirecionamento em caso de erro
+  useEffect(() => {
+    if (queryError || !stampData) {
+      const errorMessage = "Estampa não encontrada ou ID inválido";
+      toast.error(errorMessage);
+      
+      // Aguarda 3 segundos antes de redirecionar
+      const redirectTimer = setTimeout(() => {
+        navigate("/");
+      }, 3000);
 
-    // Mostra tela de erro enquanto aguarda redirecionamento
-    return (
-      <ErrorScreen 
-        settings={{
-          background_color: "black",
-          landing_page_primary_color: "#00BFFF",
-          landing_page_title: "Erro",
-          landing_page_description: errorMessage
-        }} 
-        error={errorMessage} 
-      />
-    );
-  }
+      return () => clearTimeout(redirectTimer);
+    }
+  }, [queryError, stampData, navigate]);
 
   const { error: arError } = useARExperience(stampId, stampData);
 
@@ -108,6 +100,16 @@ const ARView = () => {
 
   if (isLoading) {
     return <LoadingScreen settings={settings} />;
+  }
+
+  // Se houver erro, mostra a tela de erro mas não redireciona imediatamente
+  if (queryError || !stampData) {
+    return (
+      <ErrorScreen 
+        settings={settings} 
+        error="Estampa não encontrada ou ID inválido" 
+      />
+    );
   }
 
   if (arError) {
