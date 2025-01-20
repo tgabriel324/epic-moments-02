@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
-import Sharp from 'https://esm.sh/sharp@0.32.6'
+import { Encoder, Image } from 'https://deno.land/x/imagescript@1.2.15/mod.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -25,14 +25,21 @@ serve(async (req) => {
     const arrayBuffer = await file.arrayBuffer()
     const buffer = new Uint8Array(arrayBuffer)
 
-    // Optimize image
-    const optimizedBuffer = await Sharp(buffer)
-      .resize(800, 800, {
-        fit: 'inside',
-        withoutEnlargement: true
-      })
-      .webp({ quality: 80 })
-      .toBuffer()
+    // Decode image
+    const image = await Image.decode(buffer)
+
+    // Resize maintaining aspect ratio
+    const MAX_SIZE = 800
+    if (image.width > MAX_SIZE || image.height > MAX_SIZE) {
+      const ratio = Math.min(MAX_SIZE / image.width, MAX_SIZE / image.height)
+      image.resize(
+        Math.round(image.width * ratio),
+        Math.round(image.height * ratio)
+      )
+    }
+
+    // Encode to WebP with quality 80
+    const optimizedBuffer = await image.encodeWebP(80)
 
     const optimizedFile = new File(
       [optimizedBuffer],
