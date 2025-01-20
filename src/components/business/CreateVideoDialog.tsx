@@ -61,7 +61,14 @@ export function CreateVideoDialog() {
 
     setIsLoading(true);
     try {
-      console.log("Iniciando upload do vídeo:", { name, description, videoName: video.name });
+      // Obter o ID do usuário autenticado
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error("Usuário não autenticado");
+      }
+
+      console.log("Iniciando upload do vídeo:", { name, description, videoName: video.name, userId: user.id });
       
       // Gerar nome único para o arquivo
       const fileExt = video.name.split('.').pop();
@@ -94,7 +101,8 @@ export function CreateVideoDialog() {
           name,
           description,
           video_url: publicUrl,
-          status: 'processing'
+          status: 'processing',
+          business_id: user.id // Adicionando o business_id
         })
         .select()
         .single();
