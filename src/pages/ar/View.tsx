@@ -13,6 +13,8 @@ const ARView = () => {
   const { data: stampData, isLoading } = useQuery({
     queryKey: ["stamp", stampId],
     queryFn: async () => {
+      if (!stampId) throw new Error("ID da estampa não fornecido");
+      
       console.log("Buscando dados da estampa:", stampId);
       const { data, error } = await supabase
         .from("stamps")
@@ -24,17 +26,21 @@ const ARView = () => {
           )
         `)
         .eq("id", stampId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error("Erro ao buscar estampa:", error);
+        throw new Error("Erro ao buscar dados da estampa");
+      }
+
+      if (!data) {
         throw new Error("Estampa não encontrada");
       }
 
       return data;
     },
-    retry: false,
-    enabled: !!stampId
+    enabled: !!stampId,
+    retry: false
   });
 
   useEffect(() => {
