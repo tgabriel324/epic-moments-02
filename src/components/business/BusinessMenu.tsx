@@ -3,6 +3,8 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   ImageIcon,
+  Stamp,
+  Video,
   Settings,
   BarChart3,
 } from "lucide-react";
@@ -17,6 +19,16 @@ const menuItems = [
     title: "Mídia",
     icon: ImageIcon,
     href: "/business/media",
+  },
+  {
+    title: "Estampas",
+    icon: Stamp,
+    href: "/business/stamps",
+  },
+  {
+    title: "Vídeos",
+    icon: Video,
+    href: "/business/videos",
   },
   {
     title: "Métricas",
