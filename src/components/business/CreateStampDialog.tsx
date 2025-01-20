@@ -28,6 +28,24 @@ export function CreateStampDialog() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validar tipo
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Arquivo inválido",
+          description: "Por favor, selecione uma imagem",
+          variant: "destructive",
+        });
+        return;
+      }
+      // Validar tamanho (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "Arquivo muito grande",
+          description: "O tamanho máximo permitido é 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
       setImage(file);
     }
   };
@@ -54,19 +72,33 @@ export function CreateStampDialog() {
 
     setIsLoading(true);
     try {
-      const fileExt = image.name.split(".").pop();
-      const filePath = `${crypto.randomUUID()}.${fileExt}`;
+      console.log("Iniciando upload da imagem:", { name, hasDescription: !!description });
 
-      const { error: uploadError } = await supabase.storage
-        .from("stamps")
-        .upload(filePath, image);
+      // Preparar FormData para envio
+      const formData = new FormData();
+      formData.append('file', image);
 
-      if (uploadError) throw uploadError;
+      // Enviar para o endpoint de otimização
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/optimize-image`,
+        {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+          }
+        }
+      );
 
-      const { data: { publicUrl } } = supabase.storage
-        .from("stamps")
-        .getPublicUrl(filePath);
+      if (!response.ok) {
+        throw new Error('Falha ao otimizar imagem');
+      }
 
+      const { publicUrl } = await response.json();
+
+      console.log("Imagem otimizada e enviada:", publicUrl);
+
+      // Salvar registro no banco
       const { error: insertError } = await supabase
         .from("stamps")
         .insert({
@@ -77,6 +109,8 @@ export function CreateStampDialog() {
         });
 
       if (insertError) throw insertError;
+
+      console.log("Estampa criada com sucesso");
 
       toast({
         title: "Estampa criada",
@@ -141,6 +175,11 @@ export function CreateStampDialog() {
                 onChange={handleImageChange}
                 required
               />
+              {image && (
+                <p className="text-sm text-muted-foreground">
+                  Arquivo selecionado: {image.name}
+                </p>
+              )}
             </div>
           </div>
           <DialogFooter>
