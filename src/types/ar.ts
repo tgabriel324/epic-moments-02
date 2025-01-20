@@ -17,12 +17,17 @@ export interface ARVideoState {
   duration: number;
 }
 
-export interface ARSessionConfig {
-  requiredFeatures: string[];
-  optionalFeatures?: string[];
-  domOverlay?: {
-    root: Element | null;
-  };
+export interface ARControlsState {
+  scale: number;
+  rotation: number;
+}
+
+export interface ARSceneState {
+  xrSession: XRSession | null;
+  renderer: THREE.WebGLRenderer | null;
+  scene: THREE.Scene | null;
+  camera: THREE.PerspectiveCamera | null;
+  videoPlane: THREE.Mesh | null;
 }
 
 export interface ImageTrackingResult {
@@ -31,31 +36,35 @@ export interface ImageTrackingResult {
   trackingData?: {
     imageWidth: number;
     imageHeight: number;
-    featurePoints: number[];
+    featurePoints: Float32Array;
   };
 }
 
-export interface XRReferenceSpace extends XRSpace {
-  getOffsetReferenceSpace(originOffset: XRRigidTransform): XRReferenceSpace;
-}
-
-export interface ARSceneState {
-  xrSession: XRSession | null;
-  renderer: THREE.WebGLRenderer | null;
-  scene: THREE.Scene | null;
-  videoPlane: THREE.Mesh | null;
-}
-
-export interface ARControlsState {
-  scale: number;
-  rotation: number;
-}
-
+// Extensões do WebXR
 declare global {
+  interface Navigator {
+    xr?: XRSystem;
+  }
+
+  interface XRSystem {
+    isSessionSupported(mode: string): Promise<boolean>;
+    requestSession(mode: string, options?: XRSessionInit): Promise<XRSession>;
+  }
+
   interface XRSession {
     requestReferenceSpace(type: XRReferenceSpaceType): Promise<XRReferenceSpace>;
     updateRenderState(state: XRRenderState): Promise<void>;
     requestAnimationFrame(callback: XRFrameRequestCallback): number;
     end(): Promise<void>;
   }
+
+  interface XRReferenceSpace extends XRSpace {
+    getOffsetReferenceSpace(originOffset: XRRigidTransform): XRReferenceSpace;
+  }
+
+  interface XRFrame {
+    getViewerPose(referenceSpace: XRReferenceSpace): XRViewerPose | null;
+  }
 }
+
+export {};
