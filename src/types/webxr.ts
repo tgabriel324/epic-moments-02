@@ -22,58 +22,44 @@ export interface XRTrackedImage {
   imageSpace: XRSpace;
 }
 
-export interface ARSessionConfig {
-  requiredFeatures: string[];
-  optionalFeatures?: string[];
-  domOverlay?: {
-    root: Element | null;
-  };
-}
-
-export interface ImageTrackingResult {
-  success: boolean;
-  error?: string;
-  pose?: XRPose;
-}
-
 // Tipos globais do WebXR
 declare global {
-  type XRFrameRequestCallback = (time: DOMHighResTimeStamp, frame: XRFrame) => void;
-  
   interface XRRigidTransform {
-    position: DOMPointReadOnly;
-    orientation: DOMPointReadOnly;
-    matrix: Float32Array;
-    inverse: XRRigidTransform;
+    readonly position: DOMPointReadOnly;
+    readonly orientation: DOMPointReadOnly;
+    readonly matrix: Float32Array;
+    readonly inverse: XRRigidTransform;
   }
   
   interface XRSpace {}
   
   interface XRFrame {
-    session: XRSession;
+    readonly session: XRSession;
     getViewerPose(referenceSpace: XRReferenceSpace): XRViewerPose | null;
     getPose(space: XRSpace, baseSpace: XRSpace): XRPose | null;
   }
   
   interface XRView {
-    eye: 'left' | 'right' | 'none';
-    projectionMatrix: Float32Array;
-    transform: XRRigidTransform;
+    readonly eye: 'left' | 'right' | 'none';
+    readonly projectionMatrix: Float32Array;
+    readonly transform: XRRigidTransform;
   }
   
   interface XRViewerPose {
-    transform: XRRigidTransform;
-    views: XRView[];
+    readonly transform: XRRigidTransform;
+    readonly views: readonly XRView[];
   }
   
   interface XRPose {
-    transform: XRRigidTransform;
-    emulatedPosition: boolean;
+    readonly transform: XRRigidTransform;
+    readonly emulatedPosition: boolean;
   }
   
   interface XRReferenceSpace extends XRSpace {
     getOffsetReferenceSpace(originOffset: XRRigidTransform): XRReferenceSpace;
   }
+
+  type XRFrameRequestCallback = (time: DOMHighResTimeStamp, frame: XRFrame) => void;
 }
 
 export {};

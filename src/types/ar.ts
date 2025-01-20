@@ -16,3 +16,17 @@ export interface ARVideoState {
   currentTime: number;
   duration: number;
 }
+
+export interface ARSessionConfig {
+  requiredFeatures: string[];
+  optionalFeatures?: string[];
+  domOverlay?: {
+    root: Element | null;
+  };
+}
+
+export interface ImageTrackingResult {
+  success: boolean;
+  error?: string;
+  pose?: XRPose;
+}
