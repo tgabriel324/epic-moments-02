@@ -1,5 +1,5 @@
 import { BusinessLayout } from "@/components/layouts/BusinessLayout";
-import { Search, Video, Play, Pencil, Trash2, Loader2 } from "lucide-react";
+import { Search, Video, Play, Pencil, Trash2, Loader2, Link } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { CreateVideoDialog } from "@/components/business/CreateVideoDialog";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -16,6 +16,7 @@ import {
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
+import { LinkStampsDialog } from "@/components/business/LinkStampsDialog";
 
 type Video = {
   id: string;
@@ -33,6 +34,7 @@ export default function Videos() {
   const [editDescription, setEditDescription] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [linkingVideo, setLinkingVideo] = useState<Video | null>(null);
 
   const { data: videos, isLoading } = useQuery({
     queryKey: ['videos'],
@@ -218,6 +220,13 @@ export default function Videos() {
                     <Button 
                       variant="ghost" 
                       size="icon"
+                      onClick={() => setLinkingVideo(video)}
+                    >
+                      <Link className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
                       onClick={() => handleEdit(video)}
                     >
                       <Pencil className="h-4 w-4" />
@@ -330,6 +339,12 @@ export default function Videos() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        <LinkStampsDialog
+          videoId={linkingVideo?.id || ""}
+          isOpen={!!linkingVideo}
+          onClose={() => setLinkingVideo(null)}
+        />
       </div>
     </BusinessLayout>
   );
