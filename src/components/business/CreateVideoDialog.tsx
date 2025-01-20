@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Video, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export function CreateVideoDialog() {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,6 +26,24 @@ export function CreateVideoDialog() {
   const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validar tipo e tamanho do arquivo
+      if (!file.type.startsWith('video/')) {
+        toast({
+          title: "Arquivo inválido",
+          description: "Por favor, selecione um arquivo de vídeo",
+          variant: "destructive",
+        });
+        return;
+      }
+      // 100MB em bytes
+      if (file.size > 100 * 1024 * 1024) {
+        toast({
+          title: "Arquivo muito grande",
+          description: "O tamanho máximo permitido é 100MB",
+          variant: "destructive",
+        });
+        return;
+      }
       setVideo(file);
     }
   };
@@ -42,11 +61,55 @@ export function CreateVideoDialog() {
 
     setIsLoading(true);
     try {
-      // Implementação do upload será feita posteriormente
+      console.log("Iniciando upload do vídeo:", { name, description, videoName: video.name });
+      
+      // Gerar nome único para o arquivo
+      const fileExt = video.name.split('.').pop();
+      const fileName = `${crypto.randomUUID()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      // Upload do arquivo para o bucket 'videos'
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('videos')
+        .upload(filePath, video, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        throw new Error(`Erro no upload: ${uploadError.message}`);
+      }
+
+      console.log("Upload concluído:", uploadData);
+
+      // Obter URL pública do vídeo
+      const { data: { publicUrl } } = supabase.storage
+        .from('videos')
+        .getPublicUrl(filePath);
+
+      // Inserir registro na tabela de vídeos
+      const { data: videoData, error: insertError } = await supabase
+        .from('videos')
+        .insert({
+          name,
+          description,
+          video_url: publicUrl,
+          status: 'processing'
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        throw new Error(`Erro ao salvar vídeo: ${insertError.message}`);
+      }
+
+      console.log("Vídeo salvo com sucesso:", videoData);
+
       toast({
         title: "Sucesso",
         description: "Vídeo enviado com sucesso!",
       });
+      
       setIsOpen(false);
       setName("");
       setDescription("");
@@ -55,7 +118,7 @@ export function CreateVideoDialog() {
       console.error("Erro ao fazer upload do vídeo:", error);
       toast({
         title: "Erro ao enviar vídeo",
-        description: "Ocorreu um erro ao enviar seu vídeo. Tente novamente.",
+        description: error instanceof Error ? error.message : "Ocorreu um erro ao enviar seu vídeo. Tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -105,6 +168,11 @@ export function CreateVideoDialog() {
                 onChange={handleVideoChange}
                 required
               />
+              {video && (
+                <p className="text-sm text-muted-foreground">
+                  Arquivo selecionado: {video.name}
+                </p>
+              )}
             </div>
           </div>
           <DialogFooter>
