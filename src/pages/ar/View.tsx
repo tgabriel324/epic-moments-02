@@ -85,7 +85,7 @@ const ARView = () => {
           landing_page_title: "Erro",
           landing_page_description: errorMessage
         }} 
-        error={new Error(errorMessage)} 
+        error={errorMessage} 
       />
     );
   }
@@ -111,7 +111,7 @@ const ARView = () => {
   }
 
   if (arError) {
-    return <ErrorScreen settings={settings} error={arError} />;
+    return <ErrorScreen settings={settings} error={arError.message} />;
   }
 
   return <ARCanvas settings={settings} />;
