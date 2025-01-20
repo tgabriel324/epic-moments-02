@@ -13,6 +13,9 @@ import {
 import { Download, QrCode } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Tables } from "@/integrations/supabase/types";
+
+type QRCode = Tables<"qr_codes">;
 
 export default function QRCodes() {
   const [selectedQRs, setSelectedQRs] = useState<string[]>([]);
@@ -120,7 +123,9 @@ export default function QRCodes() {
                           if (e.target.checked) {
                             setSelectedQRs([...selectedQRs, qr.id]);
                           } else {
-                            setSelectedQRs(selectedQRs.filter((id) => id !== qr.id));
+                            setSelectedQRs(
+                              selectedQRs.filter((id) => id !== qr.id)
+                            );
                           }
                         }}
                       />
@@ -129,7 +134,9 @@ export default function QRCodes() {
                       <div className="flex items-center gap-2">
                         <QrCode className="w-8 h-8 text-muted-foreground" />
                         <div>
-                          <p className="font-medium">{qr.stamps.name}</p>
+                          <p className="font-medium">
+                            {(qr as any).stamps?.name || "Sem nome"}
+                          </p>
                           <p className="text-sm text-muted-foreground">
                             ID: {qr.id.slice(0, 8)}
                           </p>
