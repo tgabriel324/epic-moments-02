@@ -10,6 +10,7 @@ import {
   Settings,
   LogOut,
   Wand2,
+  CreditCard,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -42,6 +43,11 @@ export function BusinessMenu() {
       href: "/business/qrcodes",
       label: "QR Codes",
       icon: QrCode,
+    },
+    {
+      href: "/business/plans",
+      label: "Planos e Preços",
+      icon: CreditCard,
     },
     {
       href: "/business/settings",
