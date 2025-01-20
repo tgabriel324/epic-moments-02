@@ -10,7 +10,7 @@ declare global {
   }
   
   interface XRSession {
-    readonly enabledFeatures: string[];
+    readonly enabledFeatures: Array<string>;
     requestReferenceSpace(type: string): Promise<XRReferenceSpace>;
     requestAnimationFrame(callback: XRFrameRequestCallback): number;
     end(): Promise<void>;
@@ -58,8 +58,6 @@ declare global {
   interface XRReferenceSpace extends XRSpace {
     getOffsetReferenceSpace(originOffset: XRRigidTransform): XRReferenceSpace;
   }
-
-  type XRFrameRequestCallback = (time: DOMHighResTimeStamp, frame: XRFrame) => void;
 }
 
 export {};
