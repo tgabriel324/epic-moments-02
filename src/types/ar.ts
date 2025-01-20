@@ -5,3 +5,14 @@ export interface ARViewSettings {
   landing_page_description: string;
   landing_page_logo_url?: string;
 }
+
+export interface ARTrackingState {
+  isTracking: boolean;
+  confidence: number;
+}
+
+export interface ARVideoState {
+  isPlaying: boolean;
+  currentTime: number;
+  duration: number;
+}
