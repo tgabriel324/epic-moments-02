@@ -1,3 +1,5 @@
+import { ARSessionConfig, ImageTrackingResult } from "@/types/ar";
+
 export const checkXRSupport = async (): Promise<boolean> => {
   if (!window.navigator.xr) {
     console.error("WebXR não está disponível neste navegador");
@@ -97,4 +99,26 @@ export const setupImageTracking = async (session: XRSession, imageUrl: string): 
       error: error instanceof Error ? error.message : "Erro desconhecido"
     };
   }
+};
+
+// Função auxiliar para criar uma matriz de transformação 4x4
+export const createTransformMatrix = (position: { x: number; y: number; z: number }, rotation: number): Float32Array => {
+  const matrix = new Float32Array(16);
+  const cos = Math.cos(rotation);
+  const sin = Math.sin(rotation);
+
+  // Matriz de rotação em Y
+  matrix[0] = cos;
+  matrix[2] = sin;
+  matrix[5] = 1;
+  matrix[8] = -sin;
+  matrix[10] = cos;
+
+  // Translação
+  matrix[12] = position.x;
+  matrix[13] = position.y;
+  matrix[14] = position.z;
+  matrix[15] = 1;
+
+  return matrix;
 };

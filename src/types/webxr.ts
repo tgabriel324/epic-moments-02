@@ -10,13 +10,11 @@ declare global {
   }
   
   interface XRSession {
-    enabledFeatures?: string[];
+    readonly enabledFeatures: string[];
     requestReferenceSpace(type: string): Promise<XRReferenceSpace>;
     requestAnimationFrame(callback: XRFrameRequestCallback): number;
     end(): Promise<void>;
   }
-  
-  type XRFrameRequestCallback = (time: number, frame: XRFrame) => void;
 }
 
 export interface XRTrackedImage {
@@ -37,3 +35,45 @@ export interface ImageTrackingResult {
   error?: string;
   pose?: XRPose;
 }
+
+// Tipos globais do WebXR
+declare global {
+  type XRFrameRequestCallback = (time: DOMHighResTimeStamp, frame: XRFrame) => void;
+  
+  interface XRRigidTransform {
+    position: DOMPointReadOnly;
+    orientation: DOMPointReadOnly;
+    matrix: Float32Array;
+    inverse: XRRigidTransform;
+  }
+  
+  interface XRSpace {}
+  
+  interface XRFrame {
+    session: XRSession;
+    getViewerPose(referenceSpace: XRReferenceSpace): XRViewerPose | null;
+    getPose(space: XRSpace, baseSpace: XRSpace): XRPose | null;
+  }
+  
+  interface XRView {
+    eye: 'left' | 'right' | 'none';
+    projectionMatrix: Float32Array;
+    transform: XRRigidTransform;
+  }
+  
+  interface XRViewerPose {
+    transform: XRRigidTransform;
+    views: XRView[];
+  }
+  
+  interface XRPose {
+    transform: XRRigidTransform;
+    emulatedPosition: boolean;
+  }
+  
+  interface XRReferenceSpace extends XRSpace {
+    getOffsetReferenceSpace(originOffset: XRRigidTransform): XRReferenceSpace;
+  }
+}
+
+export {};
