@@ -10,27 +10,6 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 export default function AR() {
   const [showPreview, setShowPreview] = useState(false);
   
-  const features = [
-    {
-      title: "Estampas",
-      description: "Gerencie suas estampas para experiências em AR",
-      icon: ImageIcon,
-      href: "/business/stamps"
-    },
-    {
-      title: "Vídeos",
-      description: "Faça upload e gerencie seus vídeos em AR",
-      icon: Video,
-      href: "/business/videos"
-    },
-    {
-      title: "QR Codes",
-      description: "Gere e personalize QR codes para suas experiências",
-      icon: QrCode,
-      href: "/business/qrcodes"
-    }
-  ];
-
   // Configurações de exemplo para o preview
   const previewSettings = {
     background_color: "#121212",
@@ -53,21 +32,53 @@ export default function AR() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {features.map((feature) => (
-            <Card key={feature.title} className="hover:shadow-lg transition-shadow">
-              <Link to={feature.href}>
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <feature.icon className="h-5 w-5 text-primary" />
-                    <CardTitle className="text-lg">{feature.title}</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription>{feature.description}</CardDescription>
-                </CardContent>
-              </Link>
+          <Link to="/business/stamps">
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <ImageIcon className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-lg">Estampas</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>
+                  Gerencie suas estampas para experiências em AR
+                </CardDescription>
+              </CardContent>
             </Card>
-          ))}
+          </Link>
+
+          <Link to="/business/videos">
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Video className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-lg">Vídeos</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>
+                  Faça upload e gerencie seus vídeos em AR
+                </CardDescription>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link to="/business/qrcodes">
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <QrCode className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-lg">QR Codes</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>
+                  Gere e personalize QR codes para suas experiências
+                </CardDescription>
+              </CardContent>
+            </Card>
+          </Link>
         </div>
 
         <Card>
