@@ -8,6 +8,7 @@ import Stamps from "@/pages/business/Stamps";
 import Videos from "@/pages/business/Videos";
 import QRCodes from "@/pages/business/QRCodes";
 import View from "@/pages/ar/View";
+import AR from "@/pages/business/AR";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -33,6 +34,7 @@ function App() {
             <Route path="/business/stamps" element={<Stamps />} />
             <Route path="/business/videos" element={<Videos />} />
             <Route path="/business/qrcodes" element={<QRCodes />} />
+            <Route path="/business/ar" element={<AR />} />
             <Route path="/ar/view/:stampId" element={<View />} />
           </Routes>
         </Router>
