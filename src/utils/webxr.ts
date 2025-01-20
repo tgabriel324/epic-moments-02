@@ -1,5 +1,3 @@
-import { toast } from "sonner";
-
 export interface XRSystem {
   isSessionSupported(mode: string): Promise<boolean>;
   requestSession(mode: string, options?: any): Promise<XRSession>;
@@ -71,6 +69,15 @@ export const setupARCanvas = (canvas: HTMLCanvasElement) => {
     console.error("WebGL não está disponível");
     throw new Error("WebGL não está disponível neste dispositivo");
   }
+
+  // Configurações de otimização
+  gl.enable(gl.DEPTH_TEST);
+  gl.enable(gl.CULL_FACE);
+  gl.cullFace(gl.BACK);
+  
+  // Limpar buffer com transparência
+  gl.clearColor(0, 0, 0, 0);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   return gl;
 };
