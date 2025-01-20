@@ -1,18 +1,32 @@
 import { useEffect, useRef, useState } from "react";
 import { ARViewSettings, ARTrackingState, ARVideoState } from "@/types/ar";
-import { checkXRSupport, initARSession, setupARCanvas } from "@/utils/webxr";
+import { 
+  checkXRSupport, 
+  initARSession, 
+  setupARCanvas,
+  setupImageTracking,
+  createVideoMaterial,
+  createARScene,
+  updateVideoPlane
+} from "@/utils/webxr";
 import { toast } from "sonner";
 import { AROverlay } from "./overlay/AROverlay";
+import * as THREE from "three";
 
 interface ARCanvasProps {
   settings: ARViewSettings;
+  stampImageUrl?: string;
 }
 
-export const ARCanvas = ({ settings }: ARCanvasProps) => {
+export const ARCanvas = ({ settings, stampImageUrl }: ARCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  
   const [xrSession, setXRSession] = useState<XRSession | null>(null);
-  const [xrReferenceSpace, setXRReferenceSpace] = useState<XRReferenceSpace | null>(null);
+  const [renderer, setRenderer] = useState<THREE.WebGLRenderer | null>(null);
+  const [scene, setScene] = useState<THREE.Scene | null>(null);
+  const [videoPlane, setVideoPlane] = useState<THREE.Mesh | null>(null);
   
   // Estados
   const [tracking, setTracking] = useState<ARTrackingState>({
@@ -29,6 +43,7 @@ export const ARCanvas = ({ settings }: ARCanvasProps) => {
   const [scale, setScale] = useState(1);
   const [rotation, setRotation] = useState(0);
 
+  // Inicialização do AR
   useEffect(() => {
     let animationFrameId: number;
 
@@ -39,27 +54,65 @@ export const ARCanvas = ({ settings }: ARCanvasProps) => {
         const isSupported = await checkXRSupport();
         if (!isSupported) return;
 
-        if (!canvasRef.current) {
-          console.error("Canvas não encontrado");
+        if (!canvasRef.current || !overlayRef.current) {
+          console.error("Canvas ou overlay não encontrado");
           return;
         }
 
-        const gl = setupARCanvas(canvasRef.current);
+        // Setup Three.js
+        const newRenderer = setupARCanvas(canvasRef.current);
+        const newScene = createARScene();
         
-        const session = await initARSession();
+        setRenderer(newRenderer);
+        setScene(newScene);
+
+        // Iniciar sessão AR
+        const session = await initARSession(overlayRef.current);
         setXRSession(session);
-        
-        const referenceSpace = await session.requestReferenceSpace('local');
-        setXRReferenceSpace(referenceSpace);
-        
+
+        // Setup tracking de imagem
+        if (stampImageUrl) {
+          const trackingResult = await setupImageTracking(stampImageUrl);
+          if (!trackingResult.success) {
+            throw new Error(trackingResult.error);
+          }
+
+          // Criar plano para o vídeo
+          const geometry = new THREE.PlaneGeometry(1, 1);
+          const material = createVideoMaterial(videoRef.current!);
+          const plane = new THREE.Mesh(geometry, material);
+          newScene.add(plane);
+          setVideoPlane(plane);
+        }
+
+        // Loop de renderização
         const onXRFrame = (time: number, frame: XRFrame) => {
-          const pose = frame.getViewerPose(referenceSpace);
-          const newConfidence = pose ? 1.0 : 0;
+          const pose = frame.getViewerPose(session.referenceSpace!);
           
-          setTracking({
-            isTracking: !!pose,
-            confidence: newConfidence
-          });
+          if (pose) {
+            const view = pose.views[0];
+            const viewport = session.renderState.baseLayer!.getViewport(view);
+            
+            newRenderer.setViewport(viewport.x, viewport.y, viewport.width, viewport.height);
+            newRenderer.setSize(viewport.width, viewport.height);
+            newRenderer.render(newScene, view as any);
+
+            // Atualizar estado de tracking
+            setTracking({
+              isTracking: true,
+              confidence: 1.0
+            });
+
+            // Atualizar transformações do vídeo
+            if (videoPlane) {
+              updateVideoPlane(videoPlane, scale, rotation);
+            }
+          } else {
+            setTracking({
+              isTracking: false,
+              confidence: 0
+            });
+          }
           
           animationFrameId = session.requestAnimationFrame(onXRFrame);
         };
@@ -83,10 +136,13 @@ export const ARCanvas = ({ settings }: ARCanvasProps) => {
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
       }
+      if (renderer) {
+        renderer.dispose();
+      }
     };
-  }, []);
+  }, [stampImageUrl]);
 
-  // Handlers
+  // Handlers de vídeo
   const handlePlayPause = () => {
     if (!videoRef.current) return;
     
@@ -111,6 +167,7 @@ export const ARCanvas = ({ settings }: ARCanvasProps) => {
     }));
   };
 
+  // Handlers de transformação
   const handleScaleChange = (value: number[]) => {
     setScale(value[0]);
   };
@@ -141,21 +198,22 @@ export const ARCanvas = ({ settings }: ARCanvasProps) => {
       
       <canvas
         ref={canvasRef}
-        id="ar-canvas"
         className="w-full h-full absolute inset-0"
       />
       
-      <AROverlay 
-        settings={settings}
-        tracking={tracking}
-        videoState={videoState}
-        scale={scale}
-        onPlayPause={handlePlayPause}
-        onScaleChange={handleScaleChange}
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
-        onRotationReset={handleRotationReset}
-      />
+      <div ref={overlayRef}>
+        <AROverlay 
+          settings={settings}
+          tracking={tracking}
+          videoState={videoState}
+          scale={scale}
+          onPlayPause={handlePlayPause}
+          onScaleChange={handleScaleChange}
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          onRotationReset={handleRotationReset}
+        />
+      </div>
     </div>
   );
 };

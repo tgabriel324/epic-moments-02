@@ -274,7 +274,9 @@ export type Database = {
           id: string
           image_url: string
           name: string
+          optimized_tracking_url: string | null
           status: Database["public"]["Enums"]["stamp_status"] | null
+          tracking_data: Json | null
           updated_at: string
         }
         Insert: {
@@ -284,7 +286,9 @@ export type Database = {
           id?: string
           image_url: string
           name: string
+          optimized_tracking_url?: string | null
           status?: Database["public"]["Enums"]["stamp_status"] | null
+          tracking_data?: Json | null
           updated_at?: string
         }
         Update: {
@@ -294,7 +298,9 @@ export type Database = {
           id?: string
           image_url?: string
           name?: string
+          optimized_tracking_url?: string | null
           status?: Database["public"]["Enums"]["stamp_status"] | null
+          tracking_data?: Json | null
           updated_at?: string
         }
         Relationships: [

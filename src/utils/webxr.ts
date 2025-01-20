@@ -1,4 +1,5 @@
 import { ARSessionConfig, ImageTrackingResult } from "@/types/ar";
+import * as THREE from "three";
 
 export const checkXRSupport = async (): Promise<boolean> => {
   if (!window.navigator.xr) {
@@ -21,41 +22,34 @@ export const checkXRSupport = async (): Promise<boolean> => {
   }
 };
 
-export const setupARCanvas = (canvas: HTMLCanvasElement): WebGLRenderingContext | null => {
+export const setupARCanvas = (canvas: HTMLCanvasElement): THREE.WebGLRenderer => {
   try {
-    const gl = canvas.getContext("webgl", {
-      xrCompatible: true,
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
       alpha: true,
       antialias: true,
       preserveDrawingBuffer: true
     });
 
-    if (!gl) {
-      throw new Error("WebGL não está disponível");
-    }
-
-    // Configuração básica do WebGL
-    gl.clearColor(0, 0, 0, 0);
-    gl.enable(gl.DEPTH_TEST);
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.xr.enabled = true;
 
     console.log("Canvas AR configurado com sucesso");
-    return gl;
+    return renderer;
   } catch (error) {
     console.error("Erro ao configurar canvas AR:", error);
-    return null;
+    throw error;
   }
 };
 
-export const initARSession = async (): Promise<XRSession> => {
+export const initARSession = async (domOverlay: Element): Promise<XRSession> => {
   try {
     console.log("Iniciando sessão AR...");
     
     const session = await navigator.xr?.requestSession("immersive-ar", {
-      requiredFeatures: ["dom-overlay"],
-      optionalFeatures: ["image-tracking"],
-      domOverlay: { root: document.getElementById("ar-overlay") }
+      requiredFeatures: ["dom-overlay", "image-tracking"],
+      domOverlay: { root: domOverlay }
     });
 
     if (!session) {
@@ -70,27 +64,22 @@ export const initARSession = async (): Promise<XRSession> => {
   }
 };
 
-export const setupImageTracking = async (session: XRSession, imageUrl: string): Promise<ImageTrackingResult> => {
+export const setupImageTracking = async (imageUrl: string): Promise<ImageTrackingResult> => {
   try {
-    // Verificar se o navegador suporta tracking de imagens
-    if (!session.enabledFeatures?.includes("image-tracking")) {
-      console.warn("Tracking de imagens não suportado nesta sessão");
-      return {
-        success: false,
-        error: "Tracking de imagens não suportado"
-      };
-    }
-
     // Carregar imagem da estampa
     const response = await fetch(imageUrl);
     const blob = await response.blob();
     const imageBitmap = await createImageBitmap(blob);
 
+    // Criar textura para tracking
+    const texture = new THREE.Texture(imageBitmap);
+    texture.needsUpdate = true;
+
     console.log("Imagem carregada para tracking:", imageUrl);
     
-    // Retornar resultado do setup
     return {
-      success: true
+      success: true,
+      texture
     };
   } catch (error) {
     console.error("Erro ao configurar tracking de imagem:", error);
@@ -101,24 +90,39 @@ export const setupImageTracking = async (session: XRSession, imageUrl: string): 
   }
 };
 
-// Função auxiliar para criar uma matriz de transformação 4x4
-export const createTransformMatrix = (position: { x: number; y: number; z: number }, rotation: number): Float32Array => {
-  const matrix = new Float32Array(16);
-  const cos = Math.cos(rotation);
-  const sin = Math.sin(rotation);
+export const createVideoMaterial = (video: HTMLVideoElement): THREE.Material => {
+  const texture = new THREE.VideoTexture(video);
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.format = THREE.RGBAFormat;
 
-  // Matriz de rotação em Y
-  matrix[0] = cos;
-  matrix[2] = sin;
-  matrix[5] = 1;
-  matrix[8] = -sin;
-  matrix[10] = cos;
+  return new THREE.MeshBasicMaterial({
+    map: texture,
+    side: THREE.DoubleSide,
+    transparent: true
+  });
+};
 
-  // Translação
-  matrix[12] = position.x;
-  matrix[13] = position.y;
-  matrix[14] = position.z;
-  matrix[15] = 1;
+export const createARScene = (): THREE.Scene => {
+  const scene = new THREE.Scene();
+  
+  // Luz ambiente
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+  scene.add(ambientLight);
+  
+  // Luz direcional
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  directionalLight.position.set(0, 5, 0);
+  scene.add(directionalLight);
 
-  return matrix;
+  return scene;
+};
+
+export const updateVideoPlane = (
+  plane: THREE.Mesh,
+  scale: number,
+  rotation: number
+): void => {
+  plane.scale.set(scale, scale, 1);
+  plane.rotation.y = rotation;
 };
