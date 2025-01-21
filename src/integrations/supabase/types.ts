@@ -165,6 +165,41 @@ export type Database = {
         }
         Relationships: []
       }
+      qr_code_cache: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          qr_code_url: string
+          settings: Json | null
+          stamp_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          qr_code_url: string
+          settings?: Json | null
+          stamp_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          qr_code_url?: string
+          settings?: Json | null
+          stamp_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qr_code_cache_stamp_id_fkey"
+            columns: ["stamp_id"]
+            isOneToOne: false
+            referencedRelation: "stamps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       qr_code_settings: {
         Row: {
           background_color: string
@@ -469,6 +504,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      clean_expired_qr_cache: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       process_metrics: {
         Args: Record<PropertyKey, never>
         Returns: undefined
