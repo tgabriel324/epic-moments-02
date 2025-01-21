@@ -9,6 +9,7 @@ import Videos from "@/pages/business/Videos";
 import QRCodes from "@/pages/business/QRCodes";
 import Plans from "@/pages/business/Plans";
 import View from "@/pages/ar/View";
+import Landing from "@/pages/ar/Landing";
 import AR from "@/pages/business/AR";
 import Metrics from "@/pages/business/Metrics";
 
@@ -39,6 +40,7 @@ function App() {
             <Route path="/business/plans" element={<Plans />} />
             <Route path="/business/metrics" element={<Metrics />} />
             <Route path="/business/ar" element={<AR />} />
+            <Route path="/ar/landing/:stampId" element={<Landing />} />
             <Route path="/ar/view/:stampId" element={<View />} />
           </Routes>
         </Router>

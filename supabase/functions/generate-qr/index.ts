@@ -46,9 +46,9 @@ serve(async (req) => {
       throw new Error('Stamp not found')
     }
 
-    // Gerar URL para o QR code
+    // Gerar URL para o QR code - agora apontando para a landing page
     const baseUrl = Deno.env.get('PUBLIC_SITE_URL') || 'https://epicmomentos.com'
-    const qrUrl = `${baseUrl}/ar/view/${stampId}`
+    const qrUrl = `${baseUrl}/ar/landing/${stampId}`
 
     // Configurar opções do QR code
     const qrOptions = {
@@ -61,6 +61,8 @@ serve(async (req) => {
         light: settings?.background_color || '#FFFFFF'
       }
     }
+
+    console.log('Gerando QR code para URL:', qrUrl)
 
     // Gerar QR code como URL de dados
     const qrCode = await QRCode.toDataURL(qrUrl, qrOptions)
