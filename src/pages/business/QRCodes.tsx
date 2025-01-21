@@ -96,25 +96,24 @@ export default function QRCodes() {
 
   return (
     <BusinessLayout>
-      <div className="flex-1 h-full">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-              QR Codes
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Gerencie QR codes para suas estampas em AR
-            </p>
-          </div>
-          <div className="flex gap-4">
-            <QRCodeSettingsDialog />
-            {selectedStamps.length > 0 && (
-              <Button onClick={handleBatchDownload} variant="outline">
-                <Download className="w-4 h-4 mr-2" />
-                Baixar Selecionados
-              </Button>
-            )}
-          </div>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+            QR Codes
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Gerencie QR codes para suas estampas em AR
+          </p>
+        </div>
+
+        <div className="flex items-center justify-end space-x-4">
+          <QRCodeSettingsDialog />
+          {selectedStamps.length > 0 && (
+            <Button onClick={handleBatchDownload} variant="outline">
+              <Download className="w-4 h-4 mr-2" />
+              Baixar Selecionados
+            </Button>
+          )}
         </div>
 
         {isLoading ? (
