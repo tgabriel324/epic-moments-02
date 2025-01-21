@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Index from "@/pages/Index";
 import Login from "@/pages/Login";
+import ResetPassword from "@/pages/ResetPassword";
 import Dashboard from "@/pages/business/Dashboard";
 import Media from "@/pages/business/Media";
 import Stamps from "@/pages/business/Stamps";
@@ -32,6 +33,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/business/dashboard" element={<Dashboard />} />
             <Route path="/business/media" element={<Media />} />
             <Route path="/business/stamps" element={<Stamps />} />
