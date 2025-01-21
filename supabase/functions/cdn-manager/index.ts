@@ -1,12 +1,12 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { corsHeaders } from '../_shared/cors.ts'
 
-interface CdnResponse {
-  url: string;
-  cdnUrl: string;
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
     console.log('URL original:', url)
     console.log('URL da CDN:', cdnUrl)
 
-    const response: CdnResponse = {
+    const response = {
       url,
       cdnUrl
     }
