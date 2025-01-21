@@ -10,6 +10,7 @@ import QRCodes from "@/pages/business/QRCodes";
 import Plans from "@/pages/business/Plans";
 import View from "@/pages/ar/View";
 import AR from "@/pages/business/AR";
+import Metrics from "@/pages/business/Metrics";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,6 +37,7 @@ function App() {
             <Route path="/business/videos" element={<Videos />} />
             <Route path="/business/qrcodes" element={<QRCodes />} />
             <Route path="/business/plans" element={<Plans />} />
+            <Route path="/business/metrics" element={<Metrics />} />
             <Route path="/business/ar" element={<AR />} />
             <Route path="/ar/view/:stampId" element={<View />} />
           </Routes>
