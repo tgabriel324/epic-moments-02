@@ -1,24 +1,16 @@
 import { BusinessLayout } from "@/components/layouts/BusinessLayout";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Download, Loader2, QrCode, Eye } from "lucide-react";
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { toast } from "sonner";
-import { QRCodeSettingsDialog } from "@/components/business/QRCodeSettingsDialog";
 import { QRPreviewDialog } from "@/components/business/QRPreviewDialog";
+import { QRCodeList } from "@/components/business/qr/QRCodeList";
+import { QRCodeHeader } from "@/components/business/qr/QRCodeHeader";
 
 export default function QRCodes() {
   const [selectedStamps, setSelectedStamps] = useState<string[]>([]);
-  const [generatingQR, setGeneratingQR] = useState<string | null>(null);
   const [previewStamp, setPreviewStamp] = useState<string | null>(null);
 
   const { data: stamps, isLoading } = useQuery({
@@ -41,28 +33,37 @@ export default function QRCodes() {
     },
   });
 
-  const handleDownloadQR = async (id: string) => {
+  const handleStampSelect = (stampId: string) => {
+    if (stampId === "all" && stamps) {
+      setSelectedStamps(stamps.map((s) => s.id));
+    } else if (stampId === "none") {
+      setSelectedStamps([]);
+    } else {
+      setSelectedStamps((current) =>
+        current.includes(stampId)
+          ? current.filter((id) => id !== stampId)
+          : [...current, stampId]
+      );
+    }
+  };
+
+  const handleDownloadQR = async (stampId: string) => {
     try {
-      setGeneratingQR(id);
-      const stamp = stamps?.find(s => s.id === id);
+      const stamp = stamps?.find((s) => s.id === stampId);
       if (!stamp) {
         toast.error("Estampa não encontrada");
         return;
       }
 
-      // Gerar QR code usando a Edge Function
-      const { data, error } = await supabase.functions.invoke('generate-qr', {
-        body: { stampId: id }
+      const { data, error } = await supabase.functions.invoke("generate-qr", {
+        body: { stampId },
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      // Criar link de download
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = data.qrCode;
-      link.download = `qrcode-${stamp.name.toLowerCase().replace(/\s+/g, '-')}.png`;
+      link.download = `qrcode-${stamp.name.toLowerCase().replace(/\s+/g, "-")}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -71,24 +72,23 @@ export default function QRCodes() {
     } catch (error) {
       console.error("Erro ao baixar QR code:", error);
       toast.error("Erro ao baixar QR code");
-    } finally {
-      setGeneratingQR(null);
     }
   };
 
   const handleBatchDownload = async () => {
     try {
-      const selectedStampsData = stamps?.filter(s => selectedStamps.includes(s.id));
+      const selectedStampsData = stamps?.filter((s) =>
+        selectedStamps.includes(s.id)
+      );
       if (!selectedStampsData?.length) {
         toast.error("Nenhuma estampa selecionada");
         return;
       }
 
-      // Gerar todos os QR codes selecionados
       for (const stamp of selectedStampsData) {
         await handleDownloadQR(stamp.id);
       }
-      
+
       toast.success("QR codes baixados com sucesso!");
     } catch (error) {
       console.error("Erro ao baixar QR codes:", error);
@@ -100,117 +100,30 @@ export default function QRCodes() {
     <BusinessLayout>
       <div className="flex-1 h-full">
         <div className="p-8 space-y-6 max-w-7xl mx-auto">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                QR Codes
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                Gerencie QR codes para suas estampas em AR
-              </p>
-            </div>
-            <div className="flex gap-4">
-              <QRCodeSettingsDialog />
-              {selectedStamps.length > 0 && (
-                <Button onClick={handleBatchDownload} variant="outline">
-                  <Download className="w-4 h-4 mr-2" />
-                  Baixar Selecionados
-                </Button>
-              )}
-            </div>
+          <QRCodeHeader
+            selectedCount={selectedStamps.length}
+            onBatchDownload={handleBatchDownload}
+          />
+
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Buscar estampas..."
+              className="pl-10 bg-card border-muted/30 focus-visible:ring-primary/30"
+            />
           </div>
 
-          {isLoading ? (
-            <div className="flex items-center justify-center p-8">
-              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-            </div>
-          ) : (
-            <div className="border rounded-lg bg-card">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">
-                      <input
-                        type="checkbox"
-                        onChange={(e) => {
-                          if (e.target.checked && stamps) {
-                            setSelectedStamps(stamps.map((s) => s.id));
-                          } else {
-                            setSelectedStamps([]);
-                          }
-                        }}
-                      />
-                    </TableHead>
-                    <TableHead>Estampa</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Criado em</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {stamps?.map((stamp) => (
-                    <TableRow key={stamp.id}>
-                      <TableCell>
-                        <input
-                          type="checkbox"
-                          checked={selectedStamps.includes(stamp.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedStamps([...selectedStamps, stamp.id]);
-                            } else {
-                              setSelectedStamps(
-                                selectedStamps.filter((id) => id !== stamp.id)
-                              );
-                            }
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <QrCode className="w-8 h-8 text-muted-foreground" />
-                          <div>
-                            <p className="font-medium">{stamp.name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              ID: {stamp.id.slice(0, 8)}
-                            </p>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{stamp.status}</TableCell>
-                      <TableCell>
-                        {new Date(stamp.created_at).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setPreviewStamp(stamp.id)}
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDownloadQR(stamp.id)}
-                            disabled={generatingQR === stamp.id}
-                          >
-                            {generatingQR === stamp.id ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <Download className="w-4 h-4" />
-                            )}
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+          <QRCodeList
+            stamps={stamps}
+            isLoading={isLoading}
+            selectedStamps={selectedStamps}
+            onStampSelect={handleStampSelect}
+            onPreview={setPreviewStamp}
+            onDownload={handleDownloadQR}
+          />
         </div>
       </div>
+      
       <QRPreviewDialog
         stampId={previewStamp}
         onClose={() => setPreviewStamp(null)}
