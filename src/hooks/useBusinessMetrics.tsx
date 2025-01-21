@@ -24,7 +24,7 @@ export function useBusinessMetrics() {
   return useQuery({
     queryKey: ["business-metrics"],
     queryFn: async (): Promise<BusinessMetrics> => {
-      console.log("Fetching business metrics...");
+      console.log("Iniciando busca de métricas...");
       
       // Buscar métricas gerais
       const { data: metricsData, error: metricsError } = await supabase
@@ -38,6 +38,8 @@ export function useBusinessMetrics() {
         throw new Error("Falha ao carregar métricas");
       }
 
+      console.log("Dados de métricas mensais:", metricsData);
+
       // Buscar contagem de estampas
       const { count: stampCount, error: stampError } = await supabase
         .from("stamps")
@@ -47,6 +49,8 @@ export function useBusinessMetrics() {
         console.error("Erro ao buscar contagem de estampas:", stampError);
         throw new Error("Falha ao carregar contagem de estampas");
       }
+
+      console.log("Contagem de estampas:", stampCount);
 
       // Buscar métricas por QR Code
       const { data: qrMetrics, error: qrError } = await supabase
@@ -66,6 +70,8 @@ export function useBusinessMetrics() {
         throw new Error("Falha ao carregar métricas de QR");
       }
 
+      console.log("Dados brutos de métricas QR:", qrMetrics);
+
       // Calcular métricas por QR Code
       const qrCodeMetrics = qrMetrics?.map(stamp => {
         const interactions = stamp.ar_interactions || [];
@@ -84,6 +90,8 @@ export function useBusinessMetrics() {
         };
       }) || [];
 
+      console.log("Métricas processadas por QR:", qrCodeMetrics);
+
       // Calcular tempo médio geral de interação
       const allCompletedInteractions = qrCodeMetrics.reduce((sum, qr) => sum + qr.interactions, 0);
       const totalDuration = qrCodeMetrics.reduce((sum, qr) => sum + (qr.averageTime * qr.interactions), 0);
@@ -92,17 +100,19 @@ export function useBusinessMetrics() {
         : 0;
 
       // Processar dados mensais
-      const monthlyData = metricsData.map(metric => ({
+      const monthlyData = metricsData?.map(metric => ({
         month: new Date(metric.month_year).toLocaleDateString('pt-BR', { month: 'short' }),
-        views: metric.total_views,
-        interactions: metric.total_interactions
-      })).reverse();
+        views: metric.total_views || 0,
+        interactions: metric.total_interactions || 0
+      })).reverse() || [];
+
+      console.log("Dados mensais processados:", monthlyData);
 
       // Calcular totais
-      const totalViews = metricsData.reduce((sum, metric) => sum + (metric.total_views || 0), 0);
-      const totalInteractions = metricsData.reduce((sum, metric) => sum + (metric.total_interactions || 0), 0);
+      const totalViews = metricsData?.reduce((sum, metric) => sum + (metric.total_views || 0), 0) || 0;
+      const totalInteractions = metricsData?.reduce((sum, metric) => sum + (metric.total_interactions || 0), 0) || 0;
 
-      return {
+      const finalData = {
         stampCount: stampCount || 0,
         totalViews,
         totalInteractions,
@@ -110,6 +120,10 @@ export function useBusinessMetrics() {
         monthlyData,
         qrCodeMetrics
       };
+
+      console.log("Dados finais retornados:", finalData);
+
+      return finalData;
     }
   });
 }
