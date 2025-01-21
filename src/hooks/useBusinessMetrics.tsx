@@ -5,10 +5,18 @@ export interface BusinessMetrics {
   stampCount: number;
   totalViews: number;
   totalInteractions: number;
+  averageInteractionTime: number;
   monthlyData: {
     month: string;
     views: number;
     interactions: number;
+  }[];
+  qrCodeMetrics: {
+    stampId: string;
+    stampName: string;
+    views: number;
+    interactions: number;
+    averageTime: number;
   }[];
 }
 
@@ -40,6 +48,49 @@ export function useBusinessMetrics() {
         throw new Error("Falha ao carregar contagem de estampas");
       }
 
+      // Buscar métricas por QR Code
+      const { data: qrMetrics, error: qrError } = await supabase
+        .from("stamps")
+        .select(`
+          id,
+          name,
+          ar_interactions (
+            id,
+            duration,
+            status
+          )
+        `);
+
+      if (qrError) {
+        console.error("Erro ao buscar métricas de QR:", qrError);
+        throw new Error("Falha ao carregar métricas de QR");
+      }
+
+      // Calcular métricas por QR Code
+      const qrCodeMetrics = qrMetrics?.map(stamp => {
+        const interactions = stamp.ar_interactions || [];
+        const views = interactions.length;
+        const completedInteractions = interactions.filter(i => i.status === 'completed');
+        const totalDuration = completedInteractions.reduce((sum, i) => sum + (i.duration || 0), 0);
+        
+        return {
+          stampId: stamp.id,
+          stampName: stamp.name,
+          views,
+          interactions: completedInteractions.length,
+          averageTime: completedInteractions.length > 0 
+            ? Math.round(totalDuration / completedInteractions.length) 
+            : 0
+        };
+      }) || [];
+
+      // Calcular tempo médio geral de interação
+      const allCompletedInteractions = qrCodeMetrics.reduce((sum, qr) => sum + qr.interactions, 0);
+      const totalDuration = qrCodeMetrics.reduce((sum, qr) => sum + (qr.averageTime * qr.interactions), 0);
+      const averageInteractionTime = allCompletedInteractions > 0 
+        ? Math.round(totalDuration / allCompletedInteractions)
+        : 0;
+
       // Processar dados mensais
       const monthlyData = metricsData.map(metric => ({
         month: new Date(metric.month_year).toLocaleDateString('pt-BR', { month: 'short' }),
@@ -55,7 +106,9 @@ export function useBusinessMetrics() {
         stampCount: stampCount || 0,
         totalViews,
         totalInteractions,
-        monthlyData
+        averageInteractionTime,
+        monthlyData,
+        qrCodeMetrics
       };
     }
   });

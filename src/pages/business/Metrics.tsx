@@ -2,6 +2,7 @@ import { useState } from "react";
 import { BusinessLayout } from "@/components/layouts/BusinessLayout";
 import { MetricsCard } from "@/components/business/metrics/MetricsCard";
 import { MetricsChart } from "@/components/business/metrics/MetricsChart";
+import { QRMetricsTable } from "@/components/business/metrics/QRMetricsTable";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -9,7 +10,7 @@ import { useBusinessMetrics } from "@/hooks/useBusinessMetrics";
 import { useMetricsExport } from "@/hooks/useMetricsExport";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Download, Eye, MousePointer, Image } from "lucide-react";
+import { CalendarIcon, Download, Eye, MousePointer, Image, Clock } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Metrics() {
@@ -80,7 +81,7 @@ export default function Metrics() {
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
           <MetricsCard
             title="Total de Estampas"
             value={metrics?.stampCount || 0}
@@ -101,12 +102,23 @@ export default function Metrics() {
             value={`${metrics?.totalViews ? ((metrics.totalInteractions / metrics.totalViews) * 100).toFixed(1) : 0}%`}
             description="Interações / Visualizações"
           />
+          <MetricsCard
+            title="Tempo Médio"
+            value={`${metrics?.averageInteractionTime || 0}s`}
+            icon={<Clock />}
+            description="Duração média das interações"
+          />
         </div>
 
         <MetricsChart
           data={metrics?.monthlyData || []}
           title="Visualizações e Interações por Mês"
         />
+
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold">Métricas por QR Code</h2>
+          <QRMetricsTable metrics={metrics?.qrCodeMetrics || []} />
+        </div>
       </div>
     </BusinessLayout>
   );
