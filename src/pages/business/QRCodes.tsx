@@ -10,14 +10,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, Loader2, QrCode } from "lucide-react";
+import { Download, Loader2, QrCode, Eye } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { QRCodeSettingsDialog } from "@/components/business/QRCodeSettingsDialog";
+import { QRPreviewDialog } from "@/components/business/QRPreviewDialog";
 
 export default function QRCodes() {
   const [selectedStamps, setSelectedStamps] = useState<string[]>([]);
   const [generatingQR, setGeneratingQR] = useState<string | null>(null);
+  const [previewStamp, setPreviewStamp] = useState<string | null>(null);
 
   const { data: stamps, isLoading } = useQuery({
     queryKey: ["stamps-for-qr"],
@@ -96,108 +98,123 @@ export default function QRCodes() {
 
   return (
     <BusinessLayout>
-      <div className="container mx-auto p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-              QR Codes
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Gerencie QR codes para suas estampas em AR
-            </p>
+      <div className="flex-1 h-full">
+        <div className="p-8 space-y-6 max-w-7xl mx-auto">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                QR Codes
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                Gerencie QR codes para suas estampas em AR
+              </p>
+            </div>
+            <div className="flex gap-4">
+              <QRCodeSettingsDialog />
+              {selectedStamps.length > 0 && (
+                <Button onClick={handleBatchDownload} variant="outline">
+                  <Download className="w-4 h-4 mr-2" />
+                  Baixar Selecionados
+                </Button>
+              )}
+            </div>
           </div>
-          <div className="flex gap-4">
-            <QRCodeSettingsDialog />
-            {selectedStamps.length > 0 && (
-              <Button onClick={handleBatchDownload} variant="outline">
-                <Download className="w-4 h-4 mr-2" />
-                Baixar Selecionados
-              </Button>
-            )}
-          </div>
-        </div>
 
-        {isLoading ? (
-          <div className="flex items-center justify-center p-8">
-            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-          </div>
-        ) : (
-          <div className="border rounded-lg bg-card">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12">
-                    <input
-                      type="checkbox"
-                      onChange={(e) => {
-                        if (e.target.checked && stamps) {
-                          setSelectedStamps(stamps.map((s) => s.id));
-                        } else {
-                          setSelectedStamps([]);
-                        }
-                      }}
-                    />
-                  </TableHead>
-                  <TableHead>Estampa</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Criado em</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {stamps?.map((stamp) => (
-                  <TableRow key={stamp.id}>
-                    <TableCell>
+          {isLoading ? (
+            <div className="flex items-center justify-center p-8">
+              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <div className="border rounded-lg bg-card">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-12">
                       <input
                         type="checkbox"
-                        checked={selectedStamps.includes(stamp.id)}
                         onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedStamps([...selectedStamps, stamp.id]);
+                          if (e.target.checked && stamps) {
+                            setSelectedStamps(stamps.map((s) => s.id));
                           } else {
-                            setSelectedStamps(
-                              selectedStamps.filter((id) => id !== stamp.id)
-                            );
+                            setSelectedStamps([]);
                           }
                         }}
                       />
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <QrCode className="w-8 h-8 text-muted-foreground" />
-                        <div>
-                          <p className="font-medium">{stamp.name}</p>
-                          <p className="text-sm text-muted-foreground">
-                            ID: {stamp.id.slice(0, 8)}
-                          </p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{stamp.status}</TableCell>
-                    <TableCell>
-                      {new Date(stamp.created_at).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDownloadQR(stamp.id)}
-                        disabled={generatingQR === stamp.id}
-                      >
-                        {generatingQR === stamp.id ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <Download className="w-4 h-4" />
-                        )}
-                      </Button>
-                    </TableCell>
+                    </TableHead>
+                    <TableHead>Estampa</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Criado em</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
+                </TableHeader>
+                <TableBody>
+                  {stamps?.map((stamp) => (
+                    <TableRow key={stamp.id}>
+                      <TableCell>
+                        <input
+                          type="checkbox"
+                          checked={selectedStamps.includes(stamp.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedStamps([...selectedStamps, stamp.id]);
+                            } else {
+                              setSelectedStamps(
+                                selectedStamps.filter((id) => id !== stamp.id)
+                              );
+                            }
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <QrCode className="w-8 h-8 text-muted-foreground" />
+                          <div>
+                            <p className="font-medium">{stamp.name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              ID: {stamp.id.slice(0, 8)}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>{stamp.status}</TableCell>
+                      <TableCell>
+                        {new Date(stamp.created_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setPreviewStamp(stamp.id)}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDownloadQR(stamp.id)}
+                            disabled={generatingQR === stamp.id}
+                          >
+                            {generatingQR === stamp.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Download className="w-4 h-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
       </div>
+      <QRPreviewDialog
+        stampId={previewStamp}
+        onClose={() => setPreviewStamp(null)}
+      />
     </BusinessLayout>
   );
 }

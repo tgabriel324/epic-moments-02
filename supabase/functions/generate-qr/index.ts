@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import QRCode from 'npm:qrcode'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import QRCode from "https://esm.sh/qrcode@1.5.3"
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -8,75 +8,70 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const { stampId } = await req.json()
+    const { stampId, preview } = await req.json()
     
     if (!stampId) {
-      throw new Error('Stamp ID is required')
+      throw new Error('stampId is required')
     }
 
-    // Inicializar cliente Supabase
+    // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
-    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
     
     if (!supabaseUrl || !supabaseKey) {
-      throw new Error('Missing Supabase environment variables')
+      throw new Error('Missing environment variables')
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    // Buscar a estampa para obter o business_id
-    console.log('Buscando informações da estampa:', stampId)
-    const { data: stamp, error: stampError } = await supabase
+    // Buscar configurações do QR code e dados da estampa
+    const { data: settings } = await supabase
+      .from('qr_code_settings')
+      .select('*')
+      .single()
+
+    const { data: stamp } = await supabase
       .from('stamps')
-      .select('business_id')
+      .select('*')
       .eq('id', stampId)
       .single()
 
-    if (stampError || !stamp) {
-      console.error('Erro ao buscar estampa:', stampError)
+    if (!stamp) {
       throw new Error('Stamp not found')
     }
 
-    // Buscar configurações de QR code do negócio
-    console.log('Buscando configurações de QR code para business:', stamp.business_id)
-    const { data: settings, error: settingsError } = await supabase
-      .from('qr_code_settings')
-      .select('*')
-      .eq('business_id', stamp.business_id)
-      .single()
+    // Gerar URL para o QR code
+    const baseUrl = Deno.env.get('PUBLIC_SITE_URL') || 'https://epicmomentos.com'
+    const qrUrl = `${baseUrl}/ar/view/${stampId}`
 
-    // Generate QR code URL that points to the AR view
-    const arViewUrl = `${new URL(req.url).origin}/ar/view/${stampId}`
-    console.log('Generating QR code for URL:', arViewUrl)
-
-    // Configurações padrão do QR code
+    // Configurar opções do QR code
     const qrOptions = {
-      width: 400,
-      margin: 2,
+      type: 'image/png',
+      quality: 0.92,
+      margin: 1,
+      width: preview ? 300 : 1024,
       color: {
         dark: settings?.foreground_color || '#000000',
-        light: settings?.background_color || '#ffffff'
+        light: settings?.background_color || '#FFFFFF'
       }
     }
 
-    // Gerar QR code como data URL
-    const qrCodeDataUrl = await QRCode.toDataURL(arViewUrl, qrOptions)
+    // Gerar QR code como URL de dados
+    const qrCode = await QRCode.toDataURL(qrUrl, qrOptions)
 
     return new Response(
-      JSON.stringify({ 
-        qrCode: qrCodeDataUrl,
-        settings: settings || null 
-      }),
+      JSON.stringify({ qrCode }),
       { 
         headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json' 
-        } 
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
       }
     )
   } catch (error) {
@@ -84,7 +79,10 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { 
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        },
         status: 400
       }
     )
