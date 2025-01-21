@@ -352,6 +352,33 @@ export type Database = {
         }
         Relationships: []
       }
+      system_logs: {
+        Row: {
+          created_at: string
+          data: Json | null
+          event: string
+          id: string
+          level: Database["public"]["Enums"]["log_level"]
+          timestamp: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json | null
+          event: string
+          id?: string
+          level?: Database["public"]["Enums"]["log_level"]
+          timestamp?: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json | null
+          event?: string
+          id?: string
+          level?: Database["public"]["Enums"]["log_level"]
+          timestamp?: string
+        }
+        Relationships: []
+      }
       usage_metrics: {
         Row: {
           business_id: string | null
@@ -449,6 +476,7 @@ export type Database = {
     }
     Enums: {
       ar_interaction_status: "started" | "completed" | "failed"
+      log_level: "info" | "warn" | "error" | "debug"
       stamp_status: "active" | "inactive" | "deleted"
       subscription_plan: "free" | "pro" | "enterprise"
       user_type: "admin" | "business_owner" | "end_user"
