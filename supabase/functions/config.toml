@@ -1,3 +1,4 @@
 project_id = "blkuxfxwmcqziczwgsds"
-[functions.cdn-manager]
-verify_jwt = true
+
+[logger]
+verify_jwt = false
