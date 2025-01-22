@@ -53,10 +53,10 @@ export function UserSidebar() {
                 <SidebarMenuItem key={item.path}>
                   <SidebarMenuButton
                     asChild
-                    active={location.pathname === item.path}
+                    className={location.pathname === item.path ? "bg-[#00BFFF]/10 text-[#00BFFF]" : ""}
                   >
-                    <Link to={item.path}>
-                      <item.icon />
+                    <Link to={item.path} className="flex items-center gap-2">
+                      <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
