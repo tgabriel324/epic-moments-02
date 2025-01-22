@@ -6,10 +6,12 @@ import { useProfile } from "@/hooks/useProfile";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { LogOut, Loader2 } from "lucide-react";
+import { useState } from "react";
 
 export const BusinessLayout = ({ children }: { children: React.ReactNode }) => {
   const { profile, isLoading, updateProfile } = useProfile();
   const { signOut } = useAuth();
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -52,8 +54,8 @@ export const BusinessLayout = ({ children }: { children: React.ReactNode }) => {
             <div className="flex gap-2">
               {profile && (
                 <EditProfileDialog
-                  profile={profile}
-                  onProfileUpdate={() => updateProfile.mutate({})}
+                  open={isEditProfileOpen}
+                  onOpenChange={setIsEditProfileOpen}
                 />
               )}
               <Button
