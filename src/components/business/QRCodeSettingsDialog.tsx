@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Settings } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { QRCodeColorSettings } from "./qr/QRCodeColorSettings";
+import { QRCodeLogoSettings } from "./qr/QRCodeLogoSettings";
+import { QRCodeCustomText } from "./qr/QRCodeCustomText";
+import { QRCodeLandingPageSettings } from "./qr/QRCodeLandingPageSettings";
 
 type QRCodeSettings = {
   id?: string;
@@ -115,128 +117,49 @@ export function QRCodeSettingsDialog() {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
-            <div>
-              <Label>Cores do QR Code</Label>
-              <div className="grid grid-cols-2 gap-4 mt-2">
-                <div>
-                  <Label htmlFor="foreground_color" className="text-sm">
-                    Cor Principal
-                  </Label>
-                  <Input
-                    id="foreground_color"
-                    type="color"
-                    value={settings.foreground_color}
-                    onChange={(e) =>
-                      setSettings({ ...settings, foreground_color: e.target.value })
-                    }
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="background_color" className="text-sm">
-                    Cor de Fundo
-                  </Label>
-                  <Input
-                    id="background_color"
-                    type="color"
-                    value={settings.background_color}
-                    onChange={(e) =>
-                      setSettings({ ...settings, background_color: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
-            </div>
+            <QRCodeColorSettings
+              foregroundColor={settings.foreground_color}
+              backgroundColor={settings.background_color}
+              onForegroundColorChange={(value) =>
+                setSettings({ ...settings, foreground_color: value })
+              }
+              onBackgroundColorChange={(value) =>
+                setSettings({ ...settings, background_color: value })
+              }
+            />
 
-            <div>
-              <Label htmlFor="logo_url">URL do Logo (opcional)</Label>
-              <Input
-                id="logo_url"
-                type="url"
-                value={settings.logo_url || ""}
-                onChange={(e) =>
-                  setSettings({ ...settings, logo_url: e.target.value })
-                }
-                placeholder="https://exemplo.com/logo.png"
-              />
-            </div>
+            <QRCodeLogoSettings
+              logoUrl={settings.logo_url}
+              onLogoUrlChange={(value) =>
+                setSettings({ ...settings, logo_url: value })
+              }
+            />
 
-            <div>
-              <Label htmlFor="custom_text">Texto Personalizado (opcional)</Label>
-              <Input
-                id="custom_text"
-                value={settings.custom_text || ""}
-                onChange={(e) =>
-                  setSettings({ ...settings, custom_text: e.target.value })
-                }
-                placeholder="Escaneie para ver em AR"
-              />
-            </div>
+            <QRCodeCustomText
+              customText={settings.custom_text}
+              onCustomTextChange={(value) =>
+                setSettings({ ...settings, custom_text: value })
+              }
+            />
 
-            <div className="border-t pt-4">
-              <Label className="text-lg">Página de Destino</Label>
-              <div className="space-y-4 mt-2">
-                <div>
-                  <Label htmlFor="landing_page_title">Título</Label>
-                  <Input
-                    id="landing_page_title"
-                    value={settings.landing_page_title || ""}
-                    onChange={(e) =>
-                      setSettings({
-                        ...settings,
-                        landing_page_title: e.target.value,
-                      })
-                    }
-                    placeholder="Experiência AR"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="landing_page_description">Descrição</Label>
-                  <Input
-                    id="landing_page_description"
-                    value={settings.landing_page_description || ""}
-                    onChange={(e) =>
-                      setSettings({
-                        ...settings,
-                        landing_page_description: e.target.value,
-                      })
-                    }
-                    placeholder="Aponte a câmera para a estampa"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="landing_page_primary_color">Cor Principal</Label>
-                  <Input
-                    id="landing_page_primary_color"
-                    type="color"
-                    value={settings.landing_page_primary_color}
-                    onChange={(e) =>
-                      setSettings({
-                        ...settings,
-                        landing_page_primary_color: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="landing_page_logo_url">Logo da Página</Label>
-                  <Input
-                    id="landing_page_logo_url"
-                    type="url"
-                    value={settings.landing_page_logo_url || ""}
-                    onChange={(e) =>
-                      setSettings({
-                        ...settings,
-                        landing_page_logo_url: e.target.value,
-                      })
-                    }
-                    placeholder="https://exemplo.com/logo.png"
-                  />
-                </div>
-              </div>
-            </div>
+            <QRCodeLandingPageSettings
+              title={settings.landing_page_title}
+              description={settings.landing_page_description}
+              primaryColor={settings.landing_page_primary_color}
+              logoUrl={settings.landing_page_logo_url}
+              onTitleChange={(value) =>
+                setSettings({ ...settings, landing_page_title: value })
+              }
+              onDescriptionChange={(value) =>
+                setSettings({ ...settings, landing_page_description: value })
+              }
+              onPrimaryColorChange={(value) =>
+                setSettings({ ...settings, landing_page_primary_color: value })
+              }
+              onLogoUrlChange={(value) =>
+                setSettings({ ...settings, landing_page_logo_url: value })
+              }
+            />
           </div>
 
           <div className="flex justify-end gap-2">
