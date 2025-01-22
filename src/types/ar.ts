@@ -18,6 +18,9 @@ export interface ARTrackingState {
     rotation: THREE.Euler;
     scale: THREE.Vector3;
   };
+  attempts?: number;
+  status: 'searching' | 'tracking' | 'adjusting' | 'error';
+  suggestions?: string[];
 }
 
 export interface ARVideoState {
@@ -55,43 +58,3 @@ export interface ImageTrackingResult {
     featurePoints: Float32Array;
   };
 }
-
-// WebXR Types
-declare global {
-  interface Navigator {
-    xr?: XRSystem;
-  }
-
-  interface XRSystem {
-    isSessionSupported(mode: string): Promise<boolean>;
-    requestSession(mode: string, options?: XRSessionInit): Promise<XRSession>;
-  }
-
-  interface XRSession {
-    requestReferenceSpace(type: XRReferenceSpaceType): Promise<XRReferenceSpace>;
-    updateRenderState(state: XRRenderState): Promise<void>;
-    requestAnimationFrame(callback: XRFrameRequestCallback): number;
-    end(): Promise<void>;
-  }
-
-  interface XRReferenceSpace extends XRSpace {
-    getOffsetReferenceSpace(originOffset: XRRigidTransform): XRReferenceSpace;
-  }
-
-  interface XRFrame {
-    getViewerPose(referenceSpace: XRReferenceSpace): XRViewerPose | null;
-    getPose(space: XRSpace, baseSpace: XRSpace): XRPose | null;
-    getImageTrackingResults?(): XRImageTrackingResult[];
-  }
-  
-  interface XRImageTrackingResult {
-    readonly imageSpace: XRSpace;
-    readonly trackingState: XRTrackingState;
-    readonly measuredWidthInMeters: number;
-    readonly estimatedHeightInMeters: number;
-  }
-  
-  type XRTrackingState = "tracked" | "limited" | "emulated";
-}
-
-export {};
