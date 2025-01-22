@@ -1,6 +1,8 @@
 import { BusinessLayout } from "@/components/layouts/BusinessLayout";
+import { CreateStampDialog } from "@/components/business/CreateStampDialog";
+import { CreateVideoDialog } from "@/components/business/CreateVideoDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { StampsGrid } from "@/components/business/StampsGrid";
+import Stamps from "@/pages/business/Stamps";
 import Videos from "@/pages/business/Videos";
 
 export default function Media() {
@@ -16,13 +18,18 @@ export default function Media() {
           </p>
         </div>
 
+        <div className="flex items-center justify-end space-x-4">
+          <CreateStampDialog />
+          <CreateVideoDialog />
+        </div>
+
         <Tabs defaultValue="stamps" className="w-full">
           <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
             <TabsTrigger value="stamps">Estampas</TabsTrigger>
             <TabsTrigger value="videos">Vídeos</TabsTrigger>
           </TabsList>
           <TabsContent value="stamps" className="mt-6">
-            <StampsGrid />
+            <Stamps />
           </TabsContent>
           <TabsContent value="videos" className="mt-6">
             <Videos />
