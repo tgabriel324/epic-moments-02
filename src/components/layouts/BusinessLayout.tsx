@@ -29,7 +29,7 @@ export const BusinessLayout = ({ children }: { children: React.ReactNode }) => {
           <div className="p-4 flex flex-col gap-4">
             {/* Logo */}
             <div className="flex justify-center mb-2">
-              <Logo className="w-32 h-32" />
+              <Logo className="w-16 h-16 transition-transform duration-300 hover:scale-110" />
             </div>
 
             {/* Profile Section */}
