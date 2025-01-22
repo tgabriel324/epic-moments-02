@@ -13,8 +13,8 @@ export const useTrackingState = () => {
     const now = Date.now();
     
     if (confidence < 0.5) {
-      setTracking(prev => ({
-        ...prev,
+      setTracking(prevState => ({
+        ...prevState,
         status: 'error',
         error: "Dificuldade em detectar a estampa",
         confidence: confidence,
@@ -22,10 +22,11 @@ export const useTrackingState = () => {
           "Verifique a iluminação",
           "Ajuste a distância",
           "Limpe a câmera"
-        ]
+        ],
+        attempts: (prevState.attempts || 0) + 1
       }));
       
-      if (prev.attempts && prev.attempts >= 10) {
+      if (tracking.attempts && tracking.attempts >= 10) {
         toast.error("Dificuldade em detectar a estampa. Tente ajustar a iluminação ou distância.");
       }
     } else {
@@ -33,8 +34,8 @@ export const useTrackingState = () => {
         toast.success("Estampa detectada com sucesso!");
       }
 
-      setTracking(prev => ({
-        ...prev,
+      setTracking(prevState => ({
+        ...prevState,
         isTracking: confidence > 0.7,
         confidence,
         lastUpdate: now,
@@ -42,7 +43,7 @@ export const useTrackingState = () => {
         error: undefined
       }));
     }
-  }, []);
+  }, [tracking.attempts]);
 
   return { tracking, updateTracking };
 };

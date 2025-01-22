@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useTrackingState } from "./ar/useTrackingState";
 import { useVideoPosition } from "./ar/useVideoPosition";
 import { useARInit } from "./ar/useARInit";
@@ -17,16 +17,17 @@ export const useARScene = ({
   overlayRef
 }: UseARSceneConfig) => {
   const frameId = useRef<number>();
+  const referenceSpaceRef = useRef<XRReferenceSpace | null>(null);
   
   const { tracking, updateTracking } = useTrackingState();
   const { updateVideoPosition } = useVideoPosition();
   const { sceneState } = useARInit(stampImageUrl, videoRef, canvasRef, overlayRef);
 
   // Função principal de renderização e tracking
-  const onFrame = (frame: XRFrame) => {
+  const onFrame = (time: number, frame: XRFrame) => {
     if (!sceneState.renderer || !sceneState.scene || !sceneState.camera) return;
 
-    const pose = frame.getViewerPose(referenceSpace);
+    const pose = frame.getViewerPose(referenceSpaceRef.current!);
     if (pose) {
       updateVideoPosition(pose, sceneState.videoPlane, updateTracking);
       sceneState.renderer.render(sceneState.scene, sceneState.camera);
