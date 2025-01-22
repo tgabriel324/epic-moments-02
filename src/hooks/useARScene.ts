@@ -39,32 +39,62 @@ export const useARScene = ({
     confidence: 0
   });
 
-  // Refs para performance
+  // Refs para performance e tracking
   const frameId = useRef<number>();
   const lastFrameTime = useRef<number>(0);
   const frameCount = useRef<number>(0);
+  const trackingAttempts = useRef<number>(0);
+  const lastTrackingSuccess = useRef<number>(0);
 
-  // Função para atualizar o estado de tracking
-  const updateTracking = useCallback((confidence: number) => {
+  // Função para atualizar o estado de tracking com fallback
+  const updateTracking = useCallback((confidence: number, error?: string) => {
+    const now = Date.now();
+    
+    // Se não detectou por muito tempo, incrementa tentativas
+    if (confidence < 0.5) {
+      trackingAttempts.current++;
+      
+      // Após 5 tentativas sem sucesso, sugere ajustes
+      if (trackingAttempts.current > 5) {
+        setTracking(prev => ({
+          ...prev,
+          error: "Tente ajustar a iluminação ou distância da estampa",
+          confidence: confidence
+        }));
+      }
+    } else {
+      // Reset tentativas quando há sucesso
+      trackingAttempts.current = 0;
+      lastTrackingSuccess.current = now;
+    }
+
+    // Atualiza estado do tracking
     setTracking(prev => ({
       isTracking: confidence > 0.7,
       confidence,
-      lastUpdate: Date.now()
+      lastUpdate: now,
+      error: error || (confidence < 0.3 ? "Estampa não encontrada" : undefined)
     }));
+
+    // Log para debug
+    console.log(`Tracking update - Confidence: ${confidence}, Attempts: ${trackingAttempts.current}`);
   }, []);
 
-  // Função para atualizar a posição do vídeo
+  // Função para atualizar a posição do vídeo com smoothing
   const updateVideoPosition = useCallback((pose: XRPose) => {
     if (!sceneState.videoPlane) return;
 
     const { position, orientation } = pose.transform;
     
-    sceneState.videoPlane.position.set(
-      position.x,
-      position.y,
-      position.z
-    );
+    // Aplica smoothing na posição
+    const smoothFactor = 0.1;
+    const currentPos = sceneState.videoPlane.position;
     
+    currentPos.x += (position.x - currentPos.x) * smoothFactor;
+    currentPos.y += (position.y - currentPos.y) * smoothFactor;
+    currentPos.z += (position.z - currentPos.z) * smoothFactor;
+    
+    // Aplica orientação
     sceneState.videoPlane.quaternion.set(
       orientation.x,
       orientation.y,
@@ -100,7 +130,7 @@ export const useARScene = ({
           throw new Error(trackingResult.error);
         }
 
-        // Criar plano para o vídeo
+        // Criar plano para o vídeo com dimensões otimizadas
         const geometry = new THREE.PlaneGeometry(1, 1);
         geometry.computeBoundingSphere();
         
@@ -118,6 +148,7 @@ export const useARScene = ({
         });
 
         console.log("Cena AR configurada com sucesso");
+        toast.success("AR iniciado com sucesso");
       }
 
       // Listener para redimensionamento
@@ -128,7 +159,7 @@ export const useARScene = ({
       const animate = (time: number) => {
         frameId.current = requestAnimationFrame(animate);
         
-        // Calcular FPS
+        // Calcular FPS para debug
         frameCount.current++;
         if (time - lastFrameTime.current >= 1000) {
           const fps = Math.round((frameCount.current * 1000) / (time - lastFrameTime.current));
@@ -153,7 +184,11 @@ export const useARScene = ({
     } catch (error) {
       console.error("Erro ao iniciar AR:", error);
       toast.error(error instanceof Error ? error.message : "Erro ao iniciar experiência AR");
-      setTracking({ isTracking: false, confidence: 0 });
+      setTracking({ 
+        isTracking: false, 
+        confidence: 0,
+        error: error instanceof Error ? error.message : "Erro desconhecido"
+      });
     }
   }, [stampImageUrl, videoRef, canvasRef, overlayRef]);
 
