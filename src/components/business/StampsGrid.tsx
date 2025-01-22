@@ -2,8 +2,9 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
-import { ImagePlus, Search, Eye, Edit, Trash } from "lucide-react";
+import { ImagePlus, Search, Eye, Edit, Trash, ChevronLeft, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { CreateStampDialog } from "./CreateStampDialog";
 import { EditStampDialog } from "./EditStampDialog";
 import { DeleteStampDialog } from "./DeleteStampDialog";
@@ -11,8 +12,11 @@ import { PreviewStampDialog } from "./PreviewStampDialog";
 
 type Stamp = Tables<"stamps">;
 
+const ITEMS_PER_PAGE = 9;
+
 export function StampsGrid() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [editingStamp, setEditingStamp] = useState<Stamp | null>(null);
   const [deletingStamp, setDeletingStamp] = useState<Stamp | null>(null);
   const [previewStamp, setPreviewStamp] = useState<Stamp | null>(null);
@@ -37,9 +41,18 @@ export function StampsGrid() {
     stamp.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const totalPages = filteredStamps 
+    ? Math.ceil(filteredStamps.length / ITEMS_PER_PAGE) 
+    : 0;
+
+  const paginatedStamps = filteredStamps?.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-semibold">Suas Estampas</h2>
           <p className="text-muted-foreground mt-1">
@@ -54,7 +67,10 @@ export function StampsGrid() {
         <Input
           placeholder="Buscar estampas..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setCurrentPage(1); // Reset to first page on search
+          }}
           className="pl-10 bg-card border-muted/30 focus-visible:ring-primary/30"
         />
       </div>
@@ -77,55 +93,84 @@ export function StampsGrid() {
           <p className="mt-2 text-sm text-muted-foreground">
             Comece adicionando sua primeira estampa para conectar com vídeos em AR
           </p>
-          <CreateStampDialog />
+          <div className="mt-4">
+            <CreateStampDialog />
+          </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredStamps.map((stamp) => (
-            <div
-              key={stamp.id}
-              className="group relative aspect-square overflow-hidden rounded-lg border border-muted/20 bg-card shadow-sm transition-all hover:shadow-lg hover:shadow-primary/10 hover:border-primary/20"
-            >
-              <img
-                src={stamp.image_url}
-                alt={stamp.name}
-                className="h-full w-full object-cover transition-transform group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 transition-opacity group-hover:opacity-100">
-                <div className="absolute bottom-0 p-4 w-full">
-                  <h3 className="text-lg font-semibold text-white">
-                    {stamp.name}
-                  </h3>
-                  {stamp.description && (
-                    <p className="mt-1 text-sm text-gray-200 line-clamp-2">
-                      {stamp.description}
-                    </p>
-                  )}
-                  <div className="mt-4 flex gap-2">
-                    <button
-                      onClick={() => setPreviewStamp(stamp)}
-                      className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-                    >
-                      <Eye className="h-4 w-4 text-white" />
-                    </button>
-                    <button
-                      onClick={() => setEditingStamp(stamp)}
-                      className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-                    >
-                      <Edit className="h-4 w-4 text-white" />
-                    </button>
-                    <button
-                      onClick={() => setDeletingStamp(stamp)}
-                      className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-                    >
-                      <Trash className="h-4 w-4 text-white" />
-                    </button>
+        <>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {paginatedStamps?.map((stamp) => (
+              <div
+                key={stamp.id}
+                className="group relative aspect-square overflow-hidden rounded-lg border border-muted/20 bg-card shadow-sm transition-all hover:shadow-lg hover:shadow-primary/10 hover:border-primary/20"
+              >
+                <img
+                  src={stamp.image_url}
+                  alt={stamp.name}
+                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 transition-opacity group-hover:opacity-100">
+                  <div className="absolute bottom-0 p-4 w-full">
+                    <h3 className="text-lg font-semibold text-white">
+                      {stamp.name}
+                    </h3>
+                    {stamp.description && (
+                      <p className="mt-1 text-sm text-gray-200 line-clamp-2">
+                        {stamp.description}
+                      </p>
+                    )}
+                    <div className="mt-4 flex gap-2">
+                      <button
+                        onClick={() => setPreviewStamp(stamp)}
+                        className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                      >
+                        <Eye className="h-4 w-4 text-white" />
+                      </button>
+                      <button
+                        onClick={() => setEditingStamp(stamp)}
+                        className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                      >
+                        <Edit className="h-4 w-4 text-white" />
+                      </button>
+                      <button
+                        onClick={() => setDeletingStamp(stamp)}
+                        className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                      >
+                        <Trash className="h-4 w-4 text-white" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-6">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Página {currentPage} de {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
-          ))}
-        </div>
+          )}
+        </>
       )}
 
       <EditStampDialog
