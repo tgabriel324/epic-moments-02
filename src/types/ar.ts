@@ -12,6 +12,7 @@ export interface ARTrackingState {
   isTracking: boolean;
   confidence: number;
   lastUpdate?: number;
+  error?: string;
   trackingData?: {
     position: THREE.Vector3;
     rotation: THREE.Euler;
