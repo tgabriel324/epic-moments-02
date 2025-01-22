@@ -42,23 +42,22 @@ export function UpgradeConfirmDialog({
         return;
       }
 
-      const response = await fetch("/api/create-checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ planId: plan.id }),
+      console.log('Iniciando processo de upgrade para o plano:', plan.id);
+      
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { planId: plan.id }
       });
 
-      const { url, error } = await response.json();
-
       if (error) {
-        throw new Error(error);
+        console.error('Erro ao criar sessão de checkout:', error);
+        throw error;
       }
 
-      if (url) {
-        window.location.href = url;
+      if (data?.url) {
+        console.log('Redirecionando para URL de checkout:', data.url);
+        window.location.href = data.url;
+      } else {
+        throw new Error('URL de checkout não retornada');
       }
     } catch (error) {
       console.error("Erro ao processar upgrade:", error);
