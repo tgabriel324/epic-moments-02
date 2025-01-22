@@ -13,6 +13,7 @@ import View from "@/pages/ar/View";
 import Landing from "@/pages/ar/Landing";
 import AR from "@/pages/business/AR";
 import Metrics from "@/pages/business/Metrics";
+import UserDashboard from "@/pages/user/Dashboard";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,6 +35,8 @@ function App() {
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            
+            {/* Business Routes */}
             <Route path="/business/dashboard" element={<Dashboard />} />
             <Route path="/business/media" element={<Media />} />
             <Route path="/business/stamps" element={<Stamps />} />
@@ -42,6 +45,11 @@ function App() {
             <Route path="/business/plans" element={<Plans />} />
             <Route path="/business/metrics" element={<Metrics />} />
             <Route path="/business/ar" element={<AR />} />
+            
+            {/* User Routes */}
+            <Route path="/user/dashboard" element={<UserDashboard />} />
+            
+            {/* AR Routes */}
             <Route path="/ar/landing/:stampId" element={<Landing />} />
             <Route path="/ar/view/:stampId" element={<View />} />
           </Routes>
