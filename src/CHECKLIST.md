@@ -114,3 +114,60 @@
 - [ ] Feedback de loading
 - [ ] Tratamento de erros
 - [ ] Mensagens de sucesso/erro
+
+## 9. Área do Usuário Final
+### 🚧 Pendente
+#### Estrutura Base
+- [ ] Rota `/user/dashboard`
+- [ ] Layout base com design system do Epic Momentos
+- [ ] Navegação específica para usuário final
+- [ ] Proteção de rotas para end_user
+
+#### Dashboard Principal
+- [ ] Card de resumo de interações AR
+- [ ] Lista das últimas estampas escaneadas
+- [ ] Métricas de uso pessoal
+- [ ] Seção de estampas favoritas
+- [ ] Componentes usando a paleta (#000000, #FFFFFF, #00BFFF)
+
+#### Histórico e Interações
+- [ ] Visualização completa do histórico
+- [ ] Filtros por período
+- [ ] Alternância entre lista/grid
+- [ ] Detalhes expandidos de cada interação
+- [ ] Interface consistente com design system
+
+#### Perfil e Preferências
+- [ ] Página de perfil personalizada
+- [ ] Editor de informações básicas
+- [ ] Upload e gestão de avatar
+- [ ] Configurações de notificações
+- [ ] Estilização seguindo guidelines
+
+#### Coleção e Social
+- [ ] Gerenciamento de estampas favoritas
+- [ ] Sistema de categorização
+- [ ] Compartilhamento de experiências
+- [ ] Integração com redes sociais
+- [ ] UI/UX consistente com a marca
+
+#### Experiência AR
+- [ ] Tutorial interativo inicial
+- [ ] Guia de melhores práticas
+- [ ] Central de ajuda e FAQ
+- [ ] Suporte técnico integrado
+- [ ] Design alinhado com identidade visual
+
+#### Integrações e Analytics
+- [ ] Compartilhamento via mensageiros
+- [ ] Exportação de dados pessoais
+- [ ] Sistema de métricas individual
+- [ ] Notificações personalizadas
+- [ ] Interface moderna e responsiva
+
+#### Segurança e Privacidade
+- [ ] Gestão de permissões de usuário
+- [ ] Controles de privacidade
+- [ ] Termos específicos para AR
+- [ ] Política de dados clara
+- [ ] UI/UX seguindo padrões LGPD
