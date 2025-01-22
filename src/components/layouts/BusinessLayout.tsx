@@ -5,11 +5,12 @@ import { EditProfileDialog } from "@/components/business/profile/EditProfileDial
 import { useProfile } from "@/hooks/useProfile";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { LogOut, Loader2 } from "lucide-react";
+import { LogOut, Loader2, Settings } from "lucide-react";
 import { useState } from "react";
+import { Logo } from "@/components/Logo";
 
 export const BusinessLayout = ({ children }: { children: React.ReactNode }) => {
-  const { profile, isLoading, updateProfile } = useProfile();
+  const { profile, isLoading } = useProfile();
   const { signOut } = useAuth();
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
 
@@ -26,6 +27,9 @@ export const BusinessLayout = ({ children }: { children: React.ReactNode }) => {
       <div className="flex h-screen bg-gray-50">
         <Sidebar className="w-64 bg-white border-r border-gray-100 shadow-sm">
           <div className="p-4 flex flex-col gap-4">
+            <div className="flex items-center justify-center mb-2">
+              <Logo className="w-32 h-32" />
+            </div>
             {profile && (
               <div className="flex items-center gap-3 px-2">
                 {profile.avatar_url ? (
@@ -52,12 +56,14 @@ export const BusinessLayout = ({ children }: { children: React.ReactNode }) => {
               </div>
             )}
             <div className="flex gap-2">
-              {profile && (
-                <EditProfileDialog
-                  open={isEditProfileOpen}
-                  onOpenChange={setIsEditProfileOpen}
-                />
-              )}
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setIsEditProfileOpen(true)}
+                title="Editar Perfil"
+              >
+                <Settings className="h-4 w-4" />
+              </Button>
               <Button
                 variant="outline"
                 size="icon"
@@ -74,6 +80,12 @@ export const BusinessLayout = ({ children }: { children: React.ReactNode }) => {
           <div className="container mx-auto p-8 max-w-7xl">{children}</div>
         </main>
       </div>
+      {profile && (
+        <EditProfileDialog
+          open={isEditProfileOpen}
+          onOpenChange={setIsEditProfileOpen}
+        />
+      )}
     </SidebarProvider>
   );
 };
