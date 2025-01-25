@@ -37,7 +37,7 @@ export default function Stamps() {
 
   return (
     <BusinessLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 w-full max-w-none px-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-semibold">Suas Estampas</h2>
