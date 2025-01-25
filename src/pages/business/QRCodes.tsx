@@ -98,8 +98,8 @@ export default function QRCodes() {
 
   return (
     <BusinessLayout>
-      <div className="flex-1 h-full">
-        <div className="p-8 space-y-6 max-w-7xl mx-auto">
+      <div className="flex-1 w-full">
+        <div className="space-y-6 max-w-[1400px] mx-auto px-6">
           <QRCodeHeader
             selectedCount={selectedStamps.length}
             onBatchDownload={handleBatchDownload}

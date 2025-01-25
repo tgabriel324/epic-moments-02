@@ -37,48 +37,49 @@ export default function Stamps() {
 
   return (
     <BusinessLayout>
-      <div className="space-y-6 w-full max-w-none px-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-semibold">Suas Estampas</h2>
-            <p className="text-muted-foreground mt-1">
-              Gerencie suas estampas para conectar com vídeos em AR
-            </p>
-          </div>
-          <CreateStampDialog />
-        </div>
-
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Buscar estampas..."
-            className="pl-10 bg-card border-muted/30 focus-visible:ring-primary/30"
-          />
-        </div>
-
-        {isLoading ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="h-64 rounded-lg bg-card border border-muted/20 animate-pulse"
-              />
-            ))}
-          </div>
-        ) : !stamps?.length ? (
-          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-muted/50 bg-card/50 p-12 text-center">
-            <div className="rounded-full bg-primary/10 p-3">
-              <ImagePlus className="h-6 w-6 text-primary" />
+      <div className="flex-1 w-full">
+        <div className="space-y-6 max-w-[1400px] mx-auto px-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-semibold">Suas Estampas</h2>
+              <p className="text-muted-foreground mt-1">
+                Gerencie suas estampas para conectar com vídeos em AR
+              </p>
             </div>
-            <h3 className="mt-4 text-lg font-semibold">Nenhuma estampa</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Comece adicionando sua primeira estampa para conectar com vídeos em AR
-            </p>
             <CreateStampDialog />
           </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {stamps.map((stamp) => (
+
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Buscar estampas..."
+              className="pl-10 bg-card border-muted/30 focus-visible:ring-primary/30"
+            />
+          </div>
+
+          {isLoading ? (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="h-64 rounded-lg bg-card border border-muted/20 animate-pulse"
+                />
+              ))}
+            </div>
+          ) : !stamps?.length ? (
+            <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-muted/50 bg-card/50 p-12 text-center">
+              <div className="rounded-full bg-primary/10 p-3">
+                <ImagePlus className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="mt-4 text-lg font-semibold">Nenhuma estampa</h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Comece adicionando sua primeira estampa para conectar com vídeos em AR
+              </p>
+              <CreateStampDialog />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {stamps.map((stamp) => (
               <div
                 key={stamp.id}
                 className="group relative aspect-square overflow-hidden rounded-lg border border-muted/20 bg-card shadow-sm transition-all hover:shadow-lg hover:shadow-primary/10 hover:border-primary/20"
@@ -121,25 +122,26 @@ export default function Stamps() {
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-
-        <EditStampDialog
-          stamp={editingStamp}
-          onClose={() => setEditingStamp(null)}
-        />
-
-        <DeleteStampDialog
-          stamp={deletingStamp}
-          onClose={() => setDeletingStamp(null)}
-        />
-
-        <PreviewStampDialog
-          stamp={previewStamp}
-          onClose={() => setPreviewStamp(null)}
-        />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
+
+      <EditStampDialog
+        stamp={editingStamp}
+        onClose={() => setEditingStamp(null)}
+      />
+
+      <DeleteStampDialog
+        stamp={deletingStamp}
+        onClose={() => setDeletingStamp(null)}
+      />
+
+      <PreviewStampDialog
+        stamp={previewStamp}
+        onClose={() => setPreviewStamp(null)}
+      />
     </BusinessLayout>
   );
 }
