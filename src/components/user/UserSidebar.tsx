@@ -4,12 +4,13 @@ import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
-  SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarGroupContent,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Logo } from "@/components/Logo";
 
 const menuItems = [
   {
@@ -45,6 +46,11 @@ export function UserSidebar() {
   return (
     <Sidebar>
       <SidebarContent>
+        <div className="p-4">
+          <div className="flex justify-center mb-6">
+            <Logo className="w-16 h-16 transition-transform duration-300 hover:scale-110" />
+          </div>
+        </div>
         <SidebarGroup>
           <SidebarGroupLabel>Epic Momentos</SidebarGroupLabel>
           <SidebarGroupContent>
