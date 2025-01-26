@@ -21,28 +21,28 @@ export default function Dashboard() {
 
   return (
     <UserLayout>
-      <div className="space-y-8">
-        <div>
+      <div className="space-y-8 bg-white min-h-screen">
+        <div className="flex flex-col gap-2">
           <h1 className="text-4xl font-bold text-[#00BFFF]">Dashboard</h1>
-          <p className="mt-2 text-gray-600">
+          <p className="text-gray-600">
             Acompanhe suas interações e experiências AR
           </p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
-          <Card className="border-gray-100 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white">
+          <Card className="border border-gray-100 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-sm font-medium text-gray-600">
                 Total de Interações
               </CardTitle>
-              <div className="p-2 bg-blue-50 rounded-full">
+              <div className="p-2 bg-[#00BFFF]/10 rounded-full">
                 <Activity className="w-4 h-4 text-[#00BFFF]" />
               </div>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-gray-900">
                 {loadingInteractions ? (
-                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <Loader2 className="h-6 w-6 animate-spin text-[#00BFFF]" />
                 ) : (
                   recentInteractions?.length || 0
                 )}
@@ -54,19 +54,19 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="border-gray-100 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white">
+          <Card className="border border-gray-100 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-sm font-medium text-gray-600">
                 Última Interação
               </CardTitle>
-              <div className="p-2 bg-blue-50 rounded-full">
+              <div className="p-2 bg-[#00BFFF]/10 rounded-full">
                 <Clock className="w-4 h-4 text-[#00BFFF]" />
               </div>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-gray-900">
                 {loadingInteractions ? (
-                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <Loader2 className="h-6 w-6 animate-spin text-[#00BFFF]" />
                 ) : (
                   recentInteractions?.[0]?.created_at
                     ? new Date(recentInteractions[0].created_at).toLocaleDateString()
@@ -80,12 +80,12 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="border-gray-100 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white">
+          <Card className="border border-gray-100 shadow-lg hover:shadow-xl transition-shadow duration-300 bg-white">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-sm font-medium text-gray-600">
                 Estampas Favoritas
               </CardTitle>
-              <div className="p-2 bg-blue-50 rounded-full">
+              <div className="p-2 bg-[#00BFFF]/10 rounded-full">
                 <Star className="w-4 h-4 text-[#00BFFF]" />
               </div>
             </CardHeader>
@@ -99,7 +99,7 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        <Card className="border-gray-100 shadow-lg bg-white">
+        <Card className="border border-gray-100 shadow-lg bg-white">
           <CardHeader>
             <CardTitle className="text-xl font-semibold text-gray-900">
               Últimas Interações
@@ -115,7 +115,7 @@ export default function Dashboard() {
                 {recentInteractions.map((interaction) => (
                   <div
                     key={interaction.id}
-                    className="flex items-center justify-between border-b pb-4 last:border-0"
+                    className="flex items-center justify-between border-b border-gray-100 pb-4 last:border-0"
                   >
                     <div>
                       <p className="font-medium text-gray-900">
