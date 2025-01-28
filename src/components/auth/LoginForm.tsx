@@ -26,114 +26,25 @@ export const LoginForm = () => {
     },
   });
 
-  const createAdminUser = async () => {
-    try {
-      setIsLoading(true);
-      console.log("Iniciando criação do usuário admin");
-
-      // Criar usuário admin com nova senha
-      const { data: { user }, error: signUpError } = await supabase.auth.signUp({
-        email: 'admin@epicmomentos.com',
-        password: 'Epic@2024#',
-        options: {
-          data: {
-            user_type: 'admin'
-          }
-        }
-      });
-
-      if (signUpError) {
-        console.error("Erro ao criar usuário:", signUpError);
-        toast.error("Erro ao criar usuário admin");
-        return;
-      }
-
-      if (!user) {
-        console.error("Usuário não foi criado");
-        toast.error("Erro ao criar usuário admin");
-        return;
-      }
-
-      console.log("Usuário criado com sucesso, atualizando perfil");
-
-      // Atualizar o tipo de usuário para admin
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ 
-          user_type: 'admin',
-          first_name: 'Admin',
-          last_name: 'Epic'
-        })
-        .eq('id', user.id);
-
-      if (updateError) {
-        console.error("Erro ao atualizar perfil:", updateError);
-        toast.error("Erro ao configurar perfil admin");
-        return;
-      }
-
-      toast.success("Usuário admin criado com sucesso!");
-      console.log("Admin criado com sucesso. Email: admin@epicmomentos.com, Senha: Epic@2024#");
-
-    } catch (error) {
-      console.error("Erro inesperado:", error);
-      toast.error("Erro ao criar usuário admin");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsLoading(true);
       console.log("Iniciando processo de login");
 
-      const { data: { session }, error: signInError } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
       });
 
-      if (signInError) {
-        console.error("Erro ao fazer login:", signInError);
+      if (error) {
+        console.error("Erro ao fazer login:", error);
         toast.error("Email ou senha inválidos");
         return;
       }
 
-      if (!session) {
-        console.error("Sessão não encontrada após login");
-        toast.error("Erro ao processar login");
-        return;
-      }
-
-      // Buscar o perfil do usuário para verificar o tipo
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('user_type')
-        .eq('id', session.user.id)
-        .single();
-
-      if (profileError) {
-        console.error("Erro ao buscar perfil:", profileError);
-        toast.error("Erro ao verificar permissões");
-        return;
-      }
-
-      console.log("Tipo de usuário:", profile?.user_type);
-
-      // Redirecionar baseado no tipo de usuário
-      if (profile?.user_type === 'admin') {
-        console.log("Redirecionando para dashboard admin");
-        toast.success("Login administrativo realizado com sucesso!");
-        navigate("/admin/dashboard");
-      } else if (profile?.user_type === 'business_owner') {
-        console.log("Redirecionando para dashboard business");
-        toast.success("Login realizado com sucesso!");
-        navigate("/business/dashboard");
-      } else {
-        console.log("Redirecionando para dashboard usuário");
-        toast.success("Login realizado com sucesso!");
-        navigate("/user/dashboard");
-      }
+      toast.success("Login realizado com sucesso!");
+      console.log("Login realizado com sucesso");
+      navigate("/business/dashboard");
     } catch (error) {
       console.error("Erro inesperado:", error);
       toast.error("Erro ao processar login");
@@ -204,16 +115,6 @@ export const LoginForm = () => {
             disabled={isLoading}
           >
             {isLoading ? "Entrando..." : "Entrar"}
-          </Button>
-
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full mt-4"
-            onClick={createAdminUser}
-            disabled={isLoading}
-          >
-            Criar Usuário Admin
           </Button>
         </form>
       </Form>
