@@ -26,6 +26,58 @@ export const LoginForm = () => {
     },
   });
 
+  const createAdminUser = async () => {
+    try {
+      setIsLoading(true);
+      console.log("Iniciando criação do usuário admin");
+
+      // Criar usuário admin
+      const { data: { user }, error: signUpError } = await supabase.auth.signUp({
+        email: 'admin@epicmomentos.com',
+        password: 'admin123',
+      });
+
+      if (signUpError) {
+        console.error("Erro ao criar usuário:", signUpError);
+        toast.error("Erro ao criar usuário admin");
+        return;
+      }
+
+      if (!user) {
+        console.error("Usuário não foi criado");
+        toast.error("Erro ao criar usuário admin");
+        return;
+      }
+
+      console.log("Usuário criado com sucesso, atualizando perfil");
+
+      // Atualizar o tipo de usuário para admin
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ 
+          user_type: 'admin',
+          first_name: 'Admin',
+          last_name: 'Epic'
+        })
+        .eq('id', user.id);
+
+      if (updateError) {
+        console.error("Erro ao atualizar perfil:", updateError);
+        toast.error("Erro ao configurar perfil admin");
+        return;
+      }
+
+      toast.success("Usuário admin criado com sucesso!");
+      console.log("Admin criado com sucesso. Email: admin@epicmomentos.com, Senha: admin123");
+
+    } catch (error) {
+      console.error("Erro inesperado:", error);
+      toast.error("Erro ao criar usuário admin");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsLoading(true);
@@ -147,6 +199,17 @@ export const LoginForm = () => {
             disabled={isLoading}
           >
             {isLoading ? "Entrando..." : "Entrar"}
+          </Button>
+
+          {/* Botão temporário para criar admin */}
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full mt-4"
+            onClick={createAdminUser}
+            disabled={isLoading}
+          >
+            Criar Usuário Admin
           </Button>
         </form>
       </Form>
