@@ -31,6 +31,7 @@ const AdminLogin = () => {
     try {
       setIsLoading(true);
       console.log("Iniciando processo de login administrativo");
+      console.log("Tentando autenticar com email:", values.email);
 
       const { data: { session }, error: signInError } = await supabase.auth.signInWithPassword({
         email: values.email,
@@ -38,36 +39,48 @@ const AdminLogin = () => {
       });
 
       if (signInError) {
-        console.error("Erro ao fazer login:", signInError);
+        console.error("Erro detalhado de autenticação:", {
+          message: signInError.message,
+          status: signInError.status,
+          name: signInError.name,
+          stack: signInError.stack
+        });
         toast.error("Email ou senha inválidos");
         return;
       }
 
-      // Verificar se o usuário é admin
+      if (!session) {
+        console.error("Sessão não encontrada após autenticação bem-sucedida");
+        toast.error("Erro ao processar login");
+        return;
+      }
+
+      console.log("Autenticação bem-sucedida, verificando perfil");
+
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('user_type')
-        .eq('id', session?.user.id)
+        .eq('id', session.user.id)
         .single();
 
       if (profileError) {
-        console.error("Erro ao verificar perfil:", profileError);
+        console.error("Erro ao buscar perfil:", profileError);
         toast.error("Erro ao verificar permissões");
         return;
       }
 
       if (profile?.user_type !== 'admin') {
-        console.error("Usuário não é admin");
+        console.error("Usuário não é admin:", profile?.user_type);
         toast.error("Você não tem permissão para acessar a área administrativa");
         await supabase.auth.signOut();
         return;
       }
 
-      toast.success("Login realizado com sucesso!");
       console.log("Login administrativo realizado com sucesso");
+      toast.success("Login realizado com sucesso!");
       navigate("/admin/dashboard");
     } catch (error) {
-      console.error("Erro inesperado:", error);
+      console.error("Erro inesperado durante login:", error);
       toast.error("Erro ao processar login");
     } finally {
       setIsLoading(false);
