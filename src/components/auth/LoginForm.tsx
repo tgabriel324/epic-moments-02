@@ -31,10 +31,15 @@ export const LoginForm = () => {
       setIsLoading(true);
       console.log("Iniciando criação do usuário admin");
 
-      // Criar usuário admin
+      // Criar usuário admin com nova senha
       const { data: { user }, error: signUpError } = await supabase.auth.signUp({
         email: 'admin@epicmomentos.com',
-        password: 'admin123',
+        password: 'Epic@2024#',
+        options: {
+          data: {
+            user_type: 'admin'
+          }
+        }
       });
 
       if (signUpError) {
@@ -68,7 +73,7 @@ export const LoginForm = () => {
       }
 
       toast.success("Usuário admin criado com sucesso!");
-      console.log("Admin criado com sucesso. Email: admin@epicmomentos.com, Senha: admin123");
+      console.log("Admin criado com sucesso. Email: admin@epicmomentos.com, Senha: Epic@2024#");
 
     } catch (error) {
       console.error("Erro inesperado:", error);
@@ -201,7 +206,6 @@ export const LoginForm = () => {
             {isLoading ? "Entrando..." : "Entrar"}
           </Button>
 
-          {/* Botão temporário para criar admin */}
           <Button
             type="button"
             variant="outline"
