@@ -14,14 +14,24 @@ import Landing from "@/pages/ar/Landing";
 import AR from "@/pages/business/AR";
 import Metrics from "@/pages/business/Metrics";
 import UserDashboard from "@/pages/user/Dashboard";
+import History from "@/pages/user/History";
+import Profile from "@/pages/user/Profile";
+import Collection from "@/pages/user/Collection";
+import Help from "@/pages/user/Help";
+
+// Admin Pages
+import AdminDashboard from "@/pages/admin/Dashboard";
+import AdminUsers from "@/pages/admin/Users";
+import AdminMonitoring from "@/pages/admin/Monitoring";
+import AdminPlans from "@/pages/admin/Plans";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
-      staleTime: 5 * 60 * 1000, // 5 minutos
-      gcTime: 10 * 60 * 1000, // 10 minutos
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
     },
   },
 });
@@ -48,6 +58,16 @@ function App() {
             
             {/* User Routes */}
             <Route path="/user/dashboard" element={<UserDashboard />} />
+            <Route path="/user/history" element={<History />} />
+            <Route path="/user/profile" element={<Profile />} />
+            <Route path="/user/collection" element={<Collection />} />
+            <Route path="/user/help" element={<Help />} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/monitoring" element={<AdminMonitoring />} />
+            <Route path="/admin/plans" element={<AdminPlans />} />
             
             {/* AR Routes */}
             <Route path="/ar/landing/:stampId" element={<Landing />} />
