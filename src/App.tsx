@@ -20,6 +20,7 @@ import Collection from "@/pages/user/Collection";
 import Help from "@/pages/user/Help";
 
 // Admin Pages
+import AdminLogin from "@/pages/admin/Login";
 import AdminDashboard from "@/pages/admin/Dashboard";
 import AdminUsers from "@/pages/admin/Users";
 import AdminMonitoring from "@/pages/admin/Monitoring";
@@ -64,6 +65,7 @@ function App() {
             <Route path="/user/help" element={<Help />} />
             
             {/* Admin Routes */}
+            <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/users" element={<AdminUsers />} />
             <Route path="/admin/monitoring" element={<AdminMonitoring />} />
