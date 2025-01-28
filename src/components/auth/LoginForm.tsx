@@ -31,20 +31,52 @@ export const LoginForm = () => {
       setIsLoading(true);
       console.log("Iniciando processo de login");
 
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data: { session }, error: signInError } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
       });
 
-      if (error) {
-        console.error("Erro ao fazer login:", error);
+      if (signInError) {
+        console.error("Erro ao fazer login:", signInError);
         toast.error("Email ou senha inválidos");
         return;
       }
 
-      toast.success("Login realizado com sucesso!");
-      console.log("Login realizado com sucesso");
-      navigate("/business/dashboard");
+      if (!session) {
+        console.error("Sessão não encontrada após login");
+        toast.error("Erro ao processar login");
+        return;
+      }
+
+      // Buscar o perfil do usuário para verificar o tipo
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('user_type')
+        .eq('id', session.user.id)
+        .single();
+
+      if (profileError) {
+        console.error("Erro ao buscar perfil:", profileError);
+        toast.error("Erro ao verificar permissões");
+        return;
+      }
+
+      console.log("Tipo de usuário:", profile?.user_type);
+
+      // Redirecionar baseado no tipo de usuário
+      if (profile?.user_type === 'admin') {
+        console.log("Redirecionando para dashboard admin");
+        toast.success("Login administrativo realizado com sucesso!");
+        navigate("/admin/dashboard");
+      } else if (profile?.user_type === 'business_owner') {
+        console.log("Redirecionando para dashboard business");
+        toast.success("Login realizado com sucesso!");
+        navigate("/business/dashboard");
+      } else {
+        console.log("Redirecionando para dashboard usuário");
+        toast.success("Login realizado com sucesso!");
+        navigate("/user/dashboard");
+      }
     } catch (error) {
       console.error("Erro inesperado:", error);
       toast.error("Erro ao processar login");
