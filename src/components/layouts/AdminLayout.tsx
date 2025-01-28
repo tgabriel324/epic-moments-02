@@ -44,6 +44,7 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -70,6 +71,8 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
           return;
         }
 
+        console.log("User type:", profile?.user_type);
+
         if (profile?.user_type !== 'admin') {
           console.log("User is not admin, redirecting to home");
           toast.error("Você não tem permissão para acessar esta área");
@@ -77,6 +80,7 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
           return;
         }
 
+        setIsAdmin(true);
         setIsLoading(false);
       } catch (error) {
         console.error("Error in checkAdmin:", error);
@@ -86,6 +90,20 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     };
 
     checkAdmin();
+  }, [navigate]);
+
+  // Adiciona um listener para mudanças na autenticação
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT') {
+        setIsAdmin(false);
+        navigate('/login');
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   const handleSignOut = async () => {
@@ -105,6 +123,10 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00BFFF]" />
       </div>
     );
+  }
+
+  if (!isAdmin) {
+    return null;
   }
 
   return (
