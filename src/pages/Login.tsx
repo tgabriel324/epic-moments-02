@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AuthForm } from "@/components/auth/AuthForm";
 import { AuthToggle } from "@/components/auth/AuthToggle";
+import { AuthHeader } from "@/components/auth/AuthHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -16,7 +17,7 @@ const Login = () => {
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data: { user }, error } = await supabase.auth.signInWithPassword({
           email: values.email,
           password: values.password,
         });
@@ -27,8 +28,35 @@ const Login = () => {
           return;
         }
 
+        // Buscar o perfil do usuário para verificar o tipo
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('user_type')
+          .eq('id', user?.id)
+          .single();
+
+        if (profileError) {
+          console.error("Erro ao buscar perfil:", profileError);
+          toast.error("Erro ao verificar tipo de usuário");
+          return;
+        }
+
         toast.success("Login realizado com sucesso!");
-        navigate("/business/dashboard");
+        
+        // Redirecionar baseado no tipo de usuário
+        switch (profile?.user_type) {
+          case 'admin':
+            navigate("/admin/dashboard");
+            break;
+          case 'business_owner':
+            navigate("/business/dashboard");
+            break;
+          case 'end_user':
+            navigate("/user/dashboard");
+            break;
+          default:
+            navigate("/user/dashboard");
+        }
       } else {
         const { error } = await supabase.auth.signUp({
           email: values.email,
@@ -59,6 +87,7 @@ const Login = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#F5F5F5] py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
+        <AuthHeader />
         <AuthToggle isLogin={isLogin} onToggle={setIsLogin} />
         <div className="bg-white p-8 rounded-lg shadow-md">
           <AuthForm
