@@ -27,7 +27,7 @@ export function CreateUserDialog() {
     email: "",
     firstName: "",
     lastName: "",
-    userType: "end_user",
+    userType: "end_user" as "end_user" | "business_owner" | "admin",
   });
 
   const handleCreateUser = async (e: React.FormEvent) => {
@@ -136,7 +136,7 @@ export function CreateUserDialog() {
               <Label htmlFor="userType">Tipo de Usuário</Label>
               <Select
                 value={formData.userType}
-                onValueChange={(value) =>
+                onValueChange={(value: "end_user" | "business_owner" | "admin") =>
                   setFormData({ ...formData, userType: value })
                 }
               >

@@ -18,7 +18,7 @@ import { useState } from "react";
 
 export function CreatePlanDialog() {
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState("");
+  const [name, setName] = useState<"free" | "pro" | "enterprise">("free");
   const [price, setPrice] = useState("");
   const [maxStamps, setMaxStamps] = useState("");
   const [hasDetailedMetrics, setHasDetailedMetrics] = useState(false);
@@ -33,17 +33,15 @@ export function CreatePlanDialog() {
     try {
       const { error } = await supabase
         .from('subscription_plans')
-        .insert([
-          {
-            name,
-            price: Number(price),
-            max_stamps: Number(maxStamps),
-            has_detailed_metrics: hasDetailedMetrics,
-            has_custom_branding: hasCustomBranding,
-            has_priority_support: hasPrioritySupport,
-            has_advanced_reports: hasAdvancedReports,
-          }
-        ]);
+        .insert({
+          name,
+          price: Number(price),
+          max_stamps: Number(maxStamps),
+          has_detailed_metrics: hasDetailedMetrics,
+          has_custom_branding: hasCustomBranding,
+          has_priority_support: hasPrioritySupport,
+          has_advanced_reports: hasAdvancedReports,
+        });
 
       if (error) throw error;
 
@@ -54,7 +52,7 @@ export function CreatePlanDialog() {
 
       setOpen(false);
       // Reset form
-      setName("");
+      setName("free");
       setPrice("");
       setMaxStamps("");
       setHasDetailedMetrics(false);
@@ -90,13 +88,17 @@ export function CreatePlanDialog() {
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="name">Nome do Plano</Label>
-              <Input
+              <select
                 id="name"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Ex: Pro"
+                onChange={(e) => setName(e.target.value as "free" | "pro" | "enterprise")}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 required
-              />
+              >
+                <option value="free">Grátis</option>
+                <option value="pro">Pro</option>
+                <option value="enterprise">Enterprise</option>
+              </select>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="price">Preço (R$)</Label>
