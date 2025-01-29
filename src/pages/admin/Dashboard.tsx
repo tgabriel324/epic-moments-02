@@ -1,46 +1,58 @@
 import { AdminLayout } from "@/components/layouts/AdminLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Activity, Package } from "lucide-react";
+import { MetricsCard } from "@/components/business/metrics/MetricsCard";
+import { MetricsChart } from "@/components/business/metrics/MetricsChart";
+import { Users, Activity, Package, DollarSign } from "lucide-react";
+import { useBusinessMetrics } from "@/hooks/useBusinessMetrics";
 
 const AdminDashboard = () => {
+  const { data: metrics, isLoading } = useBusinessMetrics();
+
+  const chartData = metrics?.monthlyData || [];
+
   return (
     <AdminLayout>
       <div className="space-y-6">
         <h1 className="text-3xl font-bold text-[#000000]">Dashboard Administrativo</h1>
         
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total de Usuários</CardTitle>
-              <Users className="h-4 w-4 text-[#00BFFF]" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">1,234</div>
-              <p className="text-xs text-muted-foreground">+20% em relação ao mês anterior</p>
-            </CardContent>
-          </Card>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <MetricsCard
+            title="Total de Usuários"
+            value="1,234"
+            change={20}
+            icon={<Users />}
+            description="Usuários ativos na plataforma"
+          />
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Interações AR</CardTitle>
-              <Activity className="h-4 w-4 text-[#00BFFF]" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">45,678</div>
-              <p className="text-xs text-muted-foreground">+15% em relação ao mês anterior</p>
-            </CardContent>
-          </Card>
+          <MetricsCard
+            title="Interações AR"
+            value="45,678"
+            change={15}
+            icon={<Activity />}
+            description="Visualizações em realidade aumentada"
+          />
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Assinaturas Ativas</CardTitle>
-              <Package className="h-4 w-4 text-[#00BFFF]" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">89</div>
-              <p className="text-xs text-muted-foreground">+5% em relação ao mês anterior</p>
-            </CardContent>
-          </Card>
+          <MetricsCard
+            title="Assinaturas Ativas"
+            value="89"
+            change={5}
+            icon={<Package />}
+            description="Empresas com planos ativos"
+          />
+
+          <MetricsCard
+            title="Receita Mensal"
+            value="R$ 12.345"
+            change={25}
+            icon={<DollarSign />}
+            description="Faturamento recorrente mensal"
+          />
+        </div>
+
+        <div className="grid gap-4 grid-cols-1">
+          <MetricsChart
+            data={chartData}
+            title="Crescimento da Plataforma"
+          />
         </div>
       </div>
     </AdminLayout>
