@@ -44,7 +44,7 @@ const AdminMonitoring = () => {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
-                  <Badge variant="success" className="bg-green-500">
+                  <Badge variant="success">
                     {service.status}
                   </Badge>
                   <span className="text-sm text-muted-foreground flex items-center">
