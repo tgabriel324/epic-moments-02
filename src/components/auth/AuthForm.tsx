@@ -10,7 +10,7 @@ const formSchema = z.object({
   email: z.string().email("Email inválido"),
   password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
   confirmPassword: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
-  userType: z.enum(["business_owner", "end_user"]).optional(),
+  userType: z.enum(["admin", "business_owner", "end_user"]).optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "As senhas não coincidem",
   path: ["confirmPassword"],
@@ -115,6 +115,14 @@ export const AuthForm = ({ isLogin, isLoading, onSubmit }: AuthFormProps) => {
                       defaultValue={field.value}
                       className="flex flex-col space-y-2"
                     >
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="admin" />
+                        </FormControl>
+                        <FormLabel className="font-normal cursor-pointer">
+                          Administrador (Dono do Epic Momentos)
+                        </FormLabel>
+                      </FormItem>
                       <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
                           <RadioGroupItem value="business_owner" />
