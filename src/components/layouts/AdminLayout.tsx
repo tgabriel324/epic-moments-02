@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { 
   Sidebar, 
   SidebarContent, 
@@ -19,20 +20,42 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const checkAdmin = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        navigate('/login');
-        return;
-      }
+      try {
+        console.log("Verificando sessão do usuário...");
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          console.log("Usuário não está autenticado");
+          toast.error("Você precisa estar logado para acessar esta área");
+          navigate('/login');
+          return;
+        }
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('user_type')
-        .eq('id', session.user.id)
-        .single();
+        console.log("Verificando perfil do usuário...");
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('user_type')
+          .eq('id', session.user.id)
+          .single();
 
-      if (profile?.user_type !== 'admin') {
+        if (error) {
+          console.error("Erro ao buscar perfil:", error);
+          toast.error("Erro ao verificar permissões");
+          navigate('/');
+          return;
+        }
+
+        if (profile?.user_type !== 'admin') {
+          console.log("Usuário não é admin:", profile?.user_type);
+          toast.error("Você não tem permissão para acessar esta área");
+          navigate('/');
+          return;
+        }
+
+        console.log("Usuário admin verificado com sucesso");
+      } catch (error) {
+        console.error("Erro na verificação de admin:", error);
+        toast.error("Erro ao verificar permissões");
         navigate('/');
       }
     };
@@ -43,12 +66,12 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const menuItems = [
     {
       title: "Dashboard",
-      url: "/admin",
+      url: "/admin/dashboard",
       icon: LayoutDashboard,
     },
     {
-      title: "Donos de Negócios",
-      url: "/admin/business-owners",
+      title: "Usuários",
+      url: "/admin/users",
       icon: Users,
     },
     {
