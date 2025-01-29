@@ -24,6 +24,7 @@ import AdminDashboard from "@/pages/admin/Dashboard";
 import AdminUsers from "@/pages/admin/Users";
 import AdminMonitoring from "@/pages/admin/Monitoring";
 import AdminPlans from "@/pages/admin/Plans";
+import Manual from "@/pages/admin/Manual";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -68,6 +69,7 @@ function App() {
             <Route path="/admin/users" element={<AdminUsers />} />
             <Route path="/admin/monitoring" element={<AdminMonitoring />} />
             <Route path="/admin/plans" element={<AdminPlans />} />
+            <Route path="/admin/manual" element={<Manual />} />
             
             {/* AR Routes */}
             <Route path="/ar/landing/:stampId" element={<Landing />} />

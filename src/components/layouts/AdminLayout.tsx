@@ -13,7 +13,7 @@ import {
   SidebarMenuItem,
   SidebarProvider 
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, Users, Activity, Package, Shield } from "lucide-react";
+import { LayoutDashboard, Users, Activity, Package, Shield, BookOpen } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { useProfile } from "@/hooks/useProfile";
 
@@ -86,6 +86,11 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
       title: "Planos",
       url: "/admin/plans",
       icon: Package,
+    },
+    {
+      title: "Manual",
+      url: "/admin/manual",
+      icon: BookOpen,
     },
   ];
 
