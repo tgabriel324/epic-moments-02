@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, UserPlus, Filter } from "lucide-react";
+import { Search, Filter } from "lucide-react";
+import { CreateUserDialog } from "@/components/admin/users/CreateUserDialog";
 
 const AdminUsers = () => {
   const users = [
@@ -38,10 +39,7 @@ const AdminUsers = () => {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-[#000000]">Gestão de Usuários</h1>
-          <Button className="bg-[#00BFFF] hover:bg-[#00BFFF]/90">
-            <UserPlus className="w-4 h-4 mr-2" />
-            Novo Usuário
-          </Button>
+          <CreateUserDialog />
         </div>
 
         <Card>
