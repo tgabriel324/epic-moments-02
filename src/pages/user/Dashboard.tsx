@@ -26,19 +26,19 @@ const UserDashboard = () => {
 
   return (
     <UserLayout>
-      <div className="space-y-8">
+      <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-4xl font-bold text-gray-900">
+          <h1 className="text-2xl md:text-4xl font-bold text-gray-900">
             Olá, {profile?.first_name || "Visitante"}!
           </h1>
-          <p className="mt-2 text-gray-600">
+          <p className="mt-2 text-sm md:text-base text-gray-600">
             Bem-vindo ao Epic Momentos. Explore experiências únicas em realidade aumentada.
           </p>
         </div>
 
         {/* Quick Actions */}
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2">
           {/* Scanner Card */}
           <Card className="border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 bg-white">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
