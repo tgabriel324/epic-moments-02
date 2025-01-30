@@ -3,9 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useProfile } from "@/hooks/useProfile";
 import { Loader2, Scan, History, BookMarked, Share2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const UserDashboard = () => {
   const { profile, isLoading } = useProfile();
+  const navigate = useNavigate();
 
   if (isLoading) {
     return (
@@ -16,6 +18,11 @@ const UserDashboard = () => {
       </UserLayout>
     );
   }
+
+  const handleScanClick = () => {
+    console.log("Iniciando navegação para o scanner");
+    navigate("/ar/scanner");
+  };
 
   return (
     <UserLayout>
@@ -31,7 +38,8 @@ const UserDashboard = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Scanner Card */}
           <Card className="border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 bg-white">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-sm font-medium text-gray-600">Escanear QR Code</CardTitle>
@@ -42,13 +50,14 @@ const UserDashboard = () => {
             <CardContent>
               <Button 
                 className="w-full mt-2 bg-[#00BFFF] hover:bg-[#00BFFF]/90"
-                onClick={() => {/* Implementar scanner */}}
+                onClick={handleScanClick}
               >
                 Iniciar Scanner
               </Button>
             </CardContent>
           </Card>
 
+          {/* History Card */}
           <Card className="border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 bg-white">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-sm font-medium text-gray-600">Histórico</CardTitle>
@@ -62,6 +71,7 @@ const UserDashboard = () => {
             </CardContent>
           </Card>
 
+          {/* Collection Card */}
           <Card className="border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 bg-white">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-sm font-medium text-gray-600">Coleção</CardTitle>
@@ -75,6 +85,7 @@ const UserDashboard = () => {
             </CardContent>
           </Card>
 
+          {/* Share Card */}
           <Card className="border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 bg-white">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
               <CardTitle className="text-sm font-medium text-gray-600">Compartilhar</CardTitle>
@@ -93,22 +104,6 @@ const UserDashboard = () => {
             </CardContent>
           </Card>
         </div>
-
-        {/* Recent Activity */}
-        <Card className="border border-gray-100 shadow-sm bg-white">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold text-gray-900">
-              Atividade Recente
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col items-center justify-center py-8 text-gray-500">
-              <History className="w-12 h-12 mb-4 text-gray-300" />
-              <p>Nenhuma atividade recente</p>
-              <p className="text-sm">Suas experiências em AR aparecerão aqui</p>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </UserLayout>
   );

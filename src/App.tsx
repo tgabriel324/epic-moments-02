@@ -11,6 +11,7 @@ import QRCodes from "@/pages/business/QRCodes";
 import Plans from "@/pages/business/Plans";
 import View from "@/pages/ar/View";
 import Landing from "@/pages/ar/Landing";
+import Scanner from "@/pages/ar/Scanner"; // Nova importação
 import AR from "@/pages/business/AR";
 import Metrics from "@/pages/business/Metrics";
 import UserDashboard from "@/pages/user/Dashboard";
@@ -74,6 +75,7 @@ function App() {
             {/* AR Routes */}
             <Route path="/ar/landing/:stampId" element={<Landing />} />
             <Route path="/ar/view/:stampId" element={<View />} />
+            <Route path="/ar/scanner" element={<Scanner />} /> {/* Nova rota */}
           </Routes>
         </Router>
       </div>
