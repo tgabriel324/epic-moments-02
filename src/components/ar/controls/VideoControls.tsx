@@ -3,6 +3,7 @@ import { Slider } from "@/components/ui/slider";
 import { Pause, Play, Volume2, VolumeX } from "lucide-react";
 import { ARVideoState } from "@/types/ar";
 import { motion } from "framer-motion";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface VideoControlsProps {
   videoState: ARVideoState;
@@ -17,6 +18,8 @@ export const VideoControls = ({
   onVolumeChange,
   onSeek
 }: VideoControlsProps) => {
+  const isMobile = useIsMobile();
+  
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
@@ -27,18 +30,18 @@ export const VideoControls = ({
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-4"
+      className="space-y-2 md:space-y-4"
     >
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 md:gap-4">
         <Button
           variant="outline"
-          size="icon"
+          size={isMobile ? "sm" : "icon"}
           onClick={onPlayPause}
           className="bg-white/10"
         >
           {videoState.isPlaying ? 
-            <Pause className="h-4 w-4" /> : 
-            <Play className="h-4 w-4" />
+            <Pause className="h-3 w-3 md:h-4 md:w-4" /> : 
+            <Play className="h-3 w-3 md:h-4 md:w-4" />
           }
         </Button>
         
@@ -51,7 +54,7 @@ export const VideoControls = ({
             className="flex-1"
           />
           
-          <div className="flex justify-between text-xs text-white/70">
+          <div className="flex justify-between text-[10px] md:text-xs text-white/70">
             <span>{formatTime(videoState.currentTime)}</span>
             <span>{formatTime(videoState.duration)}</span>
           </div>
@@ -61,23 +64,25 @@ export const VideoControls = ({
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
-              size="icon"
+              size={isMobile ? "sm" : "icon"}
               onClick={() => onVolumeChange(videoState.volume === 0 ? 1 : 0)}
               className="bg-white/10"
             >
               {videoState.volume === 0 ? 
-                <VolumeX className="h-4 w-4" /> : 
-                <Volume2 className="h-4 w-4" />
+                <VolumeX className="h-3 w-3 md:h-4 md:w-4" /> : 
+                <Volume2 className="h-3 w-3 md:h-4 md:w-4" />
               }
             </Button>
             
-            <Slider
-              value={[videoState.volume || 0]}
-              max={1}
-              step={0.1}
-              onValueChange={(value) => onVolumeChange(value[0])}
-              className="w-20"
-            />
+            {!isMobile && (
+              <Slider
+                value={[videoState.volume || 0]}
+                max={1}
+                step={0.1}
+                onValueChange={(value) => onVolumeChange(value[0])}
+                className="w-20"
+              />
+            )}
           </div>
         )}
       </div>

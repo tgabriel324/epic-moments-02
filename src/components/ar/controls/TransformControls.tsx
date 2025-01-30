@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface TransformControlsProps {
   scale: number;
@@ -17,15 +18,17 @@ export const TransformControls = ({
   onZoomOut,
   onRotationReset
 }: TransformControlsProps) => {
+  const isMobile = useIsMobile();
+  
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-2 md:gap-4">
       <Button
         variant="outline"
-        size="icon"
+        size={isMobile ? "sm" : "icon"}
         onClick={onZoomOut}
         className="bg-white/10"
       >
-        <ZoomOut className="h-4 w-4" />
+        <ZoomOut className="h-3 w-3 md:h-4 md:w-4" />
       </Button>
       
       <Slider
@@ -39,20 +42,20 @@ export const TransformControls = ({
       
       <Button
         variant="outline"
-        size="icon"
+        size={isMobile ? "sm" : "icon"}
         onClick={onZoomIn}
         className="bg-white/10"
       >
-        <ZoomIn className="h-4 w-4" />
+        <ZoomIn className="h-3 w-3 md:h-4 md:w-4" />
       </Button>
       
       <Button
         variant="outline"
-        size="icon"
+        size={isMobile ? "sm" : "icon"}
         onClick={onRotationReset}
         className="bg-white/10"
       >
-        <RotateCcw className="h-4 w-4" />
+        <RotateCcw className="h-3 w-3 md:h-4 md:w-4" />
       </Button>
     </div>
   );

@@ -5,11 +5,13 @@ import { Loader2, Camera, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ARCanvas } from "@/components/ar/ARCanvas";
 import { TrackingFeedback } from "@/components/ar/tracking/TrackingFeedback";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Scanner = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [hasPermission, setHasPermission] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const initScanner = async () => {
@@ -55,7 +57,7 @@ const Scanner = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-black">
-        <Loader2 className="h-8 w-8 animate-spin text-[#00BFFF]" />
+        <Loader2 className="h-6 w-6 md:h-8 md:w-8 animate-spin text-[#00BFFF]" />
       </div>
     );
   }
@@ -63,12 +65,18 @@ const Scanner = () => {
   if (!hasPermission) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white p-4">
-        <Camera className="h-16 w-16 mb-4 text-[#00BFFF]" />
-        <h2 className="text-xl font-bold mb-2">Permissão Necessária</h2>
-        <p className="text-center mb-4">
+        <Camera className="h-12 w-12 md:h-16 md:w-16 mb-4 text-[#00BFFF]" />
+        <h2 className="text-lg md:text-xl font-bold mb-2 text-center">
+          Permissão Necessária
+        </h2>
+        <p className="text-sm md:text-base text-center mb-4 max-w-xs md:max-w-sm">
           Para usar o scanner AR, precisamos de acesso à sua câmera.
         </p>
-        <Button onClick={() => window.location.reload()} variant="outline">
+        <Button 
+          onClick={() => window.location.reload()} 
+          variant="outline"
+          className="w-full max-w-xs md:max-w-sm text-sm md:text-base py-2 md:py-3"
+        >
           Tentar Novamente
         </Button>
       </div>
@@ -88,11 +96,12 @@ const Scanner = () => {
       {/* Botão Voltar */}
       <Button
         variant="ghost"
-        className="absolute top-4 left-4 z-50 text-white"
+        className={`absolute top-safe-2 left-2 z-50 text-white 
+          ${isMobile ? 'p-2' : 'p-4'}`}
         onClick={handleBack}
       >
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        Voltar
+        <ArrowLeft className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} mr-2`} />
+        <span className={`${isMobile ? 'text-sm' : 'text-base'}`}>Voltar</span>
       </Button>
 
       {/* Canvas AR */}
