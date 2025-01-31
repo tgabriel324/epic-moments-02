@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Loader2, Camera, ArrowLeft } from "lucide-react";
@@ -11,19 +11,45 @@ const Scanner = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [hasPermission, setHasPermission] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const isMobile = useIsMobile();
 
   useEffect(() => {
     const initScanner = async () => {
       try {
         console.log("Iniciando scanner AR...");
-        const hasCamera = await checkCameraPermission();
         
-        if (!hasCamera) {
-          console.error("Permissão de câmera negada");
-          toast.error("Permissão de câmera necessária para escanear");
-          navigate("/user/dashboard");
-          return;
+        // Configuração específica para iOS Safari
+        const constraints = {
+          video: {
+            facingMode: 'environment', // Usa a câmera traseira
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
+        };
+
+        console.log("Solicitando permissão da câmera com constraints:", constraints);
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        
+        if (videoRef.current) {
+          console.log("Stream obtido, configurando vídeo...");
+          videoRef.current.srcObject = stream;
+          
+          // Eventos específicos para debug
+          videoRef.current.onloadedmetadata = () => {
+            console.log("Metadados do vídeo carregados");
+            videoRef.current?.play().catch(e => {
+              console.error("Erro ao iniciar playback:", e);
+            });
+          };
+          
+          videoRef.current.onplay = () => {
+            console.log("Vídeo iniciou playback");
+          };
+          
+          videoRef.current.onerror = (e) => {
+            console.error("Erro no elemento de vídeo:", e);
+          };
         }
 
         setHasPermission(true);
@@ -31,23 +57,22 @@ const Scanner = () => {
         console.log("Scanner AR iniciado com sucesso");
       } catch (error) {
         console.error("Erro ao iniciar scanner:", error);
-        toast.error("Erro ao iniciar scanner");
-        navigate("/user/dashboard");
+        toast.error("Erro ao acessar a câmera");
+        setHasPermission(false);
+        setIsLoading(false);
       }
     };
 
     initScanner();
-  }, [navigate]);
 
-  const checkCameraPermission = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      stream.getTracks().forEach(track => track.stop());
-      return true;
-    } catch {
-      return false;
-    }
-  };
+    // Cleanup
+    return () => {
+      if (videoRef.current?.srcObject) {
+        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+        tracks.forEach(track => track.stop());
+      }
+    };
+  }, [navigate]);
 
   const handleBack = () => {
     console.log("Voltando para o dashboard");
@@ -83,14 +108,6 @@ const Scanner = () => {
     );
   }
 
-  // Configurações padrão para a experiência AR
-  const defaultSettings = {
-    background_color: "black",
-    landing_page_primary_color: "#00BFFF",
-    landing_page_title: "Scanner AR",
-    landing_page_description: "Aponte a câmera para uma estampa para começar"
-  };
-
   return (
     <div className="relative min-h-screen bg-black">
       {/* Botão Voltar */}
@@ -104,8 +121,15 @@ const Scanner = () => {
         <span className={`${isMobile ? 'text-sm' : 'text-base'}`}>Voltar</span>
       </Button>
 
-      {/* Canvas AR */}
-      <ARCanvas settings={defaultSettings} />
+      {/* Video elemento para preview da câmera */}
+      <video
+        ref={videoRef}
+        className="w-full h-full object-cover"
+        playsInline
+        autoPlay
+        muted
+        webkit-playsinline="true"
+      />
 
       {/* Feedback de Tracking */}
       <TrackingFeedback 
