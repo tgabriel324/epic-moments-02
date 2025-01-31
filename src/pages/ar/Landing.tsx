@@ -1,97 +1,90 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Loader2, ArrowRight } from "lucide-react";
+import { ARCanvas } from "@/components/ar/ARCanvas";
+import { LoadingScreen } from "@/components/ar/LoadingScreen";
+import { ErrorScreen } from "@/components/ar/ErrorScreen";
+import { useARExperience } from "@/hooks/useARExperience";
 
 export default function Landing() {
   const { stampId } = useParams();
+  console.log("Iniciando experiência AR para estampa:", stampId);
 
-  const { data: landingData, isLoading } = useQuery({
+  const { data: stampData, isLoading } = useQuery({
     queryKey: ["landing-page", stampId],
     queryFn: async () => {
-      console.log("Buscando dados da landing page para estampa:", stampId);
-      
       if (!stampId) throw new Error("ID da estampa não fornecido");
 
       // Buscar configurações do QR code e dados da estampa
       const { data: settings } = await supabase
         .from("qr_code_settings")
         .select("*")
-        .single();
+        .maybeSingle();
 
-      const { data: stamp } = await supabase
+      const { data: stamp, error } = await supabase
         .from("stamps")
-        .select("*, business:profiles(company_name)")
+        .select("*, business:profiles(company_name), stamp_video_links(video_id)")
         .eq("id", stampId)
-        .single();
+        .maybeSingle();
 
-      if (!stamp) throw new Error("Estampa não encontrada");
+      if (error) {
+        console.error("Erro ao buscar dados da estampa:", error);
+        throw error;
+      }
+
+      if (!stamp) {
+        throw new Error("Estampa não encontrada");
+      }
 
       return {
-        settings,
+        settings: settings || {
+          background_color: "#000000",
+          landing_page_primary_color: "#00BFFF",
+          landing_page_title: "Experiência AR",
+          landing_page_description: "Aponte a câmera para a estampa"
+        },
         stamp,
       };
     },
   });
 
+  const { error } = useARExperience(stampId, stampData);
+
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
+      <LoadingScreen
+        settings={
+          stampData?.settings || {
+            background_color: "#000000",
+            landing_page_primary_color: "#00BFFF",
+            landing_page_title: "Experiência AR",
+            landing_page_description: "Aponte a câmera para a estampa"
+          }
+        }
+      />
     );
   }
 
-  if (!landingData?.settings || !landingData.stamp) {
+  if (error || !stampData?.stamp) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-white">
-        <p>Experiência não encontrada</p>
-      </div>
+      <ErrorScreen
+        error={error || "Estampa não encontrada"}
+        settings={
+          stampData?.settings || {
+            background_color: "#000000",
+            landing_page_primary_color: "#00BFFF",
+            landing_page_title: "Experiência AR",
+            landing_page_description: "Aponte a câmera para a estampa"
+          }
+        }
+      />
     );
   }
-
-  const { settings, stamp } = landingData;
-  const primaryColor = settings.landing_page_primary_color || "#00BFFF";
 
   return (
-    <div 
-      className="min-h-screen flex flex-col items-center justify-center p-6 bg-black text-white"
-      style={{ 
-        "--primary-color": primaryColor,
-        background: `radial-gradient(circle at center, ${primaryColor}10 0%, black 100%)` 
-      } as React.CSSProperties}
-    >
-      {settings.landing_page_logo_url && (
-        <img
-          src={settings.landing_page_logo_url}
-          alt="Logo"
-          className="w-32 h-32 object-contain mb-8"
-        />
-      )}
-
-      <h1 className="text-3xl md:text-4xl font-bold text-center mb-4">
-        {settings.landing_page_title || "Experiência AR"}
-      </h1>
-
-      <p className="text-lg text-center text-gray-300 mb-8 max-w-md">
-        {settings.landing_page_description || 
-          "Aponte a câmera para a estampa para ver o conteúdo em realidade aumentada"}
-      </p>
-
-      <Button
-        className="text-lg px-8 py-6 rounded-full bg-white text-black hover:bg-white/90 transition-all"
-        onClick={() => window.location.href = `/ar/view/${stampId}`}
-      >
-        Iniciar Experiência
-        <ArrowRight className="ml-2 w-5 h-5" />
-      </Button>
-
-      {stamp.business?.company_name && (
-        <p className="mt-12 text-sm text-gray-400">
-          Uma experiência de {stamp.business.company_name}
-        </p>
-      )}
-    </div>
+    <ARCanvas
+      settings={stampData.settings}
+      stampImageUrl={stampData.stamp.optimized_tracking_url || stampData.stamp.image_url}
+    />
   );
 }
