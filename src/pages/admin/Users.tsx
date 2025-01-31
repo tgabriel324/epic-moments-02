@@ -30,9 +30,15 @@ const AdminUsers = () => {
     },
   });
 
+  const getFullName = (user: any) => {
+    const firstName = user.first_name || '';
+    const lastName = user.last_name || '';
+    return `${firstName} ${lastName}`.trim() || 'N/A';
+  };
+
   const filteredUsers = users?.filter((user) =>
-    user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    getFullName(user).toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.company_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -68,7 +74,7 @@ const AdminUsers = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nome</TableHead>
-                  <TableHead>Email</TableHead>
+                  <TableHead>Empresa</TableHead>
                   <TableHead>Tipo</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Criado em</TableHead>
@@ -78,14 +84,14 @@ const AdminUsers = () => {
               <TableBody>
                 {filteredUsers?.map((user) => (
                   <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.full_name}</TableCell>
-                    <TableCell>{user.email}</TableCell>
+                    <TableCell className="font-medium">{getFullName(user)}</TableCell>
+                    <TableCell>{user.company_name || 'N/A'}</TableCell>
                     <TableCell>{user.user_type}</TableCell>
                     <TableCell>
                       <span className={`px-2 py-1 rounded-full text-xs ${
-                        user.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                       }`}>
-                        {user.status === 'active' ? 'Ativo' : 'Inativo'}
+                        {user.is_active ? 'Ativo' : 'Inativo'}
                       </span>
                     </TableCell>
                     <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
