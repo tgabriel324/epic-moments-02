@@ -56,7 +56,7 @@ export default function Landing() {
   if (isLoading) {
     return (
       <LoadingScreen
-        settings={stampData?.settings || defaultSettings}
+        settings={defaultSettings}
       />
     );
   }
@@ -70,21 +70,10 @@ export default function Landing() {
     );
   }
 
-  // Only render ARCanvas if we have stampData
-  if (stampData) {
-    return (
-      <ARCanvas
-        settings={stampData.settings || defaultSettings}
-        stampImageUrl={stampData.stamp.optimized_tracking_url || stampData.stamp.image_url}
-      />
-    );
-  }
-
-  // Fallback error state
   return (
-    <ErrorScreen
-      error="Dados da estampa não disponíveis"
-      settings={defaultSettings}
+    <ARCanvas
+      settings={stampData.settings || defaultSettings}
+      stampImageUrl={stampData.stamp.optimized_tracking_url || stampData.stamp.image_url}
     />
   );
 }
