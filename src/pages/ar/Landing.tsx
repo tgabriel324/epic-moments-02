@@ -15,6 +15,12 @@ const DEFAULT_SETTINGS = {
   landing_page_logo_url: null
 };
 
+// Função para validar UUID
+const isValidUUID = (uuid: string) => {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(uuid);
+};
+
 export default function Landing() {
   const { stampId } = useParams();
   const navigate = useNavigate();
@@ -24,9 +30,9 @@ export default function Landing() {
     queryFn: async () => {
       console.log("Buscando dados da landing page para estampa:", stampId);
       
-      if (!stampId) {
-        console.error("ID da estampa não fornecido");
-        throw new Error("ID da estampa não fornecido");
+      if (!stampId || !isValidUUID(stampId)) {
+        console.error("ID da estampa inválido:", stampId);
+        throw new Error("ID da estampa inválido");
       }
 
       // Primeiro buscar a estampa para obter o business_id
@@ -37,7 +43,7 @@ export default function Landing() {
           business:profiles(company_name)
         `)
         .eq("id", stampId)
-        .single();
+        .maybeSingle();
 
       if (stampError) {
         console.error("Erro ao buscar estampa:", stampError);
@@ -60,6 +66,11 @@ export default function Landing() {
         console.error("Erro ao buscar configurações:", settingsError);
         // Não vamos lançar o erro aqui, usaremos as configurações padrão
       }
+
+      console.log("Dados carregados com sucesso:", {
+        settings: settings || DEFAULT_SETTINGS,
+        stamp
+      });
 
       return {
         settings: settings || DEFAULT_SETTINGS,
