@@ -24,11 +24,7 @@ const Login = () => {
 
         if (error) {
           console.error("Erro ao fazer login:", error);
-          if (error.message === "Invalid login credentials") {
-            toast.error("Email ou senha incorretos");
-          } else {
-            toast.error("Erro ao fazer login. Tente novamente.");
-          }
+          toast.error("Email ou senha inválidos");
           return;
         }
 
@@ -74,12 +70,7 @@ const Login = () => {
 
         if (error) {
           console.error("Erro ao criar conta:", error);
-          if (error.message === "User already registered") {
-            toast.error("Este email já está cadastrado. Faça login.");
-            setIsLogin(true);
-          } else {
-            toast.error("Erro ao criar conta. Tente novamente.");
-          }
+          toast.error("Erro ao criar conta");
           return;
         }
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Loader2, Camera, ArrowLeft } from "lucide-react";
@@ -10,22 +10,15 @@ const Scanner = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [hasPermission, setHasPermission] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const isMobile = useIsMobile();
-  const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     const initScanner = async () => {
       try {
         console.log("Iniciando scanner AR...");
-        setError(null);
         
-        // Tenta obter acesso à câmera com timeout de 10 segundos
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error("Timeout ao acessar câmera")), 10000);
-        });
-
+        // Configurações específicas para garantir melhor compatibilidade
         const constraints = {
           video: {
             facingMode: 'environment',
@@ -35,64 +28,49 @@ const Scanner = () => {
         };
 
         console.log("Solicitando permissão da câmera com constraints:", constraints);
-        
-        // Race entre o timeout e a solicitação da câmera
-        const stream = await Promise.race([
-          navigator.mediaDevices.getUserMedia(constraints),
-          timeoutPromise
-        ]) as MediaStream;
-
-        streamRef.current = stream;
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
         
         if (videoRef.current) {
           console.log("Stream obtido, configurando vídeo...");
           videoRef.current.srcObject = stream;
           
-          // Aguarda o carregamento dos metadados do vídeo
-          await new Promise((resolve) => {
-            if (!videoRef.current) return;
-            videoRef.current.onloadedmetadata = resolve;
-          });
-
-          console.log("Metadados do vídeo carregados");
+          // Eventos específicos para debug
+          videoRef.current.onloadedmetadata = () => {
+            console.log("Metadados do vídeo carregados");
+            videoRef.current?.play().catch(e => {
+              console.error("Erro ao iniciar playback:", e);
+              toast.error("Erro ao iniciar câmera");
+            });
+          };
           
-          try {
-            await videoRef.current.play();
+          videoRef.current.onplay = () => {
             console.log("Vídeo iniciou playback com sucesso");
-            setHasPermission(true);
             setIsLoading(false);
-          } catch (playError) {
-            console.error("Erro ao iniciar playback:", playError);
-            throw new Error("Não foi possível iniciar a câmera");
-          }
+          };
+          
+          videoRef.current.onerror = (e) => {
+            console.error("Erro no elemento de vídeo:", e);
+            toast.error("Erro ao iniciar câmera");
+          };
         }
+
+        setHasPermission(true);
+        console.log("Scanner AR iniciado com sucesso");
       } catch (error) {
         console.error("Erro ao iniciar scanner:", error);
-        
-        let errorMessage = "Erro ao acessar a câmera";
-        if (error instanceof Error) {
-          if (error.name === "NotAllowedError") {
-            errorMessage = "Permissão da câmera negada";
-          } else if (error.message === "Timeout ao acessar câmera") {
-            errorMessage = "Tempo excedido ao tentar acessar a câmera";
-          }
-        }
-        
-        setError(errorMessage);
+        toast.error("Erro ao acessar a câmera");
         setHasPermission(false);
         setIsLoading(false);
-        toast.error(errorMessage);
       }
     };
 
     initScanner();
 
+    // Cleanup ao desmontar
     return () => {
-      console.log("Limpando recursos da câmera...");
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => {
-          track.stop();
-        });
+      if (videoRef.current?.srcObject) {
+        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+        tracks.forEach(track => track.stop());
       }
     };
   }, []);
@@ -104,21 +82,18 @@ const Scanner = () => {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-black">
-        <div className="text-center space-y-4">
-          <Loader2 className="h-8 w-8 animate-spin text-cyan-500 mx-auto" />
-          <p className="text-white text-sm">Iniciando câmera...</p>
-        </div>
+      <div className="flex items-center justify-center min-h-screen bg-black">
+        <Loader2 className="h-6 w-6 md:h-8 md:w-8 animate-spin text-[#00BFFF]" />
       </div>
     );
   }
 
-  if (error || !hasPermission) {
+  if (!hasPermission) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white p-4">
-        <Camera className="h-12 w-12 md:h-16 md:w-16 mb-4 text-cyan-500" />
+        <Camera className="h-12 w-12 md:h-16 md:w-16 mb-4 text-[#00BFFF]" />
         <h2 className="text-lg md:text-xl font-bold mb-2 text-center">
-          {error || "Permissão Necessária"}
+          Permissão Necessária
         </h2>
         <p className="text-sm md:text-base text-center mb-4 max-w-xs md:max-w-sm">
           Para usar o scanner AR, precisamos de acesso à sua câmera.
