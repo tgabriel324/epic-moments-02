@@ -12,7 +12,7 @@ export default function AR() {
   
   // Configurações de exemplo para o preview
   const previewSettings = {
-    background_color: "#121212",
+    background_color: "#000000",
     landing_page_primary_color: "#00BFFF",
     landing_page_title: "Preview da Experiência AR",
     landing_page_description: "Esta é uma visualização de como sua experiência em AR aparecerá para os clientes",
@@ -100,7 +100,7 @@ export default function AR() {
       </div>
 
       <Dialog open={showPreview} onOpenChange={setShowPreview}>
-        <DialogContent className="max-w-screen-lg h-[80vh] p-0">
+        <DialogContent className="max-w-[100vw] h-[100vh] p-0 border-none bg-black">
           <ARCanvas settings={previewSettings} />
         </DialogContent>
       </Dialog>
