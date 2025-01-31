@@ -48,20 +48,27 @@ export function DeletePlanDialog({ planId, planName }: DeletePlanDialogProps) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <Trash className="h-4 w-4" />
+        <Button 
+          variant="ghost" 
+          size="icon"
+          className="h-9 w-9 hover:bg-gray-100"
+        >
+          <Trash className="h-5 w-5 text-gray-500" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Excluir Plano</AlertDialogTitle>
-          <AlertDialogDescription>
+          <AlertDialogTitle className="text-xl font-semibold">Excluir Plano</AlertDialogTitle>
+          <AlertDialogDescription className="text-gray-500">
             Tem certeza que deseja excluir o plano {planName}? Esta ação não pode ser desfeita.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction onClick={handleDelete}>
+          <AlertDialogCancel className="h-11">Cancelar</AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={handleDelete}
+            className="bg-red-500 hover:bg-red-600 text-white h-11"
+          >
             Excluir
           </AlertDialogAction>
         </AlertDialogFooter>

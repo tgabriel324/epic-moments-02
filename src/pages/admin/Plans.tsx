@@ -41,67 +41,74 @@ const AdminPlans = () => {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-[#000000]">Planos e Assinaturas</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Planos e Assinaturas</h1>
           <CreatePlanDialog />
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {plans?.map((plan) => (
-            <Card key={plan.id}>
+            <Card key={plan.id} className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-lg font-medium">{plan.name}</CardTitle>
+                <CardTitle className="text-xl font-semibold text-gray-900 capitalize">
+                  {plan.name}
+                </CardTitle>
                 <div className="flex gap-2">
                   <EditPlanDialog plan={plan} />
                   <DeletePlanDialog planId={plan.id} planName={plan.name} />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <Users className="h-4 w-4 mr-2 text-[#00BFFF]" />
-                      <span className="text-sm">Assinantes</span>
+                      <Users className="h-5 w-5 mr-2 text-[#00BFFF]" />
+                      <span className="text-sm font-medium text-gray-600">Assinantes</span>
                     </div>
-                    <Badge>0</Badge>
+                    <Badge variant="secondary" className="bg-gray-100 text-gray-600">0</Badge>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <BarChart className="h-4 w-4 mr-2 text-[#00BFFF]" />
-                      <span className="text-sm">Conversão</span>
+                      <BarChart className="h-5 w-5 mr-2 text-[#00BFFF]" />
+                      <span className="text-sm font-medium text-gray-600">Conversão</span>
                     </div>
-                    <Badge variant="outline">0%</Badge>
+                    <Badge variant="outline" className="text-gray-600">0%</Badge>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <Clock className="h-4 w-4 mr-2 text-[#00BFFF]" />
-                      <span className="text-sm">Receita</span>
+                      <Clock className="h-5 w-5 mr-2 text-[#00BFFF]" />
+                      <span className="text-sm font-medium text-gray-600">Receita</span>
                     </div>
-                    <span className="font-medium">R$ 0</span>
+                    <span className="font-semibold text-gray-900">
+                      {new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                      }).format(0)}
+                    </span>
                   </div>
-                  <div className="pt-4 border-t">
-                    <h4 className="text-sm font-medium mb-2">Limites</h4>
-                    <div className="space-y-2 text-sm text-gray-600">
+                  <div className="pt-4 border-t border-gray-100">
+                    <h4 className="text-sm font-semibold text-gray-900 mb-4">Recursos Incluídos</h4>
+                    <div className="space-y-3 text-sm text-gray-600">
                       <div className="flex justify-between">
                         <span>Estampas</span>
-                        <span>{plan.max_stamps}</span>
+                        <span className="font-medium text-gray-900">{plan.max_stamps}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Métricas Detalhadas</span>
-                        <span>{plan.has_detailed_metrics ? "Sim" : "Não"}</span>
+                        <span className="font-medium text-gray-900">{plan.has_detailed_metrics ? "Sim" : "Não"}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Branding Personalizado</span>
-                        <span>{plan.has_custom_branding ? "Sim" : "Não"}</span>
+                        <span className="font-medium text-gray-900">{plan.has_custom_branding ? "Sim" : "Não"}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Suporte Prioritário</span>
-                        <span>{plan.has_priority_support ? "Sim" : "Não"}</span>
+                        <span className="font-medium text-gray-900">{plan.has_priority_support ? "Sim" : "Não"}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Relatórios Avançados</span>
-                        <span>{plan.has_advanced_reports ? "Sim" : "Não"}</span>
+                        <span className="font-medium text-gray-900">{plan.has_advanced_reports ? "Sim" : "Não"}</span>
                       </div>
                     </div>
                   </div>
@@ -111,9 +118,9 @@ const AdminPlans = () => {
           ))}
         </div>
 
-        <Card>
+        <Card className="bg-white border border-gray-100 shadow-sm">
           <CardHeader>
-            <CardTitle>Receita por Plano</CardTitle>
+            <CardTitle className="text-xl font-semibold text-gray-900">Receita por Plano</CardTitle>
           </CardHeader>
           <CardContent>
             <MetricsChart

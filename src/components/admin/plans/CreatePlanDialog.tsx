@@ -72,27 +72,27 @@ export function CreatePlanDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-[#00BFFF] hover:bg-[#00BFFF]/90">
-          <Package className="w-4 h-4 mr-2" />
+        <Button className="bg-[#00BFFF] hover:bg-[#00BFFF]/90 text-white font-medium h-11">
+          <Package className="w-5 h-5 mr-2" />
           Novo Plano
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Criar Novo Plano</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-2xl font-bold">Criar Novo Plano</DialogTitle>
+          <DialogDescription className="text-gray-500">
             Defina os detalhes do novo plano de assinatura.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid gap-4 py-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid gap-6">
             <div className="grid gap-2">
-              <Label htmlFor="name">Nome do Plano</Label>
+              <Label htmlFor="name" className="text-sm font-medium">Nome do Plano</Label>
               <select
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value as "free" | "pro" | "enterprise")}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="h-11 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#00BFFF]"
                 required
               >
                 <option value="free">Grátis</option>
@@ -101,62 +101,68 @@ export function CreatePlanDialog() {
               </select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="price">Preço (R$)</Label>
+              <Label htmlFor="price" className="text-sm font-medium">Preço (R$)</Label>
               <Input
                 id="price"
                 type="number"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 placeholder="99.90"
+                className="h-11"
                 required
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="maxStamps">Limite de Estampas</Label>
+              <Label htmlFor="maxStamps" className="text-sm font-medium">Limite de Estampas</Label>
               <Input
                 id="maxStamps"
                 type="number"
                 value={maxStamps}
                 onChange={(e) => setMaxStamps(e.target.value)}
                 placeholder="50"
+                className="h-11"
                 required
               />
             </div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="detailedMetrics">Métricas Detalhadas</Label>
-              <Switch
-                id="detailedMetrics"
-                checked={hasDetailedMetrics}
-                onCheckedChange={setHasDetailedMetrics}
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="customBranding">Branding Personalizado</Label>
-              <Switch
-                id="customBranding"
-                checked={hasCustomBranding}
-                onCheckedChange={setHasCustomBranding}
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="prioritySupport">Suporte Prioritário</Label>
-              <Switch
-                id="prioritySupport"
-                checked={hasPrioritySupport}
-                onCheckedChange={setHasPrioritySupport}
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="advancedReports">Relatórios Avançados</Label>
-              <Switch
-                id="advancedReports"
-                checked={hasAdvancedReports}
-                onCheckedChange={setHasAdvancedReports}
-              />
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="detailedMetrics" className="text-sm font-medium">Métricas Detalhadas</Label>
+                <Switch
+                  id="detailedMetrics"
+                  checked={hasDetailedMetrics}
+                  onCheckedChange={setHasDetailedMetrics}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="customBranding" className="text-sm font-medium">Branding Personalizado</Label>
+                <Switch
+                  id="customBranding"
+                  checked={hasCustomBranding}
+                  onCheckedChange={setHasCustomBranding}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="prioritySupport" className="text-sm font-medium">Suporte Prioritário</Label>
+                <Switch
+                  id="prioritySupport"
+                  checked={hasPrioritySupport}
+                  onCheckedChange={setHasPrioritySupport}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="advancedReports" className="text-sm font-medium">Relatórios Avançados</Label>
+                <Switch
+                  id="advancedReports"
+                  checked={hasAdvancedReports}
+                  onCheckedChange={setHasAdvancedReports}
+                />
+              </div>
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit">Criar Plano</Button>
+            <Button type="submit" className="w-full bg-[#00BFFF] hover:bg-[#00BFFF]/90 text-white font-medium h-11">
+              Criar Plano
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

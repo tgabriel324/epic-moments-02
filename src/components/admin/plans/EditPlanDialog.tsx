@@ -90,26 +90,30 @@ export function EditPlanDialog({ plan }: EditPlanDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <Edit className="h-4 w-4" />
+        <Button 
+          variant="ghost" 
+          size="icon"
+          className="h-9 w-9 hover:bg-gray-100"
+        >
+          <Edit className="h-5 w-5 text-gray-500" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Editar Plano</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-2xl font-bold">Editar Plano</DialogTitle>
+          <DialogDescription className="text-gray-500">
             Atualize as informações do plano de assinatura.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid gap-4 py-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid gap-6">
             <div className="grid gap-2">
-              <Label htmlFor="name">Nome do Plano</Label>
+              <Label htmlFor="name" className="text-sm font-medium">Nome do Plano</Label>
               <select
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value as "free" | "pro" | "enterprise")}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="h-11 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#00BFFF]"
                 required
               >
                 <option value="free">Grátis</option>
@@ -118,62 +122,68 @@ export function EditPlanDialog({ plan }: EditPlanDialogProps) {
               </select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="price">Preço (R$)</Label>
+              <Label htmlFor="price" className="text-sm font-medium">Preço (R$)</Label>
               <Input
                 id="price"
                 type="number"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 placeholder="99.90"
+                className="h-11"
                 required
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="maxStamps">Limite de Estampas</Label>
+              <Label htmlFor="maxStamps" className="text-sm font-medium">Limite de Estampas</Label>
               <Input
                 id="maxStamps"
                 type="number"
                 value={maxStamps}
                 onChange={(e) => setMaxStamps(e.target.value)}
                 placeholder="50"
+                className="h-11"
                 required
               />
             </div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="detailedMetrics">Métricas Detalhadas</Label>
-              <Switch
-                id="detailedMetrics"
-                checked={hasDetailedMetrics}
-                onCheckedChange={setHasDetailedMetrics}
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="customBranding">Branding Personalizado</Label>
-              <Switch
-                id="customBranding"
-                checked={hasCustomBranding}
-                onCheckedChange={setHasCustomBranding}
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="prioritySupport">Suporte Prioritário</Label>
-              <Switch
-                id="prioritySupport"
-                checked={hasPrioritySupport}
-                onCheckedChange={setHasPrioritySupport}
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="advancedReports">Relatórios Avançados</Label>
-              <Switch
-                id="advancedReports"
-                checked={hasAdvancedReports}
-                onCheckedChange={setHasAdvancedReports}
-              />
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="detailedMetrics" className="text-sm font-medium">Métricas Detalhadas</Label>
+                <Switch
+                  id="detailedMetrics"
+                  checked={hasDetailedMetrics}
+                  onCheckedChange={setHasDetailedMetrics}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="customBranding" className="text-sm font-medium">Branding Personalizado</Label>
+                <Switch
+                  id="customBranding"
+                  checked={hasCustomBranding}
+                  onCheckedChange={setHasCustomBranding}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="prioritySupport" className="text-sm font-medium">Suporte Prioritário</Label>
+                <Switch
+                  id="prioritySupport"
+                  checked={hasPrioritySupport}
+                  onCheckedChange={setHasPrioritySupport}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="advancedReports" className="text-sm font-medium">Relatórios Avançados</Label>
+                <Switch
+                  id="advancedReports"
+                  checked={hasAdvancedReports}
+                  onCheckedChange={setHasAdvancedReports}
+                />
+              </div>
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit">Salvar Alterações</Button>
+            <Button type="submit" className="w-full bg-[#00BFFF] hover:bg-[#00BFFF]/90 text-white font-medium h-11">
+              Salvar Alterações
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
