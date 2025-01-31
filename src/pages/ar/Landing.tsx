@@ -4,6 +4,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowRight, AlertCircle } from "lucide-react";
 
+// Configurações padrão caso não exista nenhuma
+const DEFAULT_SETTINGS = {
+  foreground_color: "#000000",
+  background_color: "#FFFFFF",
+  landing_page_primary_color: "#00BFFF",
+  landing_page_title: "Experiência AR",
+  landing_page_description: "Aponte a câmera para a estampa para ver o conteúdo em realidade aumentada"
+};
+
 export default function Landing() {
   const { stampId } = useParams();
 
@@ -14,17 +23,7 @@ export default function Landing() {
       
       if (!stampId) throw new Error("ID da estampa não fornecido");
 
-      // Buscar configurações do QR code e dados da estampa
-      const { data: settings, error: settingsError } = await supabase
-        .from("qr_code_settings")
-        .select("*")
-        .single();
-
-      if (settingsError) {
-        console.error("Erro ao buscar configurações:", settingsError);
-        throw settingsError;
-      }
-
+      // Primeiro buscar a estampa para obter o business_id
       const { data: stamp, error: stampError } = await supabase
         .from("stamps")
         .select("*, business:profiles(company_name)")
@@ -38,9 +37,25 @@ export default function Landing() {
 
       if (!stamp) throw new Error("Estampa não encontrada");
 
-      console.log("Dados carregados com sucesso:", { settings, stamp });
+      // Agora buscar as configurações específicas do negócio
+      const { data: settings, error: settingsError } = await supabase
+        .from("qr_code_settings")
+        .select("*")
+        .eq("business_id", stamp.business_id)
+        .maybeSingle();
+
+      if (settingsError) {
+        console.error("Erro ao buscar configurações:", settingsError);
+        // Não vamos lançar o erro aqui, usaremos as configurações padrão
+      }
+
+      console.log("Dados carregados com sucesso:", { 
+        settings: settings || DEFAULT_SETTINGS, 
+        stamp 
+      });
+      
       return {
-        settings,
+        settings: settings || DEFAULT_SETTINGS,
         stamp,
       };
     },
@@ -57,7 +72,7 @@ export default function Landing() {
   }
 
   // Estado de erro
-  if (error || !landingData?.settings || !landingData.stamp) {
+  if (error || !landingData?.stamp) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white p-6">
         <div className="max-w-md w-full space-y-6 text-center">
