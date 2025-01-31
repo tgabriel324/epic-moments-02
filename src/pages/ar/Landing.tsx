@@ -2,12 +2,12 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowRight } from "lucide-react";
+import { Loader2, ArrowRight, AlertCircle } from "lucide-react";
 
 export default function Landing() {
   const { stampId } = useParams();
 
-  const { data: landingData, isLoading } = useQuery({
+  const { data: landingData, isLoading, error } = useQuery({
     queryKey: ["landing-page", stampId],
     queryFn: async () => {
       console.log("Buscando dados da landing page para estampa:", stampId);
@@ -15,19 +15,30 @@ export default function Landing() {
       if (!stampId) throw new Error("ID da estampa não fornecido");
 
       // Buscar configurações do QR code e dados da estampa
-      const { data: settings } = await supabase
+      const { data: settings, error: settingsError } = await supabase
         .from("qr_code_settings")
         .select("*")
         .single();
 
-      const { data: stamp } = await supabase
+      if (settingsError) {
+        console.error("Erro ao buscar configurações:", settingsError);
+        throw settingsError;
+      }
+
+      const { data: stamp, error: stampError } = await supabase
         .from("stamps")
         .select("*, business:profiles(company_name)")
         .eq("id", stampId)
         .single();
 
+      if (stampError) {
+        console.error("Erro ao buscar estampa:", stampError);
+        throw stampError;
+      }
+
       if (!stamp) throw new Error("Estampa não encontrada");
 
+      console.log("Dados carregados com sucesso:", { settings, stamp });
       return {
         settings,
         stamp,
@@ -35,18 +46,34 @@ export default function Landing() {
     },
   });
 
+  // Estado de loading
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white gap-4">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="text-lg">Carregando experiência...</p>
       </div>
     );
   }
 
-  if (!landingData?.settings || !landingData.stamp) {
+  // Estado de erro
+  if (error || !landingData?.settings || !landingData.stamp) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-white">
-        <p>Experiência não encontrada</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white p-6">
+        <div className="max-w-md w-full space-y-6 text-center">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto" />
+          <h1 className="text-xl font-bold">Ops! Algo deu errado</h1>
+          <p className="text-gray-400">
+            {error?.message || "Não foi possível carregar a experiência"}
+          </p>
+          <Button
+            onClick={() => window.location.reload()}
+            variant="outline"
+            className="w-full"
+          >
+            Tentar novamente
+          </Button>
+        </div>
       </div>
     );
   }
