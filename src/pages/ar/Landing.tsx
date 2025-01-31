@@ -5,6 +5,14 @@ import { ARCanvas } from "@/components/ar/ARCanvas";
 import { LoadingScreen } from "@/components/ar/LoadingScreen";
 import { ErrorScreen } from "@/components/ar/ErrorScreen";
 import { useARExperience } from "@/hooks/useARExperience";
+import { ARViewSettings } from "@/types/ar";
+
+const defaultSettings: ARViewSettings = {
+  background_color: "#000000",
+  landing_page_primary_color: "#00BFFF",
+  landing_page_title: "Experiência AR",
+  landing_page_description: "Aponte a câmera para a estampa"
+};
 
 export default function Landing() {
   const { stampId } = useParams();
@@ -37,12 +45,7 @@ export default function Landing() {
       }
 
       return {
-        settings: settings || {
-          background_color: "#000000",
-          landing_page_primary_color: "#00BFFF",
-          landing_page_title: "Experiência AR",
-          landing_page_description: "Aponte a câmera para a estampa"
-        },
+        settings: settings || defaultSettings,
         stamp,
       };
     },
@@ -53,14 +56,7 @@ export default function Landing() {
   if (isLoading) {
     return (
       <LoadingScreen
-        settings={
-          stampData?.settings || {
-            background_color: "#000000",
-            landing_page_primary_color: "#00BFFF",
-            landing_page_title: "Experiência AR",
-            landing_page_description: "Aponte a câmera para a estampa"
-          }
-        }
+        settings={stampData?.settings || defaultSettings}
       />
     );
   }
@@ -69,21 +65,14 @@ export default function Landing() {
     return (
       <ErrorScreen
         error={error || "Estampa não encontrada"}
-        settings={
-          stampData?.settings || {
-            background_color: "#000000",
-            landing_page_primary_color: "#00BFFF",
-            landing_page_title: "Experiência AR",
-            landing_page_description: "Aponte a câmera para a estampa"
-          }
-        }
+        settings={stampData?.settings || defaultSettings}
       />
     );
   }
 
   return (
     <ARCanvas
-      settings={stampData.settings}
+      settings={stampData.settings || defaultSettings}
       stampImageUrl={stampData.stamp.optimized_tracking_url || stampData.stamp.image_url}
     />
   );
