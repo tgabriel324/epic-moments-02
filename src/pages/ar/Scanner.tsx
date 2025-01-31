@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Loader2, Camera, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ARCanvas } from "@/components/ar/ARCanvas";
 import { TrackingFeedback } from "@/components/ar/tracking/TrackingFeedback";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -19,12 +18,12 @@ const Scanner = () => {
       try {
         console.log("Iniciando scanner AR...");
         
-        // Configuração específica para iOS Safari
+        // Configurações específicas para garantir melhor compatibilidade
         const constraints = {
           video: {
-            facingMode: 'environment', // Usa a câmera traseira
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
+            facingMode: 'environment',
+            width: { ideal: window.innerWidth },
+            height: { ideal: window.innerHeight }
           }
         };
 
@@ -40,20 +39,22 @@ const Scanner = () => {
             console.log("Metadados do vídeo carregados");
             videoRef.current?.play().catch(e => {
               console.error("Erro ao iniciar playback:", e);
+              toast.error("Erro ao iniciar câmera");
             });
           };
           
           videoRef.current.onplay = () => {
-            console.log("Vídeo iniciou playback");
+            console.log("Vídeo iniciou playback com sucesso");
+            setIsLoading(false);
           };
           
           videoRef.current.onerror = (e) => {
             console.error("Erro no elemento de vídeo:", e);
+            toast.error("Erro ao iniciar câmera");
           };
         }
 
         setHasPermission(true);
-        setIsLoading(false);
         console.log("Scanner AR iniciado com sucesso");
       } catch (error) {
         console.error("Erro ao iniciar scanner:", error);
@@ -65,14 +66,14 @@ const Scanner = () => {
 
     initScanner();
 
-    // Cleanup
+    // Cleanup ao desmontar
     return () => {
       if (videoRef.current?.srcObject) {
         const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
         tracks.forEach(track => track.stop());
       }
     };
-  }, [navigate]);
+  }, []);
 
   const handleBack = () => {
     console.log("Voltando para o dashboard");
@@ -109,36 +110,43 @@ const Scanner = () => {
   }
 
   return (
-    <div className="relative min-h-screen bg-black">
-      {/* Botão Voltar */}
-      <Button
-        variant="ghost"
-        className={`absolute top-safe-2 left-2 z-50 text-white 
-          ${isMobile ? 'p-2' : 'p-4'}`}
-        onClick={handleBack}
-      >
-        <ArrowLeft className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} mr-2`} />
-        <span className={`${isMobile ? 'text-sm' : 'text-base'}`}>Voltar</span>
-      </Button>
+    <div className="relative min-h-screen bg-black overflow-hidden">
+      {/* Container do vídeo - ocupa toda a tela */}
+      <div className="absolute inset-0">
+        <video
+          ref={videoRef}
+          className="w-full h-full object-cover"
+          playsInline
+          autoPlay
+          muted
+          webkit-playsinline="true"
+        />
+      </div>
 
-      {/* Video elemento para preview da câmera */}
-      <video
-        ref={videoRef}
-        className="w-full h-full object-cover"
-        playsInline
-        autoPlay
-        muted
-        webkit-playsinline="true"
-      />
+      {/* Overlay com controles e feedback */}
+      <div className="relative z-10">
+        {/* Botão Voltar */}
+        <Button
+          variant="ghost"
+          className={`absolute top-safe-2 left-2 z-50 text-white 
+            ${isMobile ? 'p-2' : 'p-4'}`}
+          onClick={handleBack}
+        >
+          <ArrowLeft className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'} mr-2`} />
+          <span className={`${isMobile ? 'text-sm' : 'text-base'}`}>Voltar</span>
+        </Button>
 
-      {/* Feedback de Tracking */}
-      <TrackingFeedback 
-        tracking={{
-          isTracking: false,
-          confidence: 0,
-          status: 'searching'
-        }} 
-      />
+        {/* Feedback de Tracking centralizado */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <TrackingFeedback
+            tracking={{
+              isTracking: false,
+              confidence: 0,
+              status: 'searching'
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 };
