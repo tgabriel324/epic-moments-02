@@ -30,24 +30,26 @@ export function UserLayout({ children }: UserLayoutProps) {
 
   if (isMobile) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <header className="border-b p-4 flex items-center justify-between">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="p-0">
-              <UserSidebar />
-            </SheetContent>
-          </Sheet>
-          <h1 className="text-lg font-semibold">Epic Momentos</h1>
-        </header>
-        <main className="flex-1 p-4">
-          {children}
-        </main>
-      </div>
+      <SidebarProvider>
+        <div className="min-h-screen flex flex-col">
+          <header className="border-b p-4 flex items-center justify-between">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="p-0">
+                <UserSidebar />
+              </SheetContent>
+            </Sheet>
+            <h1 className="text-lg font-semibold">Epic Momentos</h1>
+          </header>
+          <main className="flex-1 p-4">
+            {children}
+          </main>
+        </div>
+      </SidebarProvider>
     );
   }
 
