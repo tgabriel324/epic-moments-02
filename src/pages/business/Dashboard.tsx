@@ -18,33 +18,33 @@ const BusinessDashboard = () => {
 
   return (
     <BusinessLayout>
-      <div className="space-y-4">
+      <div className="space-y-6">
         <div>
-          <h2 className="text-h2">Dashboard</h2>
+          <h2 className="text-h2 text-primary">Dashboard</h2>
           <p className="text-sm text-muted-foreground">
             Acompanhe as métricas principais do seu negócio
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <MetricsCard
             title="Total de Estampas"
             value={metrics?.stampCount || 0}
-            icon={<Image className="w-5 h-5" />}
+            icon={<Image className="w-4 h-4" />}
             description="Estampas ativas"
           />
 
           <MetricsCard
             title="Visualizações"
             value={metrics?.totalViews || 0}
-            icon={<Eye className="w-5 h-5" />}
+            icon={<Eye className="w-4 h-4" />}
             description="Total de visualizações"
           />
 
           <MetricsCard
             title="Interações"
             value={metrics?.totalInteractions || 0}
-            icon={<MousePointer className="w-5 h-5" />}
+            icon={<MousePointer className="w-4 h-4" />}
             description="Total de interações"
           />
 
@@ -53,12 +53,12 @@ const BusinessDashboard = () => {
             value={`${metrics?.totalViews ? 
               ((metrics.totalInteractions / metrics.totalViews) * 100).toFixed(1) : 0}%`
             }
-            icon={<Activity className="w-5 h-5" />}
+            icon={<Activity className="w-4 h-4" />}
             description="Interações/Visualizações"
           />
         </div>
 
-        <div className="grid gap-4">
+        <div className="grid gap-6">
           <MetricsChart
             data={metrics?.monthlyData || []}
             title="Visualizações vs. Interações"

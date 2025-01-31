@@ -65,11 +65,11 @@ export function BusinessMenu() {
           <Link
             key={item.href}
             to={item.href}
-            className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 ${
+            className={`flex items-center gap-3 rounded-lg px-3 py-2 text-black transition-all hover:text-gray-900 ${
               isActive ? "bg-gray-100 text-gray-900" : ""
             }`}
           >
-            <Icon className="h-3.5 w-3.5" />
+            <Icon className="h-3 w-3" />
             {item.title}
           </Link>
         );
