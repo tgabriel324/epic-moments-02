@@ -10,6 +10,7 @@ const Scanner = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [hasPermission, setHasPermission] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const isMobile = useIsMobile();
   const streamRef = useRef<MediaStream | null>(null);
@@ -18,6 +19,7 @@ const Scanner = () => {
     const initScanner = async () => {
       try {
         console.log("Iniciando scanner AR...");
+        setError(null);
         
         const constraints = {
           video: {
@@ -35,25 +37,34 @@ const Scanner = () => {
           console.log("Stream obtido, configurando vídeo...");
           videoRef.current.srcObject = stream;
           
-          // Configurar eventos antes de iniciar o playback
-          const playPromise = videoRef.current.play();
-          if (playPromise !== undefined) {
-            playPromise
-              .then(() => {
-                console.log("Vídeo iniciou playback com sucesso");
-                setHasPermission(true);
-                setIsLoading(false);
-              })
-              .catch(error => {
-                console.error("Erro ao iniciar playback:", error);
-                toast.error("Erro ao iniciar câmera");
-                setIsLoading(false);
-              });
+          videoRef.current.onloadedmetadata = () => {
+            console.log("Metadados do vídeo carregados");
+            setHasPermission(true);
+            setIsLoading(false);
+          };
+
+          videoRef.current.onerror = (e) => {
+            console.error("Erro no elemento de vídeo:", e);
+            setError("Erro ao inicializar câmera");
+            setIsLoading(false);
+          };
+          
+          try {
+            await videoRef.current.play();
+            console.log("Vídeo iniciou playback com sucesso");
+          } catch (playError) {
+            console.error("Erro ao iniciar playback:", playError);
+            setError("Erro ao iniciar câmera");
+            setIsLoading(false);
           }
         }
       } catch (error) {
         console.error("Erro ao iniciar scanner:", error);
-        toast.error("Erro ao acessar a câmera");
+        if (error instanceof DOMException && error.name === "NotAllowedError") {
+          setError("Permissão da câmera negada");
+        } else {
+          setError("Erro ao acessar a câmera");
+        }
         setHasPermission(false);
         setIsLoading(false);
       }
@@ -87,12 +98,12 @@ const Scanner = () => {
     );
   }
 
-  if (!hasPermission) {
+  if (error || !hasPermission) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white p-4">
         <Camera className="h-12 w-12 md:h-16 md:w-16 mb-4 text-cyan-500" />
         <h2 className="text-lg md:text-xl font-bold mb-2 text-center">
-          Permissão Necessária
+          {error || "Permissão Necessária"}
         </h2>
         <p className="text-sm md:text-base text-center mb-4 max-w-xs md:max-w-sm">
           Para usar o scanner AR, precisamos de acesso à sua câmera.
