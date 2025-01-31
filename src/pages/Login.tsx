@@ -62,19 +62,6 @@ const Login = () => {
             navigate("/user/dashboard");
         }
       } else {
-        // Verificar se o usuário já existe antes de tentar registrar
-        const { data: existingUser } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('id', values.email)
-          .single();
-
-        if (existingUser) {
-          toast.error("Este email já está cadastrado. Faça login.");
-          setIsLogin(true);
-          return;
-        }
-
         const { error } = await supabase.auth.signUp({
           email: values.email,
           password: values.password,
