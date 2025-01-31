@@ -18,12 +18,10 @@ const BusinessDashboard = () => {
 
   return (
     <BusinessLayout>
-      <div className="space-y-6">
+      <div className="space-y-4">
         <div>
-          <h1 className="text-h1 bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-            Dashboard
-          </h1>
-          <p className="text-muted-foreground mt-1">
+          <h2 className="text-h2">Dashboard</h2>
+          <p className="text-sm text-muted-foreground">
             Acompanhe as métricas principais do seu negócio
           </p>
         </div>
@@ -60,7 +58,7 @@ const BusinessDashboard = () => {
           />
         </div>
 
-        <div className="grid gap-4 grid-cols-1">
+        <div className="grid gap-4">
           <MetricsChart
             data={metrics?.monthlyData || []}
             title="Visualizações vs. Interações"
