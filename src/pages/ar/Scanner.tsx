@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Loader2, Camera, ArrowLeft } from "lucide-react";
@@ -10,6 +10,7 @@ const Scanner = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [hasPermission, setHasPermission] = useState(false);
+  const [isCameraReady, setIsCameraReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const isMobile = useIsMobile();
 
@@ -17,8 +18,8 @@ const Scanner = () => {
     const initScanner = async () => {
       try {
         console.log("Iniciando scanner AR...");
+        setIsLoading(true);
         
-        // Configurações específicas para garantir melhor compatibilidade
         const constraints = {
           video: {
             facingMode: 'environment',
@@ -34,23 +35,25 @@ const Scanner = () => {
           console.log("Stream obtido, configurando vídeo...");
           videoRef.current.srcObject = stream;
           
-          // Eventos específicos para debug
           videoRef.current.onloadedmetadata = () => {
             console.log("Metadados do vídeo carregados");
             videoRef.current?.play().catch(e => {
               console.error("Erro ao iniciar playback:", e);
               toast.error("Erro ao iniciar câmera");
+              setIsLoading(false);
             });
           };
           
           videoRef.current.onplay = () => {
             console.log("Vídeo iniciou playback com sucesso");
+            setIsCameraReady(true);
             setIsLoading(false);
           };
           
           videoRef.current.onerror = (e) => {
             console.error("Erro no elemento de vídeo:", e);
             toast.error("Erro ao iniciar câmera");
+            setIsLoading(false);
           };
         }
 
@@ -66,7 +69,6 @@ const Scanner = () => {
 
     initScanner();
 
-    // Cleanup ao desmontar
     return () => {
       if (videoRef.current?.srcObject) {
         const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
@@ -82,8 +84,11 @@ const Scanner = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-black">
-        <Loader2 className="h-6 w-6 md:h-8 md:w-8 animate-spin text-[#00BFFF]" />
+      <div className="flex min-h-screen items-center justify-center bg-black">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-cyan-500 mx-auto" />
+          <p className="text-white text-sm">Iniciando câmera...</p>
+        </div>
       </div>
     );
   }
@@ -91,7 +96,7 @@ const Scanner = () => {
   if (!hasPermission) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white p-4">
-        <Camera className="h-12 w-12 md:h-16 md:w-16 mb-4 text-[#00BFFF]" />
+        <Camera className="h-12 w-12 md:h-16 md:w-16 mb-4 text-cyan-500" />
         <h2 className="text-lg md:text-xl font-bold mb-2 text-center">
           Permissão Necessária
         </h2>
