@@ -10,7 +10,8 @@ const DEFAULT_SETTINGS = {
   background_color: "#FFFFFF",
   landing_page_primary_color: "#00BFFF",
   landing_page_title: "Experiência AR",
-  landing_page_description: "Aponte a câmera para a estampa para ver o conteúdo em realidade aumentada"
+  landing_page_description: "Aponte a câmera para a estampa para ver o conteúdo em realidade aumentada",
+  landing_page_logo_url: null // Adicionado para evitar erro de TypeScript
 };
 
 export default function Landing() {
@@ -27,7 +28,7 @@ export default function Landing() {
       const { data: stamp, error: stampError } = await supabase
         .from("stamps")
         .select("*, business:profiles(company_name)")
-        .eq("id", stampId)
+        .eq("id", stampId) // Usando stampId diretamente aqui
         .single();
 
       if (stampError) {
