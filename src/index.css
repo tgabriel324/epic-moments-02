@@ -75,4 +75,22 @@
     @apply bg-background text-foreground;
     font-family: 'Poppins', sans-serif;
   }
+
+  /* Estilização personalizada da scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #E5E7EB;
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #D1D5DB;
+  }
 }

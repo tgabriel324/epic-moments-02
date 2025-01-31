@@ -56,7 +56,7 @@ export function BusinessMenu() {
   const location = useLocation();
 
   return (
-    <nav className="space-y-2 px-2">
+    <nav className="space-y-2 px-2 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 hover:scrollbar-thumb-gray-300 scrollbar-track-transparent">
       {menuItems.map((item) => {
         const Icon = item.icon;
         const isActive = location.pathname === item.href;
@@ -69,7 +69,7 @@ export function BusinessMenu() {
               isActive ? "bg-gray-100 text-gray-900" : ""
             }`}
           >
-            <Icon className="h-4 w-4" />
+            <Icon className="h-3.5 w-3.5" />
             {item.title}
           </Link>
         );
