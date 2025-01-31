@@ -10,15 +10,14 @@ const Scanner = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [hasPermission, setHasPermission] = useState(false);
-  const [isCameraReady, setIsCameraReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const isMobile = useIsMobile();
+  const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     const initScanner = async () => {
       try {
         console.log("Iniciando scanner AR...");
-        setIsLoading(true);
         
         const constraints = {
           video: {
@@ -30,35 +29,28 @@ const Scanner = () => {
 
         console.log("Solicitando permissão da câmera com constraints:", constraints);
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        streamRef.current = stream;
         
         if (videoRef.current) {
           console.log("Stream obtido, configurando vídeo...");
           videoRef.current.srcObject = stream;
           
-          videoRef.current.onloadedmetadata = () => {
-            console.log("Metadados do vídeo carregados");
-            videoRef.current?.play().catch(e => {
-              console.error("Erro ao iniciar playback:", e);
-              toast.error("Erro ao iniciar câmera");
-              setIsLoading(false);
-            });
-          };
-          
-          videoRef.current.onplay = () => {
-            console.log("Vídeo iniciou playback com sucesso");
-            setIsCameraReady(true);
-            setIsLoading(false);
-          };
-          
-          videoRef.current.onerror = (e) => {
-            console.error("Erro no elemento de vídeo:", e);
-            toast.error("Erro ao iniciar câmera");
-            setIsLoading(false);
-          };
+          // Configurar eventos antes de iniciar o playback
+          const playPromise = videoRef.current.play();
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => {
+                console.log("Vídeo iniciou playback com sucesso");
+                setHasPermission(true);
+                setIsLoading(false);
+              })
+              .catch(error => {
+                console.error("Erro ao iniciar playback:", error);
+                toast.error("Erro ao iniciar câmera");
+                setIsLoading(false);
+              });
+          }
         }
-
-        setHasPermission(true);
-        console.log("Scanner AR iniciado com sucesso");
       } catch (error) {
         console.error("Erro ao iniciar scanner:", error);
         toast.error("Erro ao acessar a câmera");
@@ -70,9 +62,11 @@ const Scanner = () => {
     initScanner();
 
     return () => {
-      if (videoRef.current?.srcObject) {
-        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-        tracks.forEach(track => track.stop());
+      console.log("Limpando recursos da câmera...");
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => {
+          track.stop();
+        });
       }
     };
   }, []);
