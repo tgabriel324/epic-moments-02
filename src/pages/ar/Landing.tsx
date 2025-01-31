@@ -1,8 +1,9 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowRight, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
 
 // Configurações padrão caso não exista nenhuma
 const DEFAULT_SETTINGS = {
@@ -11,24 +12,31 @@ const DEFAULT_SETTINGS = {
   landing_page_primary_color: "#00BFFF",
   landing_page_title: "Experiência AR",
   landing_page_description: "Aponte a câmera para a estampa para ver o conteúdo em realidade aumentada",
-  landing_page_logo_url: null // Adicionado para evitar erro de TypeScript
+  landing_page_logo_url: null
 };
 
 export default function Landing() {
   const { stampId } = useParams();
+  const navigate = useNavigate();
 
   const { data: landingData, isLoading, error } = useQuery({
     queryKey: ["landing-page", stampId],
     queryFn: async () => {
       console.log("Buscando dados da landing page para estampa:", stampId);
       
-      if (!stampId) throw new Error("ID da estampa não fornecido");
+      if (!stampId) {
+        console.error("ID da estampa não fornecido");
+        throw new Error("ID da estampa não fornecido");
+      }
 
       // Primeiro buscar a estampa para obter o business_id
       const { data: stamp, error: stampError } = await supabase
         .from("stamps")
-        .select("*, business:profiles(company_name)")
-        .eq("id", stampId) // Usando stampId diretamente aqui
+        .select(`
+          *,
+          business:profiles(company_name)
+        `)
+        .eq("id", stampId)
         .single();
 
       if (stampError) {
@@ -36,7 +44,10 @@ export default function Landing() {
         throw stampError;
       }
 
-      if (!stamp) throw new Error("Estampa não encontrada");
+      if (!stamp) {
+        console.error("Estampa não encontrada");
+        throw new Error("Estampa não encontrada");
+      }
 
       // Agora buscar as configurações específicas do negócio
       const { data: settings, error: settingsError } = await supabase
@@ -45,42 +56,48 @@ export default function Landing() {
         .eq("business_id", stamp.business_id)
         .maybeSingle();
 
-      if (settingsError) {
+      if (settingsError && settingsError.code !== "PGRST116") {
         console.error("Erro ao buscar configurações:", settingsError);
         // Não vamos lançar o erro aqui, usaremos as configurações padrão
       }
 
-      console.log("Dados carregados com sucesso:", { 
-        settings: settings || DEFAULT_SETTINGS, 
-        stamp 
-      });
-      
       return {
         settings: settings || DEFAULT_SETTINGS,
         stamp,
       };
     },
+    retry: false
   });
 
   // Estado de loading
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white gap-4">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p className="text-lg">Carregando experiência...</p>
+      <div 
+        className="min-h-screen flex flex-col items-center justify-center p-6"
+        style={{ 
+          background: `radial-gradient(circle at center, ${DEFAULT_SETTINGS.landing_page_primary_color}10 0%, black 100%)` 
+        }}
+      >
+        <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
+        <p className="text-white text-lg">Carregando experiência...</p>
       </div>
     );
   }
 
   // Estado de erro
   if (error || !landingData?.stamp) {
+    const errorMessage = "Estampa não encontrada ou ID inválido";
+    toast.error(errorMessage);
+    
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white p-6">
+      <div 
+        className="min-h-screen flex flex-col items-center justify-center p-6 bg-black text-white"
+      >
         <div className="max-w-md w-full space-y-6 text-center">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto" />
           <h1 className="text-xl font-bold">Ops! Algo deu errado</h1>
           <p className="text-gray-400">
-            {error?.message || "Não foi possível carregar a experiência"}
+            {error?.message || errorMessage}
           </p>
           <Button
             onClick={() => window.location.reload()}
@@ -124,7 +141,7 @@ export default function Landing() {
 
       <Button
         className="text-lg px-8 py-6 rounded-full bg-white text-black hover:bg-white/90 transition-all"
-        onClick={() => window.location.href = `/ar/view/${stampId}`}
+        onClick={() => navigate(`/ar/view/${stampId}`)}
       >
         Iniciar Experiência
         <ArrowRight className="ml-2 w-5 h-5" />
