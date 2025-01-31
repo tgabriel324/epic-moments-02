@@ -21,6 +21,11 @@ const Scanner = () => {
         console.log("Iniciando scanner AR...");
         setError(null);
         
+        // Tenta obter acesso à câmera com timeout de 10 segundos
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error("Timeout ao acessar câmera")), 10000);
+        });
+
         const constraints = {
           video: {
             facingMode: 'environment',
@@ -30,43 +35,53 @@ const Scanner = () => {
         };
 
         console.log("Solicitando permissão da câmera com constraints:", constraints);
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        
+        // Race entre o timeout e a solicitação da câmera
+        const stream = await Promise.race([
+          navigator.mediaDevices.getUserMedia(constraints),
+          timeoutPromise
+        ]) as MediaStream;
+
         streamRef.current = stream;
         
         if (videoRef.current) {
           console.log("Stream obtido, configurando vídeo...");
           videoRef.current.srcObject = stream;
           
-          videoRef.current.onloadedmetadata = () => {
-            console.log("Metadados do vídeo carregados");
-            setHasPermission(true);
-            setIsLoading(false);
-          };
+          // Aguarda o carregamento dos metadados do vídeo
+          await new Promise((resolve) => {
+            if (!videoRef.current) return;
+            videoRef.current.onloadedmetadata = resolve;
+          });
 
-          videoRef.current.onerror = (e) => {
-            console.error("Erro no elemento de vídeo:", e);
-            setError("Erro ao inicializar câmera");
-            setIsLoading(false);
-          };
+          console.log("Metadados do vídeo carregados");
           
           try {
             await videoRef.current.play();
             console.log("Vídeo iniciou playback com sucesso");
+            setHasPermission(true);
+            setIsLoading(false);
           } catch (playError) {
             console.error("Erro ao iniciar playback:", playError);
-            setError("Erro ao iniciar câmera");
-            setIsLoading(false);
+            throw new Error("Não foi possível iniciar a câmera");
           }
         }
       } catch (error) {
         console.error("Erro ao iniciar scanner:", error);
-        if (error instanceof DOMException && error.name === "NotAllowedError") {
-          setError("Permissão da câmera negada");
-        } else {
-          setError("Erro ao acessar a câmera");
+        
+        let errorMessage = "Erro ao acessar a câmera";
+        if (error instanceof Error) {
+          if (error.name === "NotAllowedError") {
+            errorMessage = "Permissão da câmera negada";
+          } else if (error.message === "Timeout ao acessar câmera") {
+            errorMessage = "Tempo excedido ao tentar acessar a câmera";
+          }
         }
+        
+        setError(errorMessage);
         setHasPermission(false);
         setIsLoading(false);
+        toast.error(errorMessage);
       }
     };
 
