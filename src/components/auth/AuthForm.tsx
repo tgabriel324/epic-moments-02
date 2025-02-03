@@ -7,9 +7,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
 const formSchema = z.object({
-  email: z.string().email("Email inválido"),
-  password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
-  confirmPassword: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
+  email: z.string()
+    .min(1, "Email é obrigatório")
+    .email("Email inválido")
+    .transform(val => val.toLowerCase().trim()),
+  password: z.string()
+    .min(6, "A senha deve ter no mínimo 6 caracteres")
+    .regex(/[A-Z]/, "A senha deve conter pelo menos uma letra maiúscula")
+    .regex(/[0-9]/, "A senha deve conter pelo menos um número")
+    .regex(/[^A-Za-z0-9]/, "A senha deve conter pelo menos um caractere especial"),
+  confirmPassword: z.string()
+    .min(6, "A senha deve ter no mínimo 6 caracteres"),
   userType: z.enum(["admin", "business_owner", "end_user"]).optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "As senhas não coincidem",
@@ -54,6 +62,7 @@ export const AuthForm = ({ isLogin, isLoading, onSubmit }: AuthFormProps) => {
                   {...field}
                   onKeyPress={handleKeyPress}
                   className="bg-white border-[#C4C4C4] focus:border-[#00BFFF] focus:ring-[#00BFFF] text-[#000000]" 
+                  autoComplete="email"
                 />
               </FormControl>
               <FormMessage className="text-red-500" />
@@ -74,6 +83,7 @@ export const AuthForm = ({ isLogin, isLoading, onSubmit }: AuthFormProps) => {
                   {...field}
                   onKeyPress={handleKeyPress}
                   className="bg-white border-[#C4C4C4] focus:border-[#00BFFF] focus:ring-[#00BFFF] text-[#000000]" 
+                  autoComplete={isLogin ? "current-password" : "new-password"}
                 />
               </FormControl>
               <FormMessage className="text-red-500" />
@@ -96,6 +106,7 @@ export const AuthForm = ({ isLogin, isLoading, onSubmit }: AuthFormProps) => {
                       {...field}
                       onKeyPress={handleKeyPress}
                       className="bg-white border-[#C4C4C4] focus:border-[#00BFFF] focus:ring-[#00BFFF] text-[#000000]" 
+                      autoComplete="new-password"
                     />
                   </FormControl>
                   <FormMessage className="text-red-500" />

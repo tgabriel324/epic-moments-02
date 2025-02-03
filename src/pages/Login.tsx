@@ -12,10 +12,10 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleSubmit = async (values: any) => {
-    setIsLoading(true);
-    console.log("Iniciando processo de autenticação:", isLogin ? "login" : "registro", values);
-
     try {
+      setIsLoading(true);
+      console.log("Iniciando processo de autenticação:", isLogin ? "login" : "registro", values);
+
       if (isLogin) {
         console.log("Tentando fazer login com email:", values.email);
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -25,19 +25,21 @@ const Login = () => {
 
         if (error) {
           console.error("Erro detalhado ao fazer login:", error);
-          if (error.message === "Email not confirmed") {
-            toast.error("Por favor, confirme seu email antes de fazer login");
-          } else if (error.message === "Invalid login credentials") {
-            toast.error("Email ou senha incorretos");
-          } else {
-            toast.error(`Erro ao fazer login: ${error.message}`);
+          switch (error.message) {
+            case "Email not confirmed":
+              toast.error("Por favor, confirme seu email antes de fazer login");
+              break;
+            case "Invalid login credentials":
+              toast.error("Email ou senha incorretos");
+              break;
+            default:
+              toast.error(`Erro ao fazer login: ${error.message}`);
           }
           return;
         }
 
         console.log("Login bem-sucedido:", data);
-
-        // Buscar o perfil do usuário para verificar o tipo
+        
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('user_type')
@@ -52,7 +54,6 @@ const Login = () => {
 
         toast.success("Login realizado com sucesso!");
         
-        // Redirecionar baseado no tipo de usuário
         switch (profile?.user_type) {
           case 'admin':
             navigate("/admin/dashboard");
@@ -60,16 +61,12 @@ const Login = () => {
           case 'business_owner':
             navigate("/business/dashboard");
             break;
-          case 'end_user':
-            navigate("/user/dashboard");
-            break;
           default:
             navigate("/user/dashboard");
         }
       } else {
         console.log("Tentando registrar novo usuário com email:", values.email);
         
-        // Verificar se o usuário já existe
         const { data: existingUser } = await supabase
           .from('profiles')
           .select('id')
@@ -94,17 +91,22 @@ const Login = () => {
 
         if (error) {
           console.error("Erro detalhado ao criar conta:", error);
-          if (error.message === "User already registered") {
-            toast.error("Este email já está cadastrado. Faça login.");
-            setIsLogin(true);
-          } else {
-            toast.error(`Erro ao criar conta: ${error.message}`);
+          switch (error.message) {
+            case "User already registered":
+              toast.error("Este email já está cadastrado. Faça login.");
+              setIsLogin(true);
+              break;
+            case "Password should be at least 6 characters":
+              toast.error("A senha deve ter no mínimo 6 caracteres");
+              break;
+            default:
+              toast.error(`Erro ao criar conta: ${error.message}`);
           }
           return;
         }
 
         console.log("Registro bem-sucedido:", data);
-        toast.success("Conta criada com sucesso! Verifique seu email.");
+        toast.success("Conta criada com sucesso! Verifique seu email para confirmação.");
       }
     } catch (error) {
       console.error("Erro inesperado:", error);
