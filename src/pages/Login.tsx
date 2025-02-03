@@ -13,30 +13,35 @@ const Login = () => {
 
   const handleSubmit = async (values: any) => {
     setIsLoading(true);
-    console.log("Iniciando processo de autenticação:", isLogin ? "login" : "registro");
+    console.log("Iniciando processo de autenticação:", isLogin ? "login" : "registro", values);
 
     try {
       if (isLogin) {
-        const { data: { user }, error } = await supabase.auth.signInWithPassword({
+        console.log("Tentando fazer login com email:", values.email);
+        const { data, error } = await supabase.auth.signInWithPassword({
           email: values.email,
           password: values.password,
         });
 
         if (error) {
-          console.error("Erro ao fazer login:", error);
-          if (error.message === "Invalid login credentials") {
+          console.error("Erro detalhado ao fazer login:", error);
+          if (error.message === "Email not confirmed") {
+            toast.error("Por favor, confirme seu email antes de fazer login");
+          } else if (error.message === "Invalid login credentials") {
             toast.error("Email ou senha incorretos");
           } else {
-            toast.error("Erro ao fazer login. Tente novamente.");
+            toast.error(`Erro ao fazer login: ${error.message}`);
           }
           return;
         }
+
+        console.log("Login bem-sucedido:", data);
 
         // Buscar o perfil do usuário para verificar o tipo
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('user_type')
-          .eq('id', user?.id)
+          .eq('id', data.user?.id)
           .single();
 
         if (profileError) {
@@ -62,7 +67,9 @@ const Login = () => {
             navigate("/user/dashboard");
         }
       } else {
-        // Verificar se o usuário já existe antes de tentar registrar
+        console.log("Tentando registrar novo usuário com email:", values.email);
+        
+        // Verificar se o usuário já existe
         const { data: existingUser } = await supabase
           .from('profiles')
           .select('id')
@@ -75,7 +82,7 @@ const Login = () => {
           return;
         }
 
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email: values.email,
           password: values.password,
           options: {
@@ -86,16 +93,17 @@ const Login = () => {
         });
 
         if (error) {
-          console.error("Erro ao criar conta:", error);
+          console.error("Erro detalhado ao criar conta:", error);
           if (error.message === "User already registered") {
             toast.error("Este email já está cadastrado. Faça login.");
             setIsLogin(true);
           } else {
-            toast.error("Erro ao criar conta. Tente novamente.");
+            toast.error(`Erro ao criar conta: ${error.message}`);
           }
           return;
         }
 
+        console.log("Registro bem-sucedido:", data);
         toast.success("Conta criada com sucesso! Verifique seu email.");
       }
     } catch (error) {
