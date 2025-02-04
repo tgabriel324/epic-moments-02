@@ -13,9 +13,9 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-r from-[#000000] to-[#00BFFF] text-white">
+      <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-[#000000] via-[#001F33] to-[#00BFFF] text-white">
         <div className="container mx-auto px-4 py-16">
-          <div className="flex flex-col items-center text-center space-y-8 animate-fade-in">
+          <div className="flex flex-col items-center text-center space-y-8">
             <Logo className="w-32 h-32 mb-4 transition-transform duration-300 hover:scale-110" />
             <h1 className="text-4xl md:text-6xl font-bold max-w-4xl">
               Transforme suas Estampas em{" "}
@@ -37,38 +37,38 @@ const Index = () => {
               <Button 
                 size="lg"
                 variant="outline" 
-                className="border-white text-white hover:bg-white/10"
+                className="border-white text-white hover:bg-white/10 backdrop-blur-sm"
               >
                 Ver Demonstração
               </Button>
             </div>
           </div>
         </div>
-        <ArrowDown className="absolute bottom-8 animate-bounce w-8 h-8" />
+        <ArrowDown className="absolute bottom-8 animate-bounce w-8 h-8 opacity-50 hover:opacity-100 transition-opacity" />
       </section>
 
       {/* Social Proof */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Marcas que Confiam</h2>
-            <div className="flex flex-wrap justify-center gap-8 opacity-50">
-              {/* Placeholder para logos */}
-              <div className="w-32 h-12 bg-gray-200 rounded"></div>
-              <div className="w-32 h-12 bg-gray-200 rounded"></div>
-              <div className="w-32 h-12 bg-gray-200 rounded"></div>
+            <h2 className="text-3xl font-bold mb-8">Marcas que Confiam</h2>
+            <div className="flex flex-wrap justify-center gap-8">
+              {/* Placeholders com melhor contraste */}
+              <div className="w-32 h-12 bg-gray-300 rounded-lg shadow-sm"></div>
+              <div className="w-32 h-12 bg-gray-300 rounded-lg shadow-sm"></div>
+              <div className="w-32 h-12 bg-gray-300 rounded-lg shadow-sm"></div>
             </div>
           </div>
-          <div className="grid md:grid-cols-3 gap-8 text-center">
-            <div className="p-6">
+          <div className="grid md:grid-cols-3 gap-8 text-center mt-16">
+            <div className="p-6 bg-white rounded-lg shadow-sm">
               <div className="text-[#00BFFF] text-4xl font-bold mb-2">1000+</div>
               <p className="text-gray-600">Estampas Ativadas</p>
             </div>
-            <div className="p-6">
+            <div className="p-6 bg-white rounded-lg shadow-sm">
               <div className="text-[#00BFFF] text-4xl font-bold mb-2">98%</div>
               <p className="text-gray-600">Satisfação dos Clientes</p>
             </div>
-            <div className="p-6">
+            <div className="p-6 bg-white rounded-lg shadow-sm">
               <div className="text-[#00BFFF] text-4xl font-bold mb-2">50K+</div>
               <p className="text-gray-600">Interações Mensais</p>
             </div>
