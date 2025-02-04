@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Wand2, QrCode, Video, Image as ImageIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ARCanvas } from "@/components/ar/ARCanvas";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 export default function AR() {
   const [showPreview, setShowPreview] = useState(false);
@@ -18,6 +18,9 @@ export default function AR() {
     landing_page_description: "Esta é uma visualização de como sua experiência em AR aparecerá para os clientes",
     landing_page_logo_url: null
   };
+
+  // URL de exemplo para o preview
+  const previewStampUrl = "/placeholder.svg";
 
   return (
     <BusinessLayout>
@@ -101,7 +104,11 @@ export default function AR() {
 
       <Dialog open={showPreview} onOpenChange={setShowPreview}>
         <DialogContent className="max-w-[100vw] h-[100vh] p-0 border-none bg-black">
-          <ARCanvas settings={previewSettings} />
+          <DialogTitle className="sr-only">Preview AR</DialogTitle>
+          <ARCanvas 
+            settings={previewSettings} 
+            stampImageUrl={previewStampUrl}
+          />
         </DialogContent>
       </Dialog>
     </BusinessLayout>
