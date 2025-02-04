@@ -37,7 +37,7 @@ const Index = () => {
               <Button 
                 size="lg"
                 variant="outline" 
-                className="border-white text-white hover:bg-white/10 backdrop-blur-sm"
+                className="border-2 border-white bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm"
               >
                 Ver Demonstração
               </Button>
@@ -53,10 +53,14 @@ const Index = () => {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-8">Marcas que Confiam</h2>
             <div className="flex flex-wrap justify-center gap-8">
-              {/* Placeholders com melhor contraste */}
-              <div className="w-32 h-12 bg-gray-300 rounded-lg shadow-sm"></div>
-              <div className="w-32 h-12 bg-gray-300 rounded-lg shadow-sm"></div>
-              <div className="w-32 h-12 bg-gray-300 rounded-lg shadow-sm"></div>
+              {[1, 2, 3].map((i) => (
+                <div 
+                  key={i} 
+                  className="w-32 h-12 bg-white shadow-md rounded-lg flex items-center justify-center border border-gray-200"
+                >
+                  <div className="w-24 h-8 bg-gray-400/20"></div>
+                </div>
+              ))}
             </div>
           </div>
           <div className="grid md:grid-cols-3 gap-8 text-center mt-16">
