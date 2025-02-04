@@ -11,7 +11,7 @@ import QRCodes from "@/pages/business/QRCodes";
 import Plans from "@/pages/business/Plans";
 import View from "@/pages/ar/View";
 import Landing from "@/pages/ar/Landing";
-import Scanner from "@/pages/ar/Scanner"; // Nova importação
+import Scanner from "@/pages/ar/Scanner";
 import AR from "@/pages/business/AR";
 import Metrics from "@/pages/business/Metrics";
 import UserDashboard from "@/pages/user/Dashboard";
@@ -19,6 +19,7 @@ import History from "@/pages/user/History";
 import Profile from "@/pages/user/Profile";
 import Collection from "@/pages/user/Collection";
 import Help from "@/pages/user/Help";
+import DevDashboard from "@/pages/dev/Dashboard";
 
 // Admin Pages
 import AdminDashboard from "@/pages/admin/Dashboard";
@@ -48,6 +49,9 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             
+            {/* Dev Route */}
+            <Route path="/dev" element={<DevDashboard />} />
+            
             {/* Business Routes */}
             <Route path="/business/dashboard" element={<Dashboard />} />
             <Route path="/business/media" element={<Media />} />
@@ -75,7 +79,7 @@ function App() {
             {/* AR Routes */}
             <Route path="/ar/landing/:stampId" element={<Landing />} />
             <Route path="/ar/view/:stampId" element={<View />} />
-            <Route path="/ar/scanner" element={<Scanner />} /> {/* Nova rota */}
+            <Route path="/ar/scanner" element={<Scanner />} />
           </Routes>
         </Router>
       </div>
