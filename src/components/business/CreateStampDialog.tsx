@@ -31,7 +31,6 @@ export function CreateStampDialog() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Validar tipo
       if (!file.type.startsWith('image/')) {
         toast({
           title: "Arquivo inválido",
@@ -40,7 +39,6 @@ export function CreateStampDialog() {
         });
         return;
       }
-      // Validar tamanho (5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast({
           title: "Arquivo muito grande",
@@ -49,12 +47,22 @@ export function CreateStampDialog() {
         });
         return;
       }
+      console.log("Imagem selecionada:", file.name);
       setImage(file);
     }
   };
 
+  const resetForm = () => {
+    setName("");
+    setDescription("");
+    setImage(null);
+    setIsLoading(false);
+    setIsOpen(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Iniciando submissão do formulário");
     
     if (!name.trim()) {
       toast({
@@ -97,12 +105,14 @@ export function CreateStampDialog() {
         throw uploadError;
       }
 
+      console.log("Upload concluído:", uploadData);
+
       // Obter URL pública da imagem
       const { data: { publicUrl } } = supabase.storage
         .from('stamps')
         .getPublicUrl(uploadData.path);
 
-      console.log("Imagem enviada:", publicUrl);
+      console.log("URL pública gerada:", publicUrl);
 
       // Salvar registro no banco
       const { error: insertError } = await supabase
@@ -130,10 +140,7 @@ export function CreateStampDialog() {
         description: "Sua estampa foi criada com sucesso!",
       });
 
-      setIsOpen(false);
-      setName("");
-      setDescription("");
-      setImage(null);
+      resetForm();
     } catch (error) {
       console.error("Erro ao criar estampa:", error);
       toast({
