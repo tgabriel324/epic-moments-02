@@ -55,6 +55,16 @@ export function CreateStampDialog() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!name.trim()) {
+      toast({
+        title: "Nome obrigatório",
+        description: "Por favor, insira um nome para a estampa",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!image) {
       toast({
         title: "Imagem obrigatória",
@@ -82,7 +92,10 @@ export function CreateStampDialog() {
         .from('stamps')
         .upload(`${user.id}/${Date.now()}-${image.name}`, image);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error("Erro no upload:", uploadError);
+        throw uploadError;
+      }
 
       // Obter URL pública da imagem
       const { data: { publicUrl } } = supabase.storage
@@ -102,7 +115,10 @@ export function CreateStampDialog() {
           status: 'active'
         });
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error("Erro ao inserir no banco:", insertError);
+        throw insertError;
+      }
 
       console.log("Estampa criada com sucesso");
 
