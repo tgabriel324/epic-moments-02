@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { AuthForm } from "@/components/auth/AuthForm";
 import { AuthToggle } from "@/components/auth/AuthToggle";
@@ -67,17 +68,7 @@ const Login = () => {
       } else {
         console.log("Tentando registrar novo usuário com email:", values.email);
         
-        const { data: existingUser } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('id', values.email)
-          .single();
-
-        if (existingUser) {
-          toast.error("Este email já está cadastrado. Faça login.");
-          setIsLogin(true);
-          return;
-        }
+        // Removida a verificação incorreta que usava o email como UUID
 
         const { data, error } = await supabase.auth.signUp({
           email: values.email,
