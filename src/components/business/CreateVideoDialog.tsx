@@ -51,6 +51,8 @@ export function CreateVideoDialog() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Iniciando handleSubmit");
+
     if (!video) {
       toast({
         title: "Vídeo obrigatório",
@@ -80,26 +82,29 @@ export function CreateVideoDialog() {
 
       console.log("Iniciando upload do vídeo:", { name, description, videoName: video.name, userId: user.id });
       
-      // Preparar FormData para envio
-      const formData = new FormData();
-      formData.append('file', video);
-
       // Upload direto para o bucket 'videos'
       const fileExt = video.name.split('.').pop();
       const filePath = `${user.id}/${Date.now()}-${crypto.randomUUID()}.${fileExt}`;
       
+      console.log("Tentando fazer upload para o caminho:", filePath);
+
       const { error: uploadError } = await supabase.storage
         .from('videos')
         .upload(filePath, video);
 
       if (uploadError) {
+        console.error("Erro no upload:", uploadError);
         throw uploadError;
       }
+
+      console.log("Upload concluído, obtendo URL pública");
 
       // Obter URL pública do vídeo
       const { data: { publicUrl } } = supabase.storage
         .from('videos')
         .getPublicUrl(filePath);
+
+      console.log("URL pública obtida:", publicUrl);
 
       // Salvar registro na tabela de vídeos
       const { error: insertError } = await supabase
@@ -113,8 +118,11 @@ export function CreateVideoDialog() {
         });
 
       if (insertError) {
+        console.error("Erro ao inserir no banco:", insertError);
         throw insertError;
       }
+
+      console.log("Registro salvo com sucesso");
 
       toast({
         title: "Sucesso",
@@ -146,13 +154,13 @@ export function CreateVideoDialog() {
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Adicionar Novo Vídeo</DialogTitle>
+          <DialogDescription>
+            Faça upload de um vídeo para conectar com suas estampas em AR
+          </DialogDescription>
+        </DialogHeader>
         <form onSubmit={handleSubmit}>
-          <DialogHeader>
-            <DialogTitle>Adicionar Novo Vídeo</DialogTitle>
-            <DialogDescription>
-              Faça upload de um vídeo para conectar com suas estampas em AR
-            </DialogDescription>
-          </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Input
@@ -187,7 +195,7 @@ export function CreateVideoDialog() {
             </div>
           </div>
           <DialogFooter>
-            <Button
+            <Button 
               type="submit"
               disabled={isLoading}
               className="bg-primary hover:bg-primary/90"
