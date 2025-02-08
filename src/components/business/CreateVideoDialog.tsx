@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -59,6 +60,15 @@ export function CreateVideoDialog() {
       return;
     }
 
+    if (!name.trim()) {
+      toast({
+        title: "Nome obrigatório",
+        description: "Por favor, insira um nome para o vídeo",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
       // Obter o ID do usuário autenticado
@@ -74,44 +84,37 @@ export function CreateVideoDialog() {
       const formData = new FormData();
       formData.append('file', video);
 
-      // Enviar para o endpoint de otimização
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/optimize-video`,
-        {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-          }
-        }
-      );
+      // Upload direto para o bucket 'videos'
+      const fileExt = video.name.split('.').pop();
+      const filePath = `${user.id}/${Date.now()}-${crypto.randomUUID()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('videos')
+        .upload(filePath, video);
 
-      if (!response.ok) {
-        throw new Error('Falha ao otimizar vídeo');
+      if (uploadError) {
+        throw uploadError;
       }
 
-      const { publicUrl } = await response.json();
+      // Obter URL pública do vídeo
+      const { data: { publicUrl } } = supabase.storage
+        .from('videos')
+        .getPublicUrl(filePath);
 
-      console.log("Vídeo otimizado e enviado:", publicUrl);
-
-      // Inserir registro na tabela de vídeos
-      const { data: videoData, error: insertError } = await supabase
+      // Salvar registro na tabela de vídeos
+      const { error: insertError } = await supabase
         .from('videos')
         .insert({
           name,
           description,
           video_url: publicUrl,
-          status: 'processing',
+          status: 'ready',
           business_id: user.id
-        })
-        .select()
-        .single();
+        });
 
       if (insertError) {
-        throw new Error(`Erro ao salvar vídeo: ${insertError.message}`);
+        throw insertError;
       }
-
-      console.log("Vídeo salvo com sucesso:", videoData);
 
       toast({
         title: "Sucesso",
