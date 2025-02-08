@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,6 +16,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function CreateStampDialog() {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,6 +26,7 @@ export function CreateStampDialog() {
   const [image, setImage] = useState<File | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -74,29 +77,19 @@ export function CreateStampDialog() {
     try {
       console.log("Iniciando upload da imagem:", { name, hasDescription: !!description });
 
-      // Preparar FormData para envio
-      const formData = new FormData();
-      formData.append('file', image);
+      // Upload da imagem para o bucket 'stamps'
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('stamps')
+        .upload(`${user.id}/${Date.now()}-${image.name}`, image);
 
-      // Enviar para o endpoint de otimização
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/optimize-image`,
-        {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-          }
-        }
-      );
+      if (uploadError) throw uploadError;
 
-      if (!response.ok) {
-        throw new Error('Falha ao otimizar imagem');
-      }
+      // Obter URL pública da imagem
+      const { data: { publicUrl } } = supabase.storage
+        .from('stamps')
+        .getPublicUrl(uploadData.path);
 
-      const { publicUrl } = await response.json();
-
-      console.log("Imagem otimizada e enviada:", publicUrl);
+      console.log("Imagem enviada:", publicUrl);
 
       // Salvar registro no banco
       const { error: insertError } = await supabase
@@ -106,11 +99,15 @@ export function CreateStampDialog() {
           description,
           image_url: publicUrl,
           business_id: user.id,
+          status: 'active'
         });
 
       if (insertError) throw insertError;
 
       console.log("Estampa criada com sucesso");
+
+      // Invalidar cache das estampas
+      queryClient.invalidateQueries({ queryKey: ["stamps"] });
 
       toast({
         title: "Estampa criada",
