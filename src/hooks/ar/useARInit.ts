@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import * as THREE from "three";
 import { ARSceneState } from "@/types/ar";
@@ -25,6 +26,7 @@ export const useARInit = (
     camera: null,
     videoPlane: null
   });
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     console.log("Iniciando setup da cena AR...");
@@ -60,6 +62,7 @@ export const useARInit = (
           camera,
           videoPlane: plane
         });
+        setError(null);
 
         console.log("Setup AR concluído com sucesso");
         toast.success("Experiência AR iniciada");
@@ -82,6 +85,7 @@ export const useARInit = (
       } catch (error) {
         console.error("Erro ao iniciar AR:", error);
         const errorMessage = error instanceof Error ? error.message : "Erro ao iniciar experiência AR";
+        setError(errorMessage);
         toast.error(errorMessage);
         throw error;
       }
@@ -90,5 +94,5 @@ export const useARInit = (
     initAR();
   }, [stampImageUrl, videoRef, canvasRef, overlayRef]);
 
-  return { sceneState };
+  return { sceneState, error };
 };
