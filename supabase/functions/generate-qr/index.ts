@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import QRCode from "https://esm.sh/qrcode@1.5.3"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0"
@@ -34,7 +35,7 @@ serve(async (req) => {
     const { data: settings } = await supabase
       .from('qr_code_settings')
       .select('*')
-      .single()
+      .maybeSingle()
 
     const { data: stamp } = await supabase
       .from('stamps')
@@ -46,19 +47,25 @@ serve(async (req) => {
       throw new Error('Stamp not found')
     }
 
+    // Valores padrão para configurações do QR code
+    const defaultSettings = {
+      foreground_color: '#000000',
+      background_color: '#FFFFFF'
+    }
+
     // Gerar URL para o QR code - agora apontando para a landing page
     const baseUrl = Deno.env.get('PUBLIC_SITE_URL') || 'https://epicmomentos.com'
     const qrUrl = `${baseUrl}/ar/landing/${stampId}`
 
-    // Configurar opções do QR code
+    // Configurar opções do QR code usando settings ou valores padrão
     const qrOptions = {
       type: 'image/png',
       quality: 0.92,
       margin: 1,
       width: preview ? 300 : 1024,
       color: {
-        dark: settings?.foreground_color || '#000000',
-        light: settings?.background_color || '#FFFFFF'
+        dark: settings?.foreground_color || defaultSettings.foreground_color,
+        light: settings?.background_color || defaultSettings.background_color
       }
     }
 
