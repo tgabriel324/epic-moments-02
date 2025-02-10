@@ -1,4 +1,5 @@
-import { useRef } from "react";
+
+import { useRef, useCallback } from "react";
 import { ARViewSettings } from "@/types/ar";
 import { AROverlay } from "./overlay/AROverlay";
 import { useARScene } from "@/hooks/useARScene";
