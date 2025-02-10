@@ -28,24 +28,16 @@ export const BusinessLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen bg-gray-50">
-        {/* Mobile Menu Button */}
-        {isMobile && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="fixed top-4 left-4 z-50"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            <Menu className="h-6 w-6" />
-          </Button>
-        )}
-
+      <div className="flex h-screen w-full bg-gray-50">
         {/* Sidebar */}
         <Sidebar 
-          className={`w-64 bg-white border-r border-gray-100 shadow-sm ${
-            isMobile ? 'fixed inset-y-0 left-0 z-40 transform transition-transform duration-300 ease-in-out' : ''
-          } ${isMobile && !isMobileMenuOpen ? '-translate-x-full' : 'translate-x-0'}`}
+          className={`${
+            isMobile 
+              ? 'fixed inset-y-0 left-0 z-40 w-64 transform transition-transform duration-300 ease-in-out'
+              : 'w-64'
+          } bg-white border-r border-gray-100 shadow-sm ${
+            isMobile && !isMobileMenuOpen ? '-translate-x-full' : 'translate-x-0'
+          }`}
         >
           <div className="p-4 flex flex-col gap-4">
             {/* Logo */}
@@ -111,6 +103,18 @@ export const BusinessLayout = ({ children }: { children: React.ReactNode }) => {
           />
         </Sidebar>
 
+        {/* Mobile Menu Button */}
+        {isMobile && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="fixed top-4 left-4 z-50"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            <Menu className="h-6 w-6" />
+          </Button>
+        )}
+
         {/* Overlay for mobile */}
         {isMobile && isMobileMenuOpen && (
           <div 
@@ -119,6 +123,7 @@ export const BusinessLayout = ({ children }: { children: React.ReactNode }) => {
           />
         )}
 
+        {/* Main Content */}
         <main className={`flex-1 overflow-y-auto ${isMobile ? 'pt-16' : ''}`}>
           <div className="container mx-auto p-8 max-w-7xl">
             {children}
