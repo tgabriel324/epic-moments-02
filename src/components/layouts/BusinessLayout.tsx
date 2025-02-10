@@ -1,3 +1,4 @@
+
 import { Sidebar } from "@/components/ui/sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { BusinessMenu } from "@/components/business/BusinessMenu";
@@ -5,14 +6,17 @@ import { EditProfileDialog } from "@/components/business/profile/EditProfileDial
 import { useProfile } from "@/hooks/useProfile";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { LogOut, Loader2, UserCog } from "lucide-react";
+import { LogOut, Loader2, UserCog, Menu } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const BusinessLayout = ({ children }: { children: React.ReactNode }) => {
   const { profile, isLoading } = useProfile();
   const { signOut } = useAuth();
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   if (isLoading) {
     return (
@@ -25,7 +29,24 @@ export const BusinessLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <SidebarProvider>
       <div className="flex h-screen bg-gray-50">
-        <Sidebar className="w-64 bg-white border-r border-gray-100 shadow-sm">
+        {/* Mobile Menu Button */}
+        {isMobile && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="fixed top-4 left-4 z-50"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            <Menu className="h-6 w-6" />
+          </Button>
+        )}
+
+        {/* Sidebar */}
+        <Sidebar 
+          className={`w-64 bg-white border-r border-gray-100 shadow-sm ${
+            isMobile ? 'fixed inset-y-0 left-0 z-40 transform transition-transform duration-300 ease-in-out' : ''
+          } ${isMobile && !isMobileMenuOpen ? '-translate-x-full' : 'translate-x-0'}`}
+        >
           <div className="p-4 flex flex-col gap-4">
             {/* Logo */}
             <div className="flex justify-center mb-2">
@@ -90,7 +111,15 @@ export const BusinessLayout = ({ children }: { children: React.ReactNode }) => {
           />
         </Sidebar>
 
-        <main className="flex-1 overflow-y-auto">
+        {/* Overlay for mobile */}
+        {isMobile && isMobileMenuOpen && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-30"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
+
+        <main className={`flex-1 overflow-y-auto ${isMobile ? 'pt-16' : ''}`}>
           <div className="container mx-auto p-8 max-w-7xl">
             {children}
           </div>
