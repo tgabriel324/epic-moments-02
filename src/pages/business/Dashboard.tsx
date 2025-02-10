@@ -1,3 +1,4 @@
+
 import { BusinessLayout } from "@/components/layouts/BusinessLayout";
 import { MetricsCard } from "@/components/business/metrics/MetricsCard";
 import { MetricsChart } from "@/components/business/metrics/MetricsChart";
@@ -18,34 +19,39 @@ const BusinessDashboard = () => {
 
   return (
     <BusinessLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         <div>
-          <h2 className="text-h2 text-primary">Dashboard</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 className="text-xl sm:text-2xl md:text-h2 text-primary font-semibold">
+            Dashboard
+          </h2>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Acompanhe as métricas principais do seu negócio
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 md:gap-6 grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
           <MetricsCard
             title="Total de Estampas"
             value={metrics?.stampCount || 0}
-            icon={<Image className="w-4 h-4" />}
+            icon={<Image className="h-3 w-3 sm:w-4 sm:h-4" />}
             description="Estampas ativas"
+            className="col-span-1"
           />
 
           <MetricsCard
             title="Visualizações"
             value={metrics?.totalViews || 0}
-            icon={<Eye className="w-4 h-4" />}
+            icon={<Eye className="h-3 w-3 sm:w-4 sm:h-4" />}
             description="Total de visualizações"
+            className="col-span-1"
           />
 
           <MetricsCard
             title="Interações"
             value={metrics?.totalInteractions || 0}
-            icon={<MousePointer className="w-4 h-4" />}
+            icon={<MousePointer className="h-3 w-3 sm:w-4 sm:h-4" />}
             description="Total de interações"
+            className="col-span-1"
           />
 
           <MetricsCard
@@ -53,12 +59,13 @@ const BusinessDashboard = () => {
             value={`${metrics?.totalViews ? 
               ((metrics.totalInteractions / metrics.totalViews) * 100).toFixed(1) : 0}%`
             }
-            icon={<Activity className="w-4 h-4" />}
+            icon={<Activity className="h-3 w-3 sm:w-4 sm:h-4" />}
             description="Interações/Visualizações"
+            className="col-span-1"
           />
         </div>
 
-        <div className="grid gap-6">
+        <div className="grid gap-4 sm:gap-6">
           <MetricsChart
             data={metrics?.monthlyData || []}
             title="Visualizações vs. Interações"
