@@ -25,7 +25,12 @@ export const useARScene = ({
   
   const { tracking, updateTracking } = useTrackingState();
   const { updateVideoPosition } = useVideoPosition();
-  const { sceneState, error } = useARInit(stampImageUrl, videoRef, canvasRef, overlayRef);
+  const { sceneState, error } = useARInit({
+    stampImageUrl,
+    videoRef,
+    canvasRef,
+    overlayRef
+  });
 
   useEffect(() => {
     if (error) {
