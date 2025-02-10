@@ -16,11 +16,28 @@ export const TrackingFeedback = ({ tracking }: TrackingFeedbackProps) => {
     }
   }, [tracking.isTracking, tracking.confidence]);
 
-  // Se estiver tracking com alta confiança, não mostra feedback
   if (tracking.isTracking && tracking.confidence > 0.8 && !showTutorial) return null;
   
-  // Define o status e mensagem baseado no estado do tracking
   const getStatus = () => {
+    if (tracking.status === 'fallback') {
+      return {
+        icon: <Camera className="w-6 h-6 text-cyan-500" />,
+        message: "Modo câmera simples",
+        description: "AR não disponível neste dispositivo",
+        color: "bg-cyan-500",
+        suggestions: [
+          {
+            icon: <Camera className="w-4 h-4" />,
+            text: "Posicione a estampa no centro"
+          },
+          {
+            icon: <Lightbulb className="w-4 h-4" />,
+            text: "Mantenha boa iluminação"
+          }
+        ]
+      };
+    }
+
     if (tracking.error) {
       return {
         icon: <AlertCircle className="w-6 h-6 text-red-500" />,

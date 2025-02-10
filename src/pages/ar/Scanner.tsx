@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -11,6 +12,7 @@ const Scanner = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasPermission, setHasPermission] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [usingFallback, setUsingFallback] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const isMobile = useIsMobile();
   const streamRef = useRef<MediaStream | null>(null);
@@ -18,9 +20,27 @@ const Scanner = () => {
   useEffect(() => {
     const initScanner = async () => {
       try {
-        console.log("Iniciando scanner AR...");
+        console.log("Iniciando scanner...");
         setError(null);
         
+        // Tentar iniciar AR primeiro
+        try {
+          if (navigator.xr) {
+            const isArSupported = await navigator.xr.isSessionSupported("immersive-ar");
+            if (isArSupported) {
+              console.log("AR suportado, iniciando modo AR...");
+              // Continuar com modo AR
+              return;
+            }
+          }
+          console.log("AR não suportado, usando fallback de câmera");
+          setUsingFallback(true);
+        } catch (e) {
+          console.log("Erro ao verificar suporte AR, usando fallback:", e);
+          setUsingFallback(true);
+        }
+
+        // Modo fallback com câmera
         const constraints = {
           video: {
             facingMode: 'environment',
@@ -34,36 +54,22 @@ const Scanner = () => {
         streamRef.current = stream;
         
         if (videoRef.current) {
-          console.log("Stream obtido, configurando vídeo...");
           videoRef.current.srcObject = stream;
-          
           videoRef.current.onloadedmetadata = () => {
             console.log("Metadados do vídeo carregados");
             setHasPermission(true);
             setIsLoading(false);
+            videoRef.current?.play().catch(console.error);
           };
-
-          videoRef.current.onerror = (e) => {
-            console.error("Erro no elemento de vídeo:", e);
-            setError("Erro ao inicializar câmera");
-            setIsLoading(false);
-          };
-          
-          try {
-            await videoRef.current.play();
-            console.log("Vídeo iniciou playback com sucesso");
-          } catch (playError) {
-            console.error("Erro ao iniciar playback:", playError);
-            setError("Erro ao iniciar câmera");
-            setIsLoading(false);
-          }
         }
       } catch (error) {
         console.error("Erro ao iniciar scanner:", error);
         if (error instanceof DOMException && error.name === "NotAllowedError") {
           setError("Permissão da câmera negada");
+          toast.error("Precisamos de acesso à câmera para escanear a estampa");
         } else {
           setError("Erro ao acessar a câmera");
+          toast.error("Não foi possível acessar a câmera");
         }
         setHasPermission(false);
         setIsLoading(false);
@@ -146,13 +152,13 @@ const Scanner = () => {
           <span className={`${isMobile ? 'text-sm' : 'text-base'}`}>Voltar</span>
         </Button>
 
-        {/* Feedback de Tracking centralizado */}
+        {/* Feedback de Tracking */}
         <div className="absolute inset-0 flex items-center justify-center">
           <TrackingFeedback
             tracking={{
               isTracking: false,
               confidence: 0,
-              status: 'searching'
+              status: usingFallback ? 'fallback' : 'searching'
             }}
           />
         </div>

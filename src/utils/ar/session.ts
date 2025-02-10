@@ -3,21 +3,31 @@ export const initARSession = async (domOverlay: Element): Promise<XRSession> => 
   console.log("Iniciando sessão AR...");
   
   try {
+    // Verificar suporte WebXR
     if (!navigator.xr) {
-      throw new Error("WebXR não disponível");
+      console.log("WebXR não disponível, tentando modo de câmera simples");
+      throw new Error("ar_not_supported");
     }
 
-    // Verifica se já existe uma sessão ativa
+    // Verificar suporte específico para AR
+    const isArSupported = await navigator.xr.isSessionSupported("immersive-ar");
+    if (!isArSupported) {
+      console.log("AR não suportado neste dispositivo");
+      throw new Error("ar_not_supported");
+    }
+
+    // Verificar sessões existentes
     const sessions = await (navigator as any).xr.getSessions?.();
     if (sessions?.length > 0) {
       console.log("Encerrando sessão AR anterior...");
       await Promise.all(sessions.map((session: XRSession) => session.end()));
     }
 
+    // Configurar sessão com recursos necessários
     const sessionInit: XRSessionInit = {
-      requiredFeatures: ["hit-test", "dom-overlay"],
-      domOverlay: { root: domOverlay },
-      optionalFeatures: ["image-tracking", "camera-access"]
+      requiredFeatures: ["hit-test"],
+      optionalFeatures: ["dom-overlay", "camera-access"],
+      domOverlay: domOverlay ? { root: domOverlay } : undefined
     };
 
     console.log("Solicitando nova sessão AR...");
