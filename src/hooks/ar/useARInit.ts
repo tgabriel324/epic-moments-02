@@ -29,6 +29,7 @@ export const useARInit = (
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
     console.log("Iniciando setup da cena AR...");
     
     const initAR = async () => {
@@ -36,6 +37,14 @@ export const useARInit = (
         if (!stampImageUrl || !videoRef.current || !canvasRef.current || !overlayRef.current) {
           throw new Error("Referências necessárias não encontradas");
         }
+
+        // Limpa sessão anterior se existir
+        if (sceneState.xrSession) {
+          console.log("Encerrando sessão AR anterior...");
+          await sceneState.xrSession.end();
+        }
+
+        if (!isMounted) return;
 
         const renderer = setupARCanvas(canvasRef.current);
         const scene = createARScene();
@@ -48,6 +57,8 @@ export const useARInit = (
         if (!trackingResult.success) {
           throw new Error(trackingResult.error);
         }
+
+        if (!isMounted) return;
 
         const geometry = new THREE.PlaneGeometry(1, 1);
         const material = createVideoMaterial(videoRef.current);
@@ -78,20 +89,32 @@ export const useARInit = (
         window.addEventListener("resize", handleResizeEvent);
 
         return () => {
+          console.log("Limpando recursos AR...");
+          isMounted = false;
           window.removeEventListener("resize", handleResizeEvent);
-          if (session) session.end().catch(console.error);
-          if (renderer) renderer.dispose();
+          if (session) {
+            session.end().catch(console.error);
+          }
+          if (renderer) {
+            renderer.dispose();
+          }
         };
       } catch (error) {
         console.error("Erro ao iniciar AR:", error);
         const errorMessage = error instanceof Error ? error.message : "Erro ao iniciar experiência AR";
-        setError(errorMessage);
-        toast.error(errorMessage);
+        if (isMounted) {
+          setError(errorMessage);
+          toast.error(errorMessage);
+        }
         throw error;
       }
     };
 
     initAR();
+
+    return () => {
+      isMounted = false;
+    };
   }, [stampImageUrl, videoRef, canvasRef, overlayRef]);
 
   return { sceneState, error };
