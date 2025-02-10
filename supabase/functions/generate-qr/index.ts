@@ -31,21 +31,23 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    // Buscar configurações do QR code e dados da estampa
-    const { data: settings } = await supabase
-      .from('qr_code_settings')
-      .select('*')
-      .maybeSingle()
-
+    // Primeiro, buscar a estampa para obter o business_id
     const { data: stamp } = await supabase
       .from('stamps')
-      .select('*')
+      .select('*, business_id')
       .eq('id', stampId)
       .single()
 
     if (!stamp) {
       throw new Error('Stamp not found')
     }
+
+    // Agora buscar configurações do QR code usando o business_id da estampa
+    const { data: settings } = await supabase
+      .from('qr_code_settings')
+      .select('*')
+      .eq('business_id', stamp.business_id)
+      .maybeSingle()
 
     // Valores padrão para configurações do QR code
     const defaultSettings = {
