@@ -13,14 +13,18 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { VideoUploadForm } from "./video/VideoUploadForm";
 import { useVideoUpload } from "./video/useVideoUpload";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function CreateVideoDialog() {
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [video, setVideo] = useState<File | null>(null);
+  const [selectedStampIds, setSelectedStampIds] = useState<string[]>([]);
   const { toast } = useToast();
   const { isLoading, uploadVideo } = useVideoUpload();
+  const queryClient = useQueryClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,10 +70,57 @@ export function CreateVideoDialog() {
 
     const success = await uploadVideo(video, name, description);
     if (success) {
+      // Se houver estampas selecionadas, criar os vínculos
+      if (selectedStampIds.length > 0) {
+        // Primeiro, precisamos obter o ID do vídeo recém-criado
+        const { data: videos, error: queryError } = await supabase
+          .from('videos')
+          .select('id')
+          .eq('name', name)
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (queryError) {
+          console.error("Erro ao buscar vídeo:", queryError);
+          toast({
+            title: "Aviso",
+            description: "Vídeo criado, mas houve um erro ao vincular às estampas",
+            variant: "destructive",
+          });
+        } else if (videos && videos.length > 0) {
+          const videoId = videos[0].id;
+          
+          // Criar os vínculos
+          const { error: linkError } = await supabase
+            .from('stamp_video_links')
+            .insert(
+              selectedStampIds.map(stampId => ({
+                stamp_id: stampId,
+                video_id: videoId,
+                is_active: true
+              }))
+            );
+
+          if (linkError) {
+            console.error("Erro ao criar vínculos:", linkError);
+            toast({
+              title: "Aviso",
+              description: "Vídeo criado, mas houve um erro ao vincular às estampas",
+              variant: "destructive",
+            });
+          }
+        }
+      }
+
+      // Invalidar queries para atualizar a UI
+      queryClient.invalidateQueries({ queryKey: ['videos'] });
+      queryClient.invalidateQueries({ queryKey: ['stamp-video-links'] });
+
       setIsOpen(false);
       setName("");
       setDescription("");
       setVideo(null);
+      setSelectedStampIds([]);
     }
   };
 
@@ -95,6 +146,8 @@ export function CreateVideoDialog() {
           setDescription={setDescription}
           video={video}
           setVideo={setVideo}
+          selectedStampIds={selectedStampIds}
+          setSelectedStampIds={setSelectedStampIds}
           isLoading={isLoading}
           onSubmit={handleSubmit}
         />

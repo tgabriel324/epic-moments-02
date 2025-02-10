@@ -4,40 +4,40 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
-import { StampSelect } from "../stamp/StampSelect";
+import { VideoSelect } from "../video/VideoSelect";
 
-interface VideoUploadFormProps {
+interface StampUploadFormProps {
   name: string;
   setName: (name: string) => void;
   description: string;
   setDescription: (description: string) => void;
-  video: File | null;
-  setVideo: (video: File | null) => void;
-  selectedStampIds: string[];
-  setSelectedStampIds: (ids: string[]) => void;
+  image: File | null;
+  setImage: (image: File | null) => void;
+  selectedVideoId: string | null;
+  setSelectedVideoId: (id: string | null) => void;
   isLoading: boolean;
   onSubmit: (e: React.FormEvent) => Promise<void>;
 }
 
-export function VideoUploadForm({
+export function StampUploadForm({
   name,
   setName,
   description,
   setDescription,
-  video,
-  setVideo,
-  selectedStampIds,
-  setSelectedStampIds,
+  image,
+  setImage,
+  selectedVideoId,
+  setSelectedVideoId,
   isLoading,
   onSubmit
-}: VideoUploadFormProps) {
+}: StampUploadFormProps) {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="grid gap-4 py-4">
         <div className="grid gap-2">
           <Input
             id="name"
-            placeholder="Nome do vídeo"
+            placeholder="Nome da estampa"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
@@ -53,30 +53,30 @@ export function VideoUploadForm({
         </div>
         <div className="grid gap-2">
           <Input
-            id="video"
+            id="image"
             type="file"
-            accept="video/*"
+            accept="image/*"
             onChange={(e) => {
               const file = e.target.files?.[0];
               if (file) {
-                setVideo(file);
+                setImage(file);
               }
             }}
             required
           />
-          {video && (
+          {image && (
             <p className="text-sm text-muted-foreground">
-              Arquivo selecionado: {video.name}
+              Arquivo selecionado: {image.name}
             </p>
           )}
         </div>
         <div className="grid gap-2">
-          <StampSelect
-            selectedIds={selectedStampIds}
-            onSelect={setSelectedStampIds}
+          <VideoSelect
+            selectedId={selectedVideoId}
+            onSelect={setSelectedVideoId}
           />
           <p className="text-sm text-muted-foreground">
-            Opcional: vincular este vídeo a estampas existentes
+            Opcional: vincular esta estampa a um vídeo existente
           </p>
         </div>
       </div>
@@ -84,10 +84,10 @@ export function VideoUploadForm({
         <Button 
           type="submit"
           disabled={isLoading}
-          className="bg-primary hover:bg-primary/90"
+          className="bg-[#00BFFF] hover:bg-[#00BFFF]/90"
         >
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Enviar Vídeo
+          Criar Estampa
         </Button>
       </DialogFooter>
     </form>

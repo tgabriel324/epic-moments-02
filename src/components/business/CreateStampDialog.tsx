@@ -4,66 +4,40 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { ImagePlus, Loader2 } from "lucide-react";
+import { ImagePlus } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { StampUploadForm } from "./stamp/StampUploadForm";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 import { useQueryClient } from "@tanstack/react-query";
 
 export function CreateStampDialog() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState<File | null>(null);
+  const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { user } = useAuth();
   const queryClient = useQueryClient();
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (!file.type.startsWith('image/')) {
-        toast({
-          title: "Arquivo inválido",
-          description: "Por favor, selecione uma imagem",
-          variant: "destructive",
-        });
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "Arquivo muito grande",
-          description: "O tamanho máximo permitido é 5MB",
-          variant: "destructive",
-        });
-        return;
-      }
-      console.log("Imagem selecionada:", file.name);
-      setImage(file);
-    }
-  };
-
-  const resetForm = () => {
-    setName("");
-    setDescription("");
-    setImage(null);
-    setIsLoading(false);
-    setIsOpen(false);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Iniciando submissão do formulário");
-    
+    console.log("Form submitted");
+
+    if (!image) {
+      toast({
+        title: "Imagem obrigatória",
+        description: "Por favor, selecione uma imagem para upload",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!name.trim()) {
       toast({
         title: "Nome obrigatório",
@@ -73,79 +47,114 @@ export function CreateStampDialog() {
       return;
     }
 
-    if (!image) {
+    // Validar tipo
+    if (!image.type.startsWith('image/')) {
       toast({
-        title: "Imagem obrigatória",
-        description: "Por favor, selecione uma imagem para a estampa",
+        title: "Arquivo inválido",
+        description: "Por favor, selecione um arquivo de imagem",
         variant: "destructive",
       });
       return;
     }
 
-    if (!user?.id) {
+    // Validar tamanho (5MB)
+    if (image.size > 5 * 1024 * 1024) {
       toast({
-        title: "Erro de autenticação",
-        description: "Você precisa estar logado para criar uma estampa",
+        title: "Arquivo muito grande",
+        description: "O tamanho máximo permitido é 5MB",
         variant: "destructive",
       });
       return;
     }
 
     setIsLoading(true);
-    try {
-      console.log("Iniciando upload da imagem:", { name, hasDescription: !!description });
 
-      // Upload da imagem para o bucket 'stamps'
-      const { data: uploadData, error: uploadError } = await supabase.storage
+    try {
+      // Obter o ID do usuário autenticado
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error("Usuário não autenticado");
+      }
+
+      // Upload da imagem para o bucket
+      const fileExt = image.name.split('.').pop();
+      const filePath = `${user.id}/${Date.now()}-${crypto.randomUUID()}.${fileExt}`;
+      
+      console.log("Tentando fazer upload para:", filePath);
+
+      const { error: uploadError } = await supabase.storage
         .from('stamps')
-        .upload(`${user.id}/${Date.now()}-${image.name}`, image);
+        .upload(filePath, image);
 
       if (uploadError) {
         console.error("Erro no upload:", uploadError);
         throw uploadError;
       }
 
-      console.log("Upload concluído:", uploadData);
-
-      // Obter URL pública da imagem
+      // Obter URL pública
       const { data: { publicUrl } } = supabase.storage
         .from('stamps')
-        .getPublicUrl(uploadData.path);
+        .getPublicUrl(filePath);
 
-      console.log("URL pública gerada:", publicUrl);
+      console.log("URL pública:", publicUrl);
 
-      // Salvar registro no banco
-      const { error: insertError } = await supabase
-        .from("stamps")
+      // Salvar na tabela de estampas
+      const { data: stamp, error: insertError } = await supabase
+        .from('stamps')
         .insert({
           name,
           description,
           image_url: publicUrl,
-          business_id: user.id,
-          status: 'active'
-        });
+          status: 'active',
+          business_id: user.id
+        })
+        .select()
+        .single();
 
       if (insertError) {
         console.error("Erro ao inserir no banco:", insertError);
         throw insertError;
       }
 
-      console.log("Estampa criada com sucesso");
+      // Se um vídeo foi selecionado, criar o vínculo
+      if (selectedVideoId && stamp) {
+        const { error: linkError } = await supabase
+          .from('stamp_video_links')
+          .insert({
+            stamp_id: stamp.id,
+            video_id: selectedVideoId,
+            is_active: true
+          });
 
-      // Invalidar cache das estampas
-      queryClient.invalidateQueries({ queryKey: ["stamps"] });
+        if (linkError) {
+          console.error("Erro ao criar vínculo:", linkError);
+          toast({
+            title: "Aviso",
+            description: "Estampa criada, mas houve um erro ao vincular ao vídeo",
+            variant: "destructive",
+          });
+        }
+      }
+
+      // Invalidar queries para atualizar a UI
+      queryClient.invalidateQueries({ queryKey: ['stamps'] });
 
       toast({
-        title: "Estampa criada",
-        description: "Sua estampa foi criada com sucesso!",
+        title: "Sucesso",
+        description: "Estampa criada com sucesso!",
       });
 
-      resetForm();
+      setIsOpen(false);
+      setName("");
+      setDescription("");
+      setImage(null);
+      setSelectedVideoId(null);
     } catch (error) {
       console.error("Erro ao criar estampa:", error);
       toast({
         title: "Erro ao criar estampa",
-        description: "Ocorreu um erro ao criar sua estampa. Tente novamente.",
+        description: error instanceof Error ? error.message : "Ocorreu um erro ao criar sua estampa. Tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -162,57 +171,24 @@ export function CreateStampDialog() {
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
-        <form onSubmit={handleSubmit}>
-          <DialogHeader>
-            <DialogTitle>Criar Nova Estampa</DialogTitle>
-            <DialogDescription>
-              Adicione uma nova estampa para conectar com vídeos em AR
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Input
-                id="name"
-                placeholder="Nome da estampa"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </div>
-            <div className="grid gap-2">
-              <Textarea
-                id="description"
-                placeholder="Descrição (opcional)"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Input
-                id="image"
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                required
-              />
-              {image && (
-                <p className="text-sm text-muted-foreground">
-                  Arquivo selecionado: {image.name}
-                </p>
-              )}
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="bg-[#00BFFF] hover:bg-[#00BFFF]/90"
-            >
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Criar Estampa
-            </Button>
-          </DialogFooter>
-        </form>
+        <DialogHeader>
+          <DialogTitle>Adicionar Nova Estampa</DialogTitle>
+          <DialogDescription>
+            Faça upload de uma estampa para conectar com vídeos em AR
+          </DialogDescription>
+        </DialogHeader>
+        <StampUploadForm
+          name={name}
+          setName={setName}
+          description={description}
+          setDescription={setDescription}
+          image={image}
+          setImage={setImage}
+          selectedVideoId={selectedVideoId}
+          setSelectedVideoId={setSelectedVideoId}
+          isLoading={isLoading}
+          onSubmit={handleSubmit}
+        />
       </DialogContent>
     </Dialog>
   );
