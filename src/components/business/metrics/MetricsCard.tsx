@@ -26,32 +26,32 @@ export function MetricsCard({
       className
     )}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2">
-        <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground truncate pr-2">
+        <CardTitle className="text-[10px] sm:text-sm font-medium text-muted-foreground truncate pr-2">
           {title}
         </CardTitle>
         {icon && <div className="text-primary shrink-0">{icon}</div>}
       </CardHeader>
       <CardContent>
-        <div className="text-base sm:text-xl md:text-2xl font-bold truncate">
+        <div className="text-sm sm:text-xl md:text-2xl font-bold truncate">
           {value}
         </div>
         {change !== undefined && (
-          <div className="flex items-center text-[10px] sm:text-xs mt-1">
+          <div className="flex items-center text-[8px] sm:text-xs mt-0.5 sm:mt-1">
             {change >= 0 ? (
-              <ArrowUpIcon className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 mr-1" />
+              <ArrowUpIcon className="w-2 h-2 sm:w-4 sm:h-4 text-green-500 mr-0.5 sm:mr-1" />
             ) : (
-              <ArrowDownIcon className="w-3 h-3 sm:w-4 sm:h-4 text-red-500 mr-1" />
+              <ArrowDownIcon className="w-2 h-2 sm:w-4 sm:h-4 text-red-500 mr-0.5 sm:mr-1" />
             )}
             <span className={change >= 0 ? "text-green-500" : "text-red-500"}>
               {Math.abs(change)}%
             </span>
-            <span className="text-muted-foreground ml-1 truncate">
+            <span className="text-muted-foreground ml-0.5 sm:ml-1 truncate">
               do mês anterior
             </span>
           </div>
         )}
         {description && (
-          <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 truncate">
+          <p className="text-[8px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 truncate">
             {description}
           </p>
         )}

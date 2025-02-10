@@ -21,7 +21,7 @@ const BusinessDashboard = () => {
     <BusinessLayout>
       <div className="space-y-4 sm:space-y-6">
         <div>
-          <h2 className="text-xl sm:text-2xl md:text-h2 text-primary font-semibold">
+          <h2 className="text-lg sm:text-xl md:text-2xl text-primary font-semibold">
             Dashboard
           </h2>
           <p className="text-xs sm:text-sm text-muted-foreground">
@@ -29,7 +29,7 @@ const BusinessDashboard = () => {
           </p>
         </div>
 
-        <div className="grid gap-3 sm:gap-4 md:gap-6 grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-2 sm:gap-4 md:gap-6 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
           <MetricsCard
             title="Total de Estampas"
             value={metrics?.stampCount || 0}
