@@ -1,3 +1,4 @@
+
 import * as THREE from 'three';
 
 export interface ARViewSettings {
@@ -19,7 +20,7 @@ export interface ARTrackingState {
     scale: THREE.Vector3;
   };
   attempts?: number;
-  status: 'searching' | 'tracking' | 'adjusting' | 'error';
+  status: 'searching' | 'tracking' | 'adjusting' | 'error' | 'fallback';
   suggestions?: string[];
 }
 
