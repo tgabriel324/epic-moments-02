@@ -69,3 +69,4 @@ export const ARCanvas = ({ settings, stampImageUrl }: ARCanvasProps) => {
     </div>
   );
 };
+

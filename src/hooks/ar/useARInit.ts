@@ -4,12 +4,14 @@ import * as THREE from "three";
 import { ARSceneState } from "@/types/ar";
 import { toast } from "sonner";
 
-export const useARInit = (
-  stampImageUrl: string | undefined,
-  videoRef: React.RefObject<HTMLVideoElement>,
-  canvasRef: React.RefObject<HTMLCanvasElement>,
-  overlayRef: React.RefObject<HTMLDivElement>
-) => {
+interface UseARInitProps {
+  stampImageUrl: string | undefined;
+  videoRef: React.RefObject<HTMLVideoElement>;
+  canvasRef: React.RefObject<HTMLCanvasElement>;
+  overlayRef: React.RefObject<HTMLDivElement>;
+}
+
+export const useARInit = ({ stampImageUrl, videoRef, canvasRef, overlayRef }: UseARInitProps) => {
   const [sceneState, setSceneState] = useState<ARSceneState>({
     xrSession: null,
     renderer: null,
