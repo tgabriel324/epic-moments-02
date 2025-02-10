@@ -33,7 +33,7 @@ export const ARCanvas = ({ settings, stampImageUrl }: ARCanvasProps) => {
     }}>
       <video
         ref={videoRef}
-        className={`w-full h-full object-cover ${usingFallback ? 'block' : 'hidden'}`}
+        className="w-full h-full object-cover"
         playsInline
         autoPlay
         muted
