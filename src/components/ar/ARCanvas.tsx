@@ -1,9 +1,10 @@
 
-import { useRef, useCallback } from "react";
+import { useRef, useEffect } from "react";
 import { ARViewSettings } from "@/types/ar";
 import { AROverlay } from "./overlay/AROverlay";
-import { useARScene } from "@/hooks/useARScene";
-import { useARControls } from "@/hooks/useARControls";
+import { useARInit } from "@/hooks/ar/useARInit";
+import { LoadingScreen } from "./LoadingScreen";
+import { ErrorScreen } from "./ErrorScreen";
 
 interface ARCanvasProps {
   settings: ARViewSettings;
@@ -15,18 +16,16 @@ export const ARCanvas = ({ settings, stampImageUrl }: ARCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   
-  const { sceneState, tracking } = useARScene({
+  const { sceneState, error, usingFallback } = useARInit({
     stampImageUrl,
     videoRef,
     canvasRef,
     overlayRef
   });
-  
-  const {
-    controlsState,
-    videoState,
-    handlers
-  } = useARControls(videoRef);
+
+  if (error) {
+    return <ErrorScreen settings={settings} error={error} />;
+  }
 
   return (
     <div className="relative min-h-screen" style={{
@@ -34,10 +33,11 @@ export const ARCanvas = ({ settings, stampImageUrl }: ARCanvasProps) => {
     }}>
       <video
         ref={videoRef}
-        className="hidden"
+        className={`w-full h-full object-cover ${usingFallback ? 'block' : 'hidden'}`}
         playsInline
+        autoPlay
+        muted
         webkit-playsinline="true"
-        onTimeUpdate={handlers.handleTimeUpdate}
       />
       
       <canvas
@@ -48,14 +48,22 @@ export const ARCanvas = ({ settings, stampImageUrl }: ARCanvasProps) => {
       <div ref={overlayRef}>
         <AROverlay 
           settings={settings}
-          tracking={tracking}
-          videoState={videoState}
-          scale={controlsState.scale}
-          onPlayPause={handlers.handlePlayPause}
-          onScaleChange={handlers.handleScaleChange}
-          onZoomIn={handlers.handleZoomIn}
-          onZoomOut={handlers.handleZoomOut}
-          onRotationReset={handlers.handleRotationReset}
+          tracking={{
+            isTracking: false,
+            confidence: 0,
+            status: usingFallback ? 'fallback' : 'searching'
+          }}
+          videoState={{
+            isPlaying: true,
+            currentTime: 0,
+            duration: 0
+          }}
+          scale={1}
+          onPlayPause={() => {}}
+          onScaleChange={() => {}}
+          onZoomIn={() => {}}
+          onZoomOut={() => {}}
+          onRotationReset={() => {}}
         />
       </div>
     </div>

@@ -2,15 +2,6 @@
 import { useState, useEffect, useRef } from "react";
 import * as THREE from "three";
 import { ARSceneState } from "@/types/ar";
-import {
-  checkXRSupport,
-  setupARCanvas,
-  createARScene,
-  setupARCamera,
-  initARSession,
-  setupImageTracking,
-  createVideoMaterial
-} from "@/utils/webxr";
 import { toast } from "sonner";
 
 export const useARInit = (
@@ -27,6 +18,7 @@ export const useARInit = (
     videoPlane: null
   });
   const [error, setError] = useState<string | null>(null);
+  const [usingFallback, setUsingFallback] = useState(false);
   const initializingRef = useRef(false);
 
   useEffect(() => {
@@ -34,7 +26,6 @@ export const useARInit = (
     console.log("Iniciando setup da cena AR...");
     
     const initAR = async () => {
-      // Evita inicializações simultâneas
       if (initializingRef.current) {
         console.log("Inicialização AR já em andamento...");
         return;
@@ -47,70 +38,63 @@ export const useARInit = (
           throw new Error("Referências necessárias não encontradas");
         }
 
-        // Limpa sessão anterior se existir
-        if (sceneState.xrSession) {
-          console.log("Encerrando sessão AR anterior...");
-          await sceneState.xrSession.end();
-          
-          // Aguarda um pequeno delay para garantir que a sessão anterior foi encerrada
-          await new Promise(resolve => setTimeout(resolve, 100));
+        // Tentar iniciar modo AR
+        try {
+          if (navigator.xr) {
+            const isArSupported = await navigator.xr.isSessionSupported("immersive-ar");
+            if (isArSupported) {
+              console.log("AR suportado, iniciando modo AR...");
+              // Setup AR aqui
+              return;
+            }
+          }
+          console.log("AR não suportado, usando fallback de câmera");
+          setUsingFallback(true);
+        } catch (e) {
+          console.log("Erro ao verificar suporte AR, usando fallback:", e);
+          setUsingFallback(true);
         }
 
-        if (!isMounted) return;
+        // Modo fallback com câmera simples
+        const constraints = {
+          video: {
+            facingMode: 'environment',
+            width: { ideal: window.innerWidth },
+            height: { ideal: window.innerHeight }
+          }
+        };
 
-        const renderer = setupARCanvas(canvasRef.current);
-        const scene = createARScene();
-        const camera = setupARCamera();
-        const session = await initARSession(overlayRef.current);
+        console.log("Solicitando permissão da câmera com constraints:", constraints);
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
         
-        console.log("Configurando tracking de imagem:", stampImageUrl);
-        const trackingResult = await setupImageTracking(stampImageUrl);
-        
-        if (!trackingResult.success) {
-          throw new Error(trackingResult.error);
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.onloadedmetadata = () => {
+            console.log("Metadados do vídeo carregados");
+            if (isMounted) {
+              setError(null);
+              videoRef.current?.play().catch(console.error);
+            }
+          };
         }
 
-        if (!isMounted) return;
-
-        const geometry = new THREE.PlaneGeometry(1, 1);
-        const material = createVideoMaterial(videoRef.current);
-        const plane = new THREE.Mesh(geometry, material);
-        plane.matrixAutoUpdate = false;
-        scene.add(plane);
-
-        setSceneState({
-          xrSession: session,
-          renderer,
-          scene,
-          camera,
-          videoPlane: plane
-        });
-        setError(null);
-
-        console.log("Setup AR concluído com sucesso");
-        toast.success("Experiência AR iniciada");
-
-        const handleResizeEvent = () => {
-          if (camera && renderer) {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-          }
-        };
+        // Setup da cena THREE.js básica para fallback
+        const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
         
-        window.addEventListener("resize", handleResizeEvent);
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        
+        if (isMounted) {
+          setSceneState({
+            xrSession: null,
+            renderer,
+            scene,
+            camera,
+            videoPlane: null
+          });
+        }
 
-        return () => {
-          console.log("Limpando recursos AR...");
-          isMounted = false;
-          window.removeEventListener("resize", handleResizeEvent);
-          if (session) {
-            session.end().catch(console.error);
-          }
-          if (renderer) {
-            renderer.dispose();
-          }
-        };
       } catch (error) {
         console.error("Erro ao iniciar AR:", error);
         const errorMessage = error instanceof Error ? error.message : "Erro ao iniciar experiência AR";
@@ -118,7 +102,6 @@ export const useARInit = (
           setError(errorMessage);
           toast.error(errorMessage);
         }
-        throw error;
       } finally {
         initializingRef.current = false;
       }
@@ -128,8 +111,16 @@ export const useARInit = (
 
     return () => {
       isMounted = false;
+      if (sceneState.renderer) {
+        sceneState.renderer.dispose();
+      }
+      // Limpar streams de vídeo
+      if (videoRef.current?.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream;
+        stream.getTracks().forEach(track => track.stop());
+      }
     };
   }, [stampImageUrl, videoRef, canvasRef, overlayRef]);
 
-  return { sceneState, error };
+  return { sceneState, error, usingFallback };
 };
