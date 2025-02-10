@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import * as THREE from "three";
 import { ARSceneState } from "@/types/ar";
 import {
@@ -27,12 +27,21 @@ export const useARInit = (
     videoPlane: null
   });
   const [error, setError] = useState<string | null>(null);
+  const initializingRef = useRef(false);
 
   useEffect(() => {
     let isMounted = true;
     console.log("Iniciando setup da cena AR...");
     
     const initAR = async () => {
+      // Evita inicializações simultâneas
+      if (initializingRef.current) {
+        console.log("Inicialização AR já em andamento...");
+        return;
+      }
+
+      initializingRef.current = true;
+
       try {
         if (!stampImageUrl || !videoRef.current || !canvasRef.current || !overlayRef.current) {
           throw new Error("Referências necessárias não encontradas");
@@ -42,6 +51,9 @@ export const useARInit = (
         if (sceneState.xrSession) {
           console.log("Encerrando sessão AR anterior...");
           await sceneState.xrSession.end();
+          
+          // Aguarda um pequeno delay para garantir que a sessão anterior foi encerrada
+          await new Promise(resolve => setTimeout(resolve, 100));
         }
 
         if (!isMounted) return;
@@ -107,6 +119,8 @@ export const useARInit = (
           toast.error(errorMessage);
         }
         throw error;
+      } finally {
+        initializingRef.current = false;
       }
     };
 
